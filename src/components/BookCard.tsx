@@ -34,15 +34,15 @@ export const BookCard = ({ book }: BookCardProps) => {
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-card border-border transition-all duration-500 hover:shadow-[var(--shadow-hover)] hover:-translate-y-2">
+    <Card className="group relative overflow-hidden bg-card border-2 transition-all duration-500 hover:shadow-[var(--shadow-hover)] hover:-translate-y-2">
       <Link to={`/book/${book.id}`} className="block">
-        <div className="relative overflow-hidden aspect-[2/3]">
+        <div className="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
           <img
             src={coverImages[book.coverImage]}
             alt={book.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
           {/* Hover overlay with actions */}
           <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
