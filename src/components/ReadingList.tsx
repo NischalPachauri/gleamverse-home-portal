@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { books } from "@/data/books";
@@ -31,23 +31,29 @@ export const ReadingList = () => {
     return id;
   });
 
+  const loadReadingList = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_library")
+        .select("book_id")
+        .eq("user_session_id", sessionId);
+
+      if (error) {
+        console.error("Error loading reading list:", error);
+        setReadingList([]);
+        return;
+      }
+
+      setReadingList(data?.map((item) => item.book_id) || []);
+    } catch (error) {
+      console.error("Error loading reading list:", error);
+      setReadingList([]);
+    }
+  }, [sessionId]);
+
   useEffect(() => {
     loadReadingList();
-  }, []);
-
-  const loadReadingList = async () => {
-    const { data, error } = await supabase
-      .from("user_library")
-      .select("book_id")
-      .eq("user_session_id", sessionId);
-
-    if (error) {
-      console.error("Error loading reading list:", error);
-      return;
-    }
-
-    setReadingList(data?.map((item) => item.book_id) || []);
-  };
+  }, [loadReadingList]);
 
   const removeFromList = async (bookId: string) => {
     const { error } = await supabase

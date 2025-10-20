@@ -41,6 +41,108 @@ export type Database = {
         }
         Relationships: []
       }
+      books: {
+        Row: {
+          id: string
+          title: string
+          author: string | null
+          pdf_url: string
+          cover_url: string | null
+          genre: string | null
+          read_count: number | null
+          created_at: string | null
+        }
+        Insert: {
+          id: string
+          title: string
+          author?: string | null
+          pdf_url: string
+          cover_url?: string | null
+          genre?: string | null
+          read_count?: number | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          author?: string | null
+          pdf_url?: string
+          cover_url?: string | null
+          genre?: string | null
+          read_count?: number | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          id: string
+          user_session_id: string
+          display_name: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_session_id: string
+          display_name?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_session_id?: string
+          display_name?: string | null
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      bookmarks: {
+        Row: {
+          id: string
+          user_session_id: string
+          book_id: string
+          status: string
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_session_id: string
+          book_id: string
+          status?: string
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_session_id?: string
+          book_id?: string
+          status?: string
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      read_progress: {
+        Row: {
+          id: string
+          user_session_id: string
+          book_id: string
+          current_page: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_session_id: string
+          book_id: string
+          current_page?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_session_id?: string
+          book_id?: string
+          current_page?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

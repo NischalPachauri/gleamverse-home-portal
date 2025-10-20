@@ -1,4 +1,4 @@
-import { Book, Home, Library, Upload, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Book, Home, Library, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Footer = () => {
@@ -47,12 +47,7 @@ export const Footer = () => {
                   Categories
                 </a>
               </li>
-              <li>
-                <a href="#upload" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
-                  <Upload className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  Upload Books
-                </a>
-              </li>
+              {/* Upload link removed as per requirement */}
             </ul>
           </div>
 

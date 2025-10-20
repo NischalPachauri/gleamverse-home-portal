@@ -2,6 +2,8 @@ import { useState, useMemo } from "react";
 import { BookCard } from "@/components/BookCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Footer } from "@/components/Footer";
+import { TopBooks } from "@/components/TopBooks";
+import { GoHomeButton } from "@/components/GoHomeButton";
 import { ReadingList } from "@/components/ReadingList";
 import { books } from "@/data/books";
 import { Search, Sparkles, Book, Globe, FlaskConical, Landmark, User, Laptop, Palette, Baby, Moon, Sun } from "lucide-react";
@@ -13,9 +15,20 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import libraryBg from "@/assets/library-background.jpg";
 
+// Fallback component in case of errors
+const IndexFallback = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-4xl font-bold mb-4">Public Library</h1>
+      <p className="text-lg text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+);
+
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -34,6 +47,8 @@ const Index = () => {
     const uniqueCategories = Array.from(new Set(books.map(book => book.genre)));
     return ["All", ...uniqueCategories.sort()];
   }, []);
+  
+  try {
 
   const filteredBooks = books.filter((book) => {
     const matchesSearch =
@@ -75,7 +90,7 @@ const Index = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${libraryBg})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-background"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-secondary/50 to-background"></div>
         </div>
         
         <div className="relative h-full container mx-auto px-4 flex flex-col items-center justify-center text-center">
@@ -92,8 +107,8 @@ const Index = () => {
           <p className="text-2xl md:text-3xl font-semibold text-white/95 mb-2 animate-fade-in [animation-delay:200ms] drop-shadow-lg">
             Where Learning Never Stops
           </p>
-          <p className="text-lg text-white/80 max-w-2xl animate-fade-in [animation-delay:300ms] drop-shadow-md">
-            Explore our vibrant collection of books, all free to read and download
+          <p className="text-lg text-white/90 max-w-2xl animate-fade-in [animation-delay:300ms] drop-shadow-md">
+            Explore a vibrant collection with a calmer, modern gradient theme
           </p>
         </div>
       </header>
@@ -128,30 +143,10 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Browse Categories Section */}
-      <section id="categories" className="container mx-auto px-4 py-16">
-        <h2 className="text-5xl font-bold text-center mb-4 text-primary animate-fade-in">
-          Browse Categories
-        </h2>
-        <div className="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto mb-12 rounded-full"></div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {categoryData.map((cat, idx) => (
-            <CategoryCard
-              key={cat.name}
-              icon={cat.icon}
-              title={cat.name}
-              onClick={() => setSelectedCategory(cat.name)}
-              isActive={selectedCategory === cat.name}
-            />
-          ))}
-        </div>
-      </section>
+      {/* Top Books Carousel */}
+      <TopBooks />
 
-      {/* Your Library Section */}
-      <ReadingList />
-
-      {/* Books Grid */}
+      {/* Books Grid - Browse Collection (moved above categories and library) */}
       <main className="container mx-auto px-4 pb-16">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
@@ -177,22 +172,39 @@ const Index = () => {
         )}
       </main>
 
-      {/* Upload Section */}
-      <section id="upload" className="container mx-auto px-4 py-16">
-        <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-3xl p-12 text-center">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Upload Your Books</h2>
-          <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-            Want to add your own PDFs to the library? Access the Cloud backend to upload books that will automatically appear on this website.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Navigate to Settings → Backend to manage your book collection
-          </p>
+      {/* Browse Categories Section */}
+      <section id="categories" className="container mx-auto px-4 py-16">
+        <h2 className="text-5xl font-bold text-center mb-4 text-primary animate-fade-in">
+          Browse Categories
+        </h2>
+        <div className="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto mb-12 rounded-full"></div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {categoryData.map((cat, idx) => (
+            <CategoryCard
+              key={cat.name}
+              icon={cat.icon}
+              title={cat.name}
+              onClick={() => setSelectedCategory(cat.name)}
+              isActive={selectedCategory === cat.name}
+            />
+          ))}
         </div>
       </section>
 
+      {/* Your Library Section */}
+      <ReadingList />
+
+      {/* Upload Section removed as per requirement */}
+
       <Footer />
+      <GoHomeButton />
     </div>
   );
+  } catch (error) {
+    console.error('Index component error:', error);
+    return <IndexFallback />;
+  }
 };
 
 export default Index;
