@@ -78,7 +78,7 @@ export default function Profile() {
                       </div>
                       <div className="flex gap-2 mt-3">
                         {sections.map(s => (
-                          <Button key={s.key} size="xs" variant={sec.key === s.key ? 'default' : 'outline'} onClick={() => setStatus(id, s.key)}>
+                          <Button key={s.key} size="sm" variant={sec.key === s.key ? 'default' : 'outline'} onClick={() => setStatus(id, s.key)}>
                             {s.title}
                           </Button>
                         ))}

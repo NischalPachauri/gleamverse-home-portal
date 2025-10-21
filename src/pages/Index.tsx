@@ -102,7 +102,7 @@ const Index = () => {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${libraryBg})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-secondary/50 to-background"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-background"></div>
         </div>
         
         <div className="relative h-full container mx-auto px-4 flex flex-col items-center justify-center text-center">

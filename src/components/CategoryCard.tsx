@@ -12,13 +12,13 @@ export const CategoryCard = ({ icon: Icon, title, onClick, isActive }: CategoryC
     <div
       onClick={onClick}
       className={`
-        group relative cursor-pointer rounded-2xl p-8 
-        transition-all duration-500 hover:scale-110
+        group relative cursor-pointer rounded-xl p-8 border
+        transition-all duration-300 hover:scale-[1.03]
         ${isActive 
-          ? 'bg-gradient-to-br from-primary to-secondary text-white shadow-lg' 
-          : 'bg-card hover:shadow-xl'
+          ? 'bg-primary text-primary-foreground shadow-lg border-primary' 
+          : 'bg-card hover:shadow-elegant border-border/50 hover:border-primary/30'
         }
-        transform hover:-translate-y-2
+        transform hover:-translate-y-1
         animate-fade-in
       `}
       style={{

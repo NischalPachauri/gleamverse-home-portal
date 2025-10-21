@@ -97,7 +97,7 @@ export const BookCard = ({ book }: BookCardProps) => {
   };
 
   return (
-    <Card className="group relative overflow-hidden bg-card border-2 transition-all duration-500 hover:shadow-[var(--shadow-hover)] hover:-translate-y-2">
+    <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
       <Link to={`/book/${book.id}`} className="block">
         <div className="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
           <img
