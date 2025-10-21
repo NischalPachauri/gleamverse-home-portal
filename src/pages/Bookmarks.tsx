@@ -39,6 +39,14 @@ export default function Bookmarks() {
     try { return JSON.parse(localStorage.getItem("bookStatus") || "{}"); } catch { return {}; }
   }, []);
 
+  const scrollToSection = (section: string) => {
+    const id = `section-${section.replace(/\s+/g, '-').toLowerCase()}`;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const grouped = useMemo(() => {
     const map: Record<string, typeof books> = {
       "Planning to read": [],
@@ -86,7 +94,14 @@ export default function Bookmarks() {
               const Icon = statusIcons[section];
               const count = grouped[section].length;
               return (
-                <Card key={section} className="p-4 bg-card border-border/50 hover:border-primary/30 transition-colors">
+                <Card
+                  key={section}
+                  className="p-4 bg-card border-border/50 hover:border-primary/30 transition-colors cursor-pointer"
+                  onClick={() => scrollToSection(section)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToSection(section); } }}
+                >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg bg-primary/10`}>
                       <Icon className={`w-5 h-5 ${statusColors[section]}`} />
@@ -118,7 +133,7 @@ export default function Bookmarks() {
           groupOrder.map((section) => {
             const Icon = statusIcons[section];
             return (
-              <div key={section} className="mb-12">
+              <div key={section} id={`section-${section.replace(/\s+/g, '-').toLowerCase()}`} className="mb-12">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-lg bg-primary/10">
                     <Icon className={`w-6 h-6 ${statusColors[section]}`} />

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { books as localBooks } from "@/data/books";
 import { Link } from "react-router-dom";
-import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -29,7 +28,7 @@ interface BookItem {
 export const TopBooks = () => {
   const [top, setTop] = useState<BookItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.2 });
+  const [six, setSix] = useState<BookItem[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -38,10 +37,10 @@ export const TopBooks = () => {
           .from("books")
           .select("id,title,author,cover_url")
           .order("read_count", { ascending: false })
-          .limit(7);
+          .limit(24);
         if (!error && data && data.length > 0) {
           // Randomize then take 7
-          const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0,7);
+          const shuffled = [...data].sort(() => Math.random() - 0.5);
           setTop(shuffled as BookItem[]);
           return;
         }
@@ -51,7 +50,6 @@ export const TopBooks = () => {
       // fallback to local books - ensure we always have content
       const fallbackBooks = [...localBooks]
         .sort(()=> Math.random() - 0.5)
-        .slice(0, 7)
         .map((b: { id: string; title: string; author: string; coverImage: string }) => ({ 
         id: b.id, 
         title: b.title, 
@@ -64,13 +62,28 @@ export const TopBooks = () => {
     load();
   }, []);
 
-  // No timer-based scrolling; animation is pure CSS marquee
+  // Utility to pick 6 random unique books
+  const pickSix = (pool: BookItem[]) => {
+    if (pool.length === 0) return [] as BookItem[];
+    const copy = [...pool];
+    const result: BookItem[] = [];
+    for (let i = 0; i < 6; i++) {
+      if (copy.length === 0) break;
+      const idx = Math.floor(Math.random() * copy.length);
+      result.push(copy.splice(idx, 1)[0]);
+    }
+    // If fewer than 6 available, loop from start
+    while (result.length < 6 && pool.length > 0) {
+      result.push(pool[result.length % pool.length]);
+    }
+    return result;
+  };
 
-  // Build a 7-item list, looping if needed
-  const sevenBooks = useMemo(() => {
-    if (top.length === 0) return [] as BookItem[];
-    const base = top.length >= 7 ? top.slice(0,7) : Array.from({length:7}, (_,i)=> top[i % top.length]);
-    return base;
+  // Choose six once when data arrives
+  useEffect(() => {
+    if (top.length > 0) {
+      setSix(pickSix(top));
+    }
   }, [top]);
 
   const coverSrc = (b: BookItem) => {
@@ -78,11 +91,11 @@ export const TopBooks = () => {
     return coverImages[b.coverImage || ""] || "";
   };
 
-  // Duplicate list for seamless marquee (hooks must be before any return)
-  const marqueeBooks = useMemo(() => {
-    if (sevenBooks.length === 0) return [] as BookItem[];
-    return [...sevenBooks, ...sevenBooks];
-  }, [sevenBooks]);
+  // Build duplicated list for a seamless continuous loop
+  const loopBooks = useMemo(() => {
+    if (six.length === 0) return [] as BookItem[];
+    return [...six, ...six];
+  }, [six]);
 
   if (loading) {
     return (
@@ -97,12 +110,12 @@ export const TopBooks = () => {
   }
 
   return (
-    <section ref={sectionRef} className={`container mx-auto px-4 py-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+    <section className="container mx-auto px-4 py-12">
       <h2 className="text-4xl font-bold text-center mb-4 text-primary">Top Books</h2>
-      <p className="text-center text-muted-foreground mb-8">Most read books right now</p>
-      <div className="relative overflow-hidden rounded-2xl">
-        <div className="topbooks-marquee">
-          {marqueeBooks.map((b, idx) => (
+      <p className="text-center text-muted-foreground mb-8">Trending books right now</p>
+      <div className="relative rounded-2xl overflow-hidden">
+        <div className="topbooks-loop">
+          {loopBooks.map((b, idx) => (
             <div key={`${b.id}-${idx}`} className="px-3">
               <Link
                 to={`/book/${b.id}`}
@@ -133,20 +146,10 @@ export const TopBooks = () => {
         </div>
       </div>
 
-      {/* Local styles for continuous marquee */}
       <style dangerouslySetInnerHTML={{__html: `
-        .topbooks-marquee {
-          display: flex;
-          gap: 12px;
-          width: max-content;
-          animation: topbooks-marquee 30s linear infinite;
-          will-change: transform;
-        }
-        .topbooks-marquee:hover { animation-play-state: paused; }
-        @keyframes topbooks-marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
+        .topbooks-loop { display: flex; gap: 12px; width: max-content; animation: topbooks-loop 28s linear infinite; will-change: transform; }
+        .topbooks-loop:hover { animation-play-state: paused; }
+        @keyframes topbooks-loop { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
       `}} />
     </section>
   );
