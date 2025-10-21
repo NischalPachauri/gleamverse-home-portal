@@ -113,13 +113,13 @@ const Index = () => {
           >
             <Sparkles className="w-10 h-10 text-white" />
           </Button>
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 text-white animate-fade-in [animation-delay:100ms] drop-shadow-2xl">
+          <h1 className="text-5xl md:text-7xl font-bold mb-4 text-white dark:text-white animate-fade-in [animation-delay:100ms] drop-shadow-2xl">
             Public Library
           </h1>
-          <p className="text-2xl md:text-3xl font-semibold text-white/95 mb-2 animate-fade-in [animation-delay:200ms] drop-shadow-lg">
+          <p className="text-2xl md:text-3xl font-semibold text-white dark:text-white/95 mb-2 animate-fade-in [animation-delay:200ms] drop-shadow-lg">
             Where Learning Never Stops
           </p>
-          <p className="text-lg text-white/90 max-w-2xl animate-fade-in [animation-delay:300ms] drop-shadow-md">
+          <p className="text-lg text-white/95 dark:text-white/90 max-w-2xl animate-fade-in [animation-delay:300ms] drop-shadow-md">
             Explore a vibrant collection with a calmer, modern gradient theme
           </p>
         </div>

@@ -2,6 +2,9 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { books } from "@/data/books";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { BookMarked, BookOpen, Clock, CheckCircle2, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 // Import cover images used across the app
 import hp1 from "@/assets/covers/hp1.jpg";
 import hp2 from "@/assets/covers/hp2.jpg";
@@ -16,7 +19,22 @@ const coverImages: Record<string, string> = { hp1, hp2, hp3, hp4, hp5, hp6, hp7,
 
 const groupOrder = ["Planning to read", "Reading", "On hold", "Completed"] as const;
 
+const statusIcons = {
+  "Planning to read": BookMarked,
+  "Reading": BookOpen,
+  "On hold": Clock,
+  "Completed": CheckCircle2,
+};
+
+const statusColors = {
+  "Planning to read": "text-blue-500",
+  "Reading": "text-primary",
+  "On hold": "text-amber-500",
+  "Completed": "text-green-500",
+};
+
 export default function Bookmarks() {
+  const navigate = useNavigate();
   const statusMap: Record<string, string> = useMemo(() => {
     try { return JSON.parse(localStorage.getItem("bookStatus") || "{}"); } catch { return {}; }
   }, []);
@@ -35,34 +53,114 @@ export default function Bookmarks() {
     return map;
   }, [statusMap]);
 
+  const totalBooks = Object.values(grouped).reduce((acc, arr) => acc + arr.length, 0);
+
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-10">
-        <h1 className="text-4xl font-bold mb-6">Bookmarks</h1>
-        <p className="text-muted-foreground mb-8">Your books organized by status</p>
-
-        {groupOrder.map((section) => (
-          <div key={section} className="mb-10">
-            <h2 className="text-2xl font-semibold mb-4">{section}</h2>
-            {grouped[section].length === 0 ? (
-              <p className="text-sm text-muted-foreground">No books here yet.</p>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {grouped[section].map((b) => (
-                  <Link key={b.id} to={`/book/${b.id}`}>
-                    <Card className="p-3 hover:shadow-lg transition-shadow">
-                      <div className="aspect-[2/3] w-full bg-muted rounded mb-2 overflow-hidden">
-                        <img src={coverImages[b.coverImage] || '/placeholder.svg'} alt={b.title} className="w-full h-full object-cover" onError={(e)=>{ (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }} />
-                      </div>
-                      <div className="text-sm font-medium line-clamp-2">{b.title}</div>
-                      <div className="text-xs text-muted-foreground">{b.author}</div>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            )}
+      {/* Hero Header */}
+      <div className="relative bg-gradient-to-br from-primary/10 via-background to-accent/5 border-b border-border">
+        <div className="container mx-auto px-4 py-12">
+          <Button
+            onClick={() => navigate('/')}
+            variant="ghost"
+            size="sm"
+            className="mb-6"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Library
+          </Button>
+          
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 rounded-xl bg-primary/10">
+              <BookMarked className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold">Your Bookmarks</h1>
+              <p className="text-muted-foreground mt-1">Track and organize your reading journey</p>
+            </div>
           </div>
-        ))}
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+            {groupOrder.map((section) => {
+              const Icon = statusIcons[section];
+              const count = grouped[section].length;
+              return (
+                <Card key={section} className="p-4 bg-card border-border/50 hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-primary/10`}>
+                      <Icon className={`w-5 h-5 ${statusColors[section]}`} />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{count}</p>
+                      <p className="text-xs text-muted-foreground">{section}</p>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="container mx-auto px-4 py-10">
+        {totalBooks === 0 ? (
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-muted mb-4">
+              <BookMarked className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h2 className="text-2xl font-semibold mb-2">No bookmarks yet</h2>
+            <p className="text-muted-foreground mb-6">Start adding books to your reading lists</p>
+            <Button onClick={() => navigate('/')}>Browse Books</Button>
+          </div>
+        ) : (
+          groupOrder.map((section) => {
+            const Icon = statusIcons[section];
+            return (
+              <div key={section} className="mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Icon className={`w-6 h-6 ${statusColors[section]}`} />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">{section}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {grouped[section].length} {grouped[section].length === 1 ? 'book' : 'books'}
+                    </p>
+                  </div>
+                </div>
+                
+                {grouped[section].length === 0 ? (
+                  <Card className="p-8 text-center bg-muted/30 border-dashed">
+                    <p className="text-sm text-muted-foreground">No books in this category yet</p>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {grouped[section].map((b) => (
+                      <Link key={b.id} to={`/book/${b.id}`} className="group">
+                        <Card className="overflow-hidden border-border/50 hover:border-primary/30 hover:shadow-elegant transition-all duration-300 hover:-translate-y-1">
+                          <div className="aspect-[2/3] w-full bg-muted overflow-hidden">
+                            <img 
+                              src={coverImages[b.coverImage] || '/placeholder.svg'} 
+                              alt={b.title} 
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }} 
+                            />
+                          </div>
+                          <div className="p-3">
+                            <div className="text-sm font-semibold line-clamp-2 mb-1 group-hover:text-primary transition-colors">{b.title}</div>
+                            <div className="text-xs text-muted-foreground">{b.author}</div>
+                          </div>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
