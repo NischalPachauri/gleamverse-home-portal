@@ -5,7 +5,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Vite query suffix not typed
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Volume2, VolumeX, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,6 +39,22 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   // Remove page turning state to avoid flicker
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Music state management
+  const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
+  const [currentTrack, setCurrentTrack] = useState<number>(0);
+  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
+  const [audioContextInitialized, setAudioContextInitialized] = useState<boolean>(false);
+  
+  // Available instrumental tracks - Your music files
+  const musicTracks = [
+    { name: "Track 1", url: "/music/track1.mp3" },
+    { name: "Track 2", url: "/music/track2.mp3" },
+    { name: "Track 3", url: "/music/track3.mp3" },
+    { name: "Track 4", url: "/music/track4.mp3" },
+    { name: "Track 5", url: "/music/track5.mp3" },
+    { name: "Track 6", url: "/music/track6.mp3" }
+  ];
 
   // Add error boundary for PDF loading
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
@@ -183,6 +199,60 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // Cleanup audio when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioRef) {
+        audioRef.pause();
+        audioRef.currentTime = 0;
+      }
+    };
+  }, [audioRef]);
+
+  // Test audio file accessibility
+  const testAudioFile = async (url: string) => {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      console.log(`Audio file ${url} status:`, response.status);
+      return response.ok;
+    } catch (error) {
+      console.error(`Error testing audio file ${url}:`, error);
+      return false;
+    }
+  };
+
+  // Test all audio files on component mount
+  useEffect(() => {
+    musicTracks.forEach((track, index) => {
+      testAudioFile(track.url).then(isAccessible => {
+        console.log(`Track ${index + 1} (${track.name}): ${isAccessible ? 'Accessible' : 'Not accessible'}`);
+      });
+    });
+  }, []);
+
+  // Initialize audio context on user interaction
+  const initializeAudioContext = async () => {
+    if (audioContextInitialized) return true;
+    
+    try {
+      // Create a silent audio to initialize the audio context
+      const silentAudio = new Audio();
+      silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+      silentAudio.volume = 0;
+      
+      await silentAudio.play();
+      silentAudio.pause();
+      silentAudio.remove();
+      
+      setAudioContextInitialized(true);
+      console.log('Audio context initialized');
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize audio context:', error);
+      return false;
+    }
+  };
+
   const toggleMode = () => {
     const next = !twoPageMode;
     setTwoPageMode(next);
@@ -190,6 +260,169 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     // Normalize left page when switching to two-page mode
     if (next && pageNumber % 2 === 0) {
       setPageNumber(pageNumber - 1);
+    }
+  };
+
+  // Music control functions
+  const toggleMusic = async () => {
+    if (isMusicPlaying) {
+      if (audioRef) {
+        audioRef.pause();
+        audioRef.currentTime = 0;
+      }
+      setIsMusicPlaying(false);
+      toast.success("Background music stopped");
+    } else {
+      // Initialize audio context first
+      const contextInitialized = await initializeAudioContext();
+      if (!contextInitialized) {
+        toast.error("Failed to initialize audio. Please try again.");
+        return;
+      }
+
+      const audio = new Audio();
+      audio.loop = true;
+      audio.volume = 0.3; // Set volume to 30% for background music
+      audio.preload = 'auto';
+      audio.crossOrigin = 'anonymous';
+      
+      // Add event listeners before setting source
+      audio.addEventListener('loadstart', () => {
+        console.log('Audio loading started');
+      });
+      
+      audio.addEventListener('canplaythrough', () => {
+        console.log('Audio can play through');
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        const error = audio.error;
+        let errorMessage = `Music file not found: ${musicTracks[currentTrack].name}`;
+        
+        if (error) {
+          switch (error.code) {
+            case error.MEDIA_ERR_ABORTED:
+              errorMessage = "Audio playback was aborted";
+              break;
+            case error.MEDIA_ERR_NETWORK:
+              errorMessage = "Network error while loading audio";
+              break;
+            case error.MEDIA_ERR_DECODE:
+              errorMessage = "Audio file format not supported";
+              break;
+            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorMessage = "Audio file not found or format not supported";
+              break;
+          }
+        }
+        
+        toast.error(errorMessage);
+        setIsMusicPlaying(false);
+      });
+      
+      // Set the source and try to play
+      audio.src = musicTracks[currentTrack].url;
+      
+      try {
+        await audio.play();
+        setAudioRef(audio);
+        setIsMusicPlaying(true);
+        toast.success(`Playing: ${musicTracks[currentTrack].name}`);
+        console.log('Audio started playing successfully');
+      } catch (error: any) {
+        console.error('Error playing music:', error);
+        if (error.name === 'NotAllowedError') {
+          toast.error("Autoplay blocked. Please click the play button to start music.");
+        } else if (error.name === 'NotSupportedError') {
+          toast.error("Audio format not supported by your browser.");
+        } else {
+          toast.error(`Failed to play: ${musicTracks[currentTrack].name}. Please check if the music file exists and is in a supported format.`);
+        }
+      }
+    }
+  };
+
+  const changeTrack = async (trackIndex: number) => {
+    const wasPlaying = isMusicPlaying;
+    
+    if (isMusicPlaying && audioRef) {
+      audioRef.pause();
+      audioRef.currentTime = 0;
+    }
+    
+    setCurrentTrack(trackIndex);
+    
+    if (wasPlaying) {
+      // Initialize audio context first
+      const contextInitialized = await initializeAudioContext();
+      if (!contextInitialized) {
+        toast.error("Failed to initialize audio. Please try again.");
+        return;
+      }
+
+      const audio = new Audio();
+      audio.loop = true;
+      audio.volume = 0.3;
+      audio.preload = 'auto';
+      audio.crossOrigin = 'anonymous';
+      
+      // Add event listeners before setting source
+      audio.addEventListener('loadstart', () => {
+        console.log('Audio loading started for track:', trackIndex);
+      });
+      
+      audio.addEventListener('canplaythrough', () => {
+        console.log('Audio can play through for track:', trackIndex);
+      });
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error for track:', trackIndex, e);
+        const error = audio.error;
+        let errorMessage = `Music file not found: ${musicTracks[trackIndex].name}`;
+        
+        if (error) {
+          switch (error.code) {
+            case error.MEDIA_ERR_ABORTED:
+              errorMessage = "Audio playback was aborted";
+              break;
+            case error.MEDIA_ERR_NETWORK:
+              errorMessage = "Network error while loading audio";
+              break;
+            case error.MEDIA_ERR_DECODE:
+              errorMessage = "Audio file format not supported";
+              break;
+            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorMessage = "Audio file not found or format not supported";
+              break;
+          }
+        }
+        
+        toast.error(errorMessage);
+        setIsMusicPlaying(false);
+      });
+      
+      // Set the source and try to play
+      audio.src = musicTracks[trackIndex].url;
+      
+      try {
+        await audio.play();
+        setAudioRef(audio);
+        toast.success(`Now playing: ${musicTracks[trackIndex].name}`);
+        console.log('Audio track changed successfully');
+      } catch (error: any) {
+        console.error('Error playing music:', error);
+        if (error.name === 'NotAllowedError') {
+          toast.error("Autoplay blocked. Please click the play button to start music.");
+        } else if (error.name === 'NotSupportedError') {
+          toast.error("Audio format not supported by your browser.");
+        } else {
+          toast.error(`Failed to play: ${musicTracks[trackIndex].name}. Please check if the music file exists and is in a supported format.`);
+        }
+        setIsMusicPlaying(false);
+      }
+    } else {
+      toast.success(`Selected: ${musicTracks[trackIndex].name}`);
     }
   };
 
@@ -300,6 +533,63 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             className="gap-2"
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </Button>
+
+          <Button 
+            onClick={toggleMusic} 
+            size="sm" 
+            variant="outline"
+            className="gap-2"
+          >
+            {isMusicPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isMusicPlaying ? `Stop ${musicTracks[currentTrack].name}` : "Play Music"}
+          </Button>
+
+          <div className="relative">
+            <select
+              value={currentTrack}
+              onChange={(e) => changeTrack(parseInt(e.target.value))}
+              className="text-sm border border-border rounded px-2 py-1 bg-background text-foreground"
+            >
+              {musicTracks.map((track, index) => (
+                <option key={index} value={index}>
+                  {track.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <Button 
+            onClick={async () => {
+              console.log('Testing audio file:', musicTracks[currentTrack].url);
+              const isAccessible = await testAudioFile(musicTracks[currentTrack].url);
+              toast.info(`Track ${currentTrack + 1} is ${isAccessible ? 'accessible' : 'not accessible'}`);
+              
+              if (isAccessible) {
+                // Try to actually play a short test
+                try {
+                  const testAudio = new Audio(musicTracks[currentTrack].url);
+                  testAudio.volume = 0.1; // Very low volume for test
+                  testAudio.currentTime = 0;
+                  
+                  await testAudio.play();
+                  setTimeout(() => {
+                    testAudio.pause();
+                    testAudio.remove();
+                    toast.success("Audio test successful - sound is working!");
+                  }, 1000);
+                } catch (error) {
+                  console.error('Audio test failed:', error);
+                  toast.error("Audio test failed - check browser audio settings");
+                }
+              }
+            }}
+            size="sm" 
+            variant="outline"
+            className="gap-2"
+          >
+            <Music className="w-4 h-4" />
+            Test
           </Button>
 
           <Button onClick={handleDownload} size="sm" className="bg-primary hover:bg-primary/90 gap-2">
