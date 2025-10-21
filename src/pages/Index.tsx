@@ -3,7 +3,6 @@ import { BookCard } from "@/components/BookCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Footer } from "@/components/Footer";
 import { TopBooks } from "@/components/TopBooks";
-import { GoHomeButton } from "@/components/GoHomeButton";
 import { ReadingList } from "@/components/ReadingList";
 import { books } from "@/data/books";
 import { Search, Sparkles, Book, Globe, FlaskConical, Landmark, User, Laptop, Palette, Baby, Moon, Sun } from "lucide-react";
@@ -72,14 +71,27 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Theme Toggle */}
-      <div className="fixed top-4 right-4 z-50">
+      {/* Theme Toggle, Login and Bookmarks */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2">
+        <Button
+          onClick={() => navigate('/login')}
+          variant="outline"
+          className="bg-background/80 backdrop-blur-sm"
+        >
+          Login
+        </Button>
+        <Button
+          onClick={() => navigate('/bookmarks')}
+          className="bg-primary/80 backdrop-blur-sm"
+        >
+          Bookmarks
+        </Button>
         <Button
           onClick={toggleTheme}
-          size="lg"
-          className="rounded-full w-14 h-14 shadow-2xl bg-gradient-to-br from-primary to-secondary hover:scale-110 transition-all duration-300"
+          size="sm"
+          className="rounded-full w-10 h-10 shadow-2xl bg-gradient-to-br from-primary to-secondary hover:scale-105 transition-all duration-300"
         >
-          {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+          {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </Button>
       </div>
 
@@ -114,7 +126,7 @@ const Index = () => {
       </header>
 
       {/* Search Bar */}
-      <div className="container mx-auto px-4 -mt-10 relative z-10 mb-12">
+      <div id="search" className="container mx-auto px-4 -mt-10 relative z-10 mb-12">
         <div className="max-w-3xl mx-auto">
           <div className="relative mb-6">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
@@ -127,27 +139,17 @@ const Index = () => {
             />
           </div>
           
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                className="cursor-pointer px-4 py-2 text-sm transition-all hover:scale-105"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Badge>
-            ))}
-          </div>
+          {/* Category Filters removed per requirements */}
         </div>
       </div>
 
       {/* Top Books Carousel */}
-      <TopBooks />
+      <div id="top-books">
+        <TopBooks />
+      </div>
 
       {/* Books Grid - Browse Collection (moved above categories and library) */}
-      <main className="container mx-auto px-4 pb-16">
+      <main id="browse" className="container mx-auto px-4 pb-16">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-foreground mb-2">
             {searchQuery ? "Search Results" : "Browse Collection"}
@@ -193,12 +195,13 @@ const Index = () => {
       </section>
 
       {/* Your Library Section */}
-      <ReadingList />
+      <div id="library">
+        <ReadingList />
+      </div>
 
       {/* Upload Section removed as per requirement */}
 
       <Footer />
-      <GoHomeButton />
     </div>
   );
   } catch (error) {

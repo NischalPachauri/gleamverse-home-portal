@@ -72,6 +72,9 @@ export const ReadingList = () => {
   };
 
   const libraryBooks = books.filter((book) => readingList.includes(book.id));
+  const statusMap: Record<string,string> = (() => {
+    try { return JSON.parse(localStorage.getItem('bookStatus') || '{}'); } catch { return {}; }
+  })();
 
   if (libraryBooks.length === 0) {
     return (
@@ -110,6 +113,11 @@ export const ReadingList = () => {
                   className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg transition-transform duration-300"
                 />
               </Link>
+              {statusMap[book.id] && (
+                <div className="mt-2 text-xs font-medium text-center rounded-full px-2 py-1 bg-primary/10 text-primary">
+                  {statusMap[book.id]}
+                </div>
+              )}
               <Button
                 variant="destructive"
                 size="sm"

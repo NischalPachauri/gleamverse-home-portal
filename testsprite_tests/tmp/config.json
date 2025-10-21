@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8080",
+  "executionArgs": {
+    "projectName": "read-gleam-verse",
+    "projectPath": "C:\\Users\\nisch\\OneDrive\\Documents\\read-gleam-verse",
+    "testIds": [],
+    "additionalInstruction": "Test all functionality including footer navigation links, authentication system, book search, PDF reader, theme management, and API endpoints. Verify that all backend API endpoints are working correctly and returning proper JSON responses. Test the complete user journey from login to reading books.",
+    "envs": {
+      "API_KEY": "sk-user-rXhrsr7ogez4HE7QQ8ul6B7jZHS0KZDtpKrycr1_ltyTIuYYsCIfpwj4BSW4YgibfEq7EI0aQrgrbi8b_l1Der3LatfoxMpDTxaiHDe7NwmxJHW4WUkdkXcck81QyXIdpEY"
+    }
+  },
+  "proxy": "http://55673e6e-b019-419f-9ced-e8f60d73bad3:NNXdeQdcINmWCgB5xmwCfXy7yn5x4rLK@tun.testsprite.com:8080"
+}

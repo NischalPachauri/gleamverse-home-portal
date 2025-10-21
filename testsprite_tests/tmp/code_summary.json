@@ -1,0 +1,266 @@
+{
+  "tech_stack": [
+    "TypeScript",
+    "React",
+    "Vite",
+    "Tailwind CSS",
+    "React Router DOM",
+    "Supabase",
+    "React PDF",
+    "Lucide React",
+    "Sonner",
+    "Radix UI"
+  ],
+  "features": [
+    {
+      "name": "Book Search and Filter",
+      "description": "Search books by title, author, or description with category filtering",
+      "files": [
+        "src/pages/Index.tsx",
+        "src/data/books.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Book Search API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/search": {
+            "get": {
+              "summary": "Search books",
+              "parameters": [
+                {
+                  "name": "query",
+                  "in": "query",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "name": "category",
+                  "in": "query",
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "List of matching books"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PDF Reader",
+      "description": "Read PDF books with zoom controls, page navigation, and two-page mode",
+      "files": [
+        "src/components/PDFReader.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "PDF Reader API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/reader/{bookId}": {
+            "get": {
+              "summary": "Open PDF reader for a book",
+              "parameters": [
+                {
+                  "name": "bookId",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "PDF reader interface"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "User Authentication",
+      "description": "User login and registration with fallback local authentication",
+      "files": [
+        "src/pages/Login.tsx",
+        "src/pages/Register.tsx",
+        "src/integrations/supabase/client.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Authentication API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/login": {
+            "post": {
+              "summary": "User login",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "password": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Login successful"
+                }
+              }
+            }
+          },
+          "/register": {
+            "post": {
+              "summary": "User registration",
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "email": {"type": "string"},
+                        "password": {"type": "string"},
+                        "name": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Registration successful"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Book Status Management",
+      "description": "Manage book reading status (Planning to read, Reading, On hold, Completed)",
+      "files": [
+        "src/components/BookCard.tsx",
+        "src/pages/Bookmarks.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Book Status API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/book/{bookId}/status": {
+            "put": {
+              "summary": "Update book status",
+              "parameters": [
+                {
+                  "name": "bookId",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "requestBody": {
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string",
+                          "enum": ["Planning to read", "Reading", "On hold", "Completed"]
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "responses": {
+                "200": {
+                  "description": "Status updated successfully"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Top Books Carousel",
+      "description": "Display rotating carousel of top books with infinite loop",
+      "files": [
+        "src/components/TopBooks.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Top Books API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/top-books": {
+            "get": {
+              "summary": "Get top books for carousel",
+              "responses": {
+                "200": {
+                  "description": "List of top books"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Theme Management",
+      "description": "Dark/light theme toggle with persistence",
+      "files": [
+        "src/contexts/ThemeContext.tsx",
+        "src/pages/Index.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Theme API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/theme": {
+            "post": {
+              "summary": "Toggle theme",
+              "responses": {
+                "200": {
+                  "description": "Theme toggled successfully"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

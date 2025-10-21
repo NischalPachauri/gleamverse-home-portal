@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC001",
+    "title": "search books by query and category",
+    "description": "Verify that the /search endpoint returns a list of books matching the query parameter and optional category filter, ensuring accurate search results by title, author, or description."
+  },
+  {
+    "id": "TC002",
+    "title": "open pdf reader for a specific book",
+    "description": "Test the /reader/{bookId} endpoint to ensure it opens the PDF reader interface for the given bookId, supporting page navigation, zoom controls, and two-page mode."
+  },
+  {
+    "id": "TC003",
+    "title": "user login with valid credentials",
+    "description": "Validate the /login endpoint by submitting valid email and password, expecting a successful login response and proper authentication handling."
+  },
+  {
+    "id": "TC004",
+    "title": "user registration with required details",
+    "description": "Test the /register endpoint by providing valid email, password, and name, verifying successful user registration and profile creation."
+  },
+  {
+    "id": "TC005",
+    "title": "update book reading status",
+    "description": "Verify the /book/{bookId}/status endpoint allows updating the reading status of a book to one of the allowed values (Planning to read, Reading, On hold, Completed) and returns a success response."
+  },
+  {
+    "id": "TC006",
+    "title": "retrieve top books for carousel display",
+    "description": "Test the /top-books endpoint to ensure it returns a list of top trending books for the carousel, supporting infinite looping and correct author information."
+  },
+  {
+    "id": "TC007",
+    "title": "toggle and persist user theme preference",
+    "description": "Validate the /theme endpoint to toggle between dark and light themes, ensuring the preference is saved and persists across user sessions."
+  }
+]

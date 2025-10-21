@@ -1,17 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Volume2, VolumeX, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns } from "lucide-react";
+// Use a same-origin worker URL to avoid cross-origin/module worker issues
+// Vite will bundle this and return a URL string
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore - Vite query suffix not typed
+import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 
-// Set up the worker with fallback
+// Configure PDF.js worker to use locally bundled worker for reliability
 try {
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as unknown as string;
+  console.log('PDF.js worker configured:', pdfWorkerUrl);
 } catch (error) {
-  console.warn('PDF.js worker setup failed, using fallback:', error);
-  pdfjs.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.mjs';
+  console.error('Failed to configure PDF.js worker:', error);
+  // Fallback to CDN
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 }
 
 interface PDFReaderProps {
@@ -20,22 +27,39 @@ interface PDFReaderProps {
 }
 
 export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
+  console.log('PDFReader initialized with:', { pdfPath, title });
   const { id } = useParams();
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [nightMode, setNightMode] = useState<boolean>(false);
-  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  // TTS removed per requirements
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isInLibrary, setIsInLibrary] = useState<boolean>(false);
-  const [isPageTurning, setIsPageTurning] = useState<boolean>(false);
+  // Remove page turning state to avoid flicker
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Add error boundary for PDF loading
+  const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
+    console.log('PDF loaded successfully:', { numPages, pdfPath });
+    setNumPages(numPages);
+    setLoading(false);
+    setError(null);
+    toast.success(`Document loaded! ${numPages} pages available.`);
+  }, [pdfPath]);
+
+  const onDocumentLoadError = useCallback((error: Error) => {
+    console.error('PDF load error:', error, 'PDF path:', pdfPath);
+    setError('Failed to load PDF. Please try again.');
+    setLoading(false);
+    toast.error("Failed to load PDF. Please try again.");
+  }, [pdfPath]);
   const [twoPageMode, setTwoPageMode] = useState<boolean>(() => {
     const stored = localStorage.getItem("twoPageMode");
     return stored ? stored === "true" : true;
   });
-  const speechRef = useRef<SpeechSynthesisUtterance | null>(null);
+  // TTS removed per requirements
   const containerRef = useRef<HTMLDivElement>(null);
   const [sessionId] = useState(() => {
     let sid = localStorage.getItem("sessionId");
@@ -45,12 +69,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     }
     return sid;
   });
-
-  useEffect(() => {
-    checkIfInLibrary();
-    // Restore last read page for this book
-    restoreLastPosition();
-  }, [id, checkIfInLibrary, restoreLastPosition]);
 
   const checkIfInLibrary = useCallback(async () => {
     if (!id) return;
@@ -80,6 +98,12 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     }
   }, [id, sessionId]);
 
+  useEffect(() => {
+    checkIfInLibrary();
+    // Restore last read page for this book
+    restoreLastPosition();
+  }, [id, checkIfInLibrary, restoreLastPosition]);
+
   const toggleLibrary = async () => {
     if (!id) return;
 
@@ -100,48 +124,27 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     }
   };
 
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
-    setNumPages(numPages);
-    setLoading(false);
-    setError(null);
-    toast.success(`Document loaded! ${numPages} pages available.`);
-  }
-
-  function onDocumentLoadError(error: Error) {
-    setLoading(false);
-    setError("Failed to load PDF. Please check if the file exists and try again.");
-    toast.error("Failed to load PDF. Please try again.");
-    console.error("PDF load error:", error);
-  }
 
   const goToPrevPage = () => {
     if (pageNumber <= 1) return;
-    setIsPageTurning(true);
-    setTimeout(() => {
-      setPageNumber((prev) => {
+    setPageNumber((prev) => {
         if (twoPageMode) {
           const nextPage = Math.max(prev - 2, 1);
           return nextPage % 2 === 0 ? nextPage - 1 : nextPage;
         }
         return Math.max(prev - 1, 1);
       });
-      setIsPageTurning(false);
-    }, 300);
   };
 
   const goToNextPage = () => {
     if (pageNumber >= numPages) return;
-    setIsPageTurning(true);
-    setTimeout(() => {
-      setPageNumber((prev) => {
+    setPageNumber((prev) => {
         if (twoPageMode) {
           const nextLeft = Math.min(prev + 2, numPages);
           return nextLeft % 2 === 0 ? nextLeft - 1 : nextLeft;
         }
         return Math.min(prev + 1, numPages);
       });
-      setIsPageTurning(false);
-    }, 300);
   };
 
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.0));
@@ -190,56 +193,13 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     }
   };
 
-  const fetchPageText = async (pageNum: number) => {
-    try {
-      const loadingTask = pdfjs.getDocument(pdfPath);
-      const pdf = await loadingTask.promise;
-      const page = await pdf.getPage(pageNum);
-      const textContent = await page.getTextContent();
-      return textContent.items.map((i: { str?: string }) => ('str' in i ? i.str : '')).join(' ');
-    } catch (e) {
-      console.error('TTS text extraction error', e);
-      return '';
-    }
-  };
+  // TTS removed per requirements
 
-  const toggleTextToSpeech = async () => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      toast.success("Text-to-speech stopped");
-      return;
-    }
-    const leftText = await fetchPageText(pageNumber);
-    let toRead = leftText;
-    if (twoPageMode && pageNumber + 1 <= numPages) {
-      const rightText = await fetchPageText(pageNumber + 1);
-      toRead = `${leftText} ${rightText}`.trim();
-    }
-    const utterance = new SpeechSynthesisUtterance(
-      toRead || `Reading page ${pageNumber} of ${title}.`
-    );
-    utterance.onend = () => setIsSpeaking(false);
-    speechRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-    toast.success("Text-to-speech started");
-  };
+  // TTS removed per requirements
 
-  useEffect(() => {
-    return () => {
-      if (isSpeaking) {
-        window.speechSynthesis.cancel();
-      }
-    };
-  }, [isSpeaking]);
+  // TTS removed per requirements
 
-  useEffect(() => {
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    }
-  }, [pageNumber, isSpeaking]);
+  // TTS removed per requirements
 
   // Persist reading position whenever page changes
   useEffect(() => {
@@ -259,6 +219,21 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     persist();
     // We intentionally do not handle errors here; silent best-effort persistence
   }, [pageNumber, id, sessionId]);
+
+  // Show error state if PDF failed to load
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-background p-8">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-destructive">PDF Loading Error</h2>
+          <p className="text-muted-foreground">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={containerRef} className="flex flex-col h-full bg-background">
@@ -286,7 +261,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           </Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-center flex-1">
           <Button onClick={zoomOut} size="sm" variant="outline">
             <ZoomOut className="w-4 h-4" />
           </Button>
@@ -316,14 +291,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             {nightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
 
-          <Button 
-            onClick={toggleTextToSpeech} 
-            size="sm" 
-            variant="outline"
-            className="gap-2"
-          >
-            {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          </Button>
+          {/* TTS control removed per requirements */}
 
           <Button 
             onClick={toggleFullscreen} 
@@ -348,13 +316,14 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
 
       {/* PDF Viewer - supports Single/Two-page. Duplicate text fix: text layer disabled. */}
       <div 
-        className={`flex-1 overflow-auto p-8 transition-colors ${
+        className={`flex-1 overflow-auto p-2 transition-colors ${
           nightMode ? "bg-gray-900" : "bg-muted"
         }`}
+        style={{ maxHeight: 'calc(100vh - 200px)' }}
       >
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-1">
           <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>
-          <div className={`transition-all duration-500 [transform-style:preserve-3d] ${isPageTurning ? 'page-curl' : ''}`}>
+          <div>
             <Document
               file={pdfPath}
               onLoadSuccess={onDocumentLoadSuccess}
@@ -367,7 +336,30 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
               }
             >
               {twoPageMode ? (
-                <div className="flex gap-4 items-start">
+                <div className="two-page-spread">
+                  <div className={`pdf-page`}>
+                    <Page
+                      pageNumber={pageNumber}
+                      scale={scale}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={true}
+                      className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                    />
+                  </div>
+                  {pageNumber + 1 <= numPages && (
+                    <div className={`pdf-page`}>
+                      <Page
+                        pageNumber={pageNumber + 1}
+                        scale={scale}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={true}
+                        className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className={`pdf-page`}>
                   <Page
                     pageNumber={pageNumber}
                     scale={scale}
@@ -375,24 +367,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
                     renderAnnotationLayer={true}
                     className={`shadow-2xl ${nightMode ? "invert" : ""}`}
                   />
-                  {pageNumber + 1 <= numPages && (
-                    <Page
-                      pageNumber={pageNumber + 1}
-                      scale={scale}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={true}
-                      className={`shadow-2xl ${nightMode ? "invert" : ""}`}
-                    />
-                  )}
                 </div>
-              ) : (
-                <Page
-                  pageNumber={pageNumber}
-                  scale={scale}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={true}
-                  className={`shadow-2xl ${nightMode ? "invert" : ""}`}
-                />
               )}
             </Document>
           </div>
@@ -409,11 +384,32 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         </div>
       </div>
 
-      {/* Local CSS for 3D page curl effect */}
+      {/* Page animations removed per requirements */}
       <style dangerouslySetInnerHTML={{__html: `
-        .page-curl { position: relative; }
-        .page-curl::after { content: ''; position: absolute; right: 0; top: 0; width: 60px; height: 100%; background: linear-gradient(270deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); transform-origin: right center; animation: curl 500ms ease; border-radius: 6px 0 0 6px; pointer-events: none; }
-        @keyframes curl { from { transform: rotateY(-25deg); opacity: 0.0; } to { transform: rotateY(0deg); opacity: 1; } }
+        .two-page-spread {
+          display: flex;
+          gap: 8px;
+          align-items: flex-start;
+        }
+        .pdf-page {
+          margin-bottom: 0;
+          padding-bottom: 0;
+          max-height: 80vh;
+          overflow: hidden;
+        }
+        .pdf-page canvas {
+          display: block;
+          margin: 0 auto;
+          max-height: 80vh;
+          object-fit: contain;
+        }
+        .react-pdf__Page {
+          max-height: 80vh !important;
+        }
+        .react-pdf__Page__canvas {
+          max-height: 80vh !important;
+          height: auto !important;
+        }
       `}} />
     </div>
   );

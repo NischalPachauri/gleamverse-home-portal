@@ -1,4 +1,4 @@
-import { Book, Home, Library, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Book, Home, Library, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, Search, Star, Bookmark, Grid3X3 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const Footer = () => {
@@ -7,7 +7,7 @@ export const Footer = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* About Us */}
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-4">
             <h3 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
               <Book className="w-6 h-6" />
               About Us
@@ -32,7 +32,7 @@ export const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4 animate-fade-in [animation-delay:100ms]">
+          <div className="space-y-4">
             <h3 className="text-2xl font-bold text-primary mb-4">Quick Links</h3>
             <ul className="space-y-3">
               <li>
@@ -42,17 +42,46 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="#categories" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                <a href="#categories" onClick={(e) => { e.preventDefault(); document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
                   <Library className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Categories
                 </a>
               </li>
-              {/* Upload link removed as per requirement */}
+              <li>
+                <a href="#browse" onClick={(e) => { e.preventDefault(); document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                  <Grid3X3 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Browse Collection
+                </a>
+              </li>
+              <li>
+                <a href="#top-books" onClick={(e) => { e.preventDefault(); document.getElementById('top-books')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                  <Star className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Top Books
+                </a>
+              </li>
+              <li>
+                <a href="#search" onClick={(e) => { e.preventDefault(); document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                  <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Search Bar
+                </a>
+              </li>
+              <li>
+                <a href="#library" onClick={(e) => { e.preventDefault(); document.getElementById('library')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                  <Library className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Your Library
+                </a>
+              </li>
+              <li>
+                <Link to="/bookmarks" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                  <Bookmark className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Bookmarks
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Contact Us */}
-          <div className="space-y-4 animate-fade-in [animation-delay:200ms]">
+          <div className="space-y-4">
             <h3 className="text-2xl font-bold text-primary mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-muted-foreground group">
@@ -61,11 +90,11 @@ export const Footer = () => {
               </li>
               <li className="flex items-start gap-3 text-muted-foreground group">
                 <Phone className="w-5 h-5 text-primary mt-0.5 group-hover:scale-110 transition-transform" />
-                <span>+1 (555) 123-4567</span>
+                <span>9354374659</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground group">
                 <MapPin className="w-5 h-5 text-primary mt-0.5 group-hover:scale-110 transition-transform" />
-                <span>123 Library Street, Bookville</span>
+                <span>Ajay Kumar Garg Engineering College</span>
               </li>
             </ul>
           </div>

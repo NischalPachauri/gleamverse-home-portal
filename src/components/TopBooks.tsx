@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { books as localBooks } from "@/data/books";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -28,7 +27,7 @@ interface BookItem {
 
 export const TopBooks = () => {
   const [top, setTop] = useState<BookItem[]>([]);
-  const [index, setIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
@@ -39,72 +38,80 @@ export const TopBooks = () => {
           .order("read_count", { ascending: false })
           .limit(7);
         if (!error && data && data.length > 0) {
-          setTop(data as BookItem[]);
+          // Randomize then take 7
+          const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0,7);
+          setTop(shuffled as BookItem[]);
           return;
         }
       } catch (error) {
         console.error('Error loading top books:', error);
       }
-      // fallback to local books
-      try {
-        setTop(localBooks.slice(0, 7).map((b: { id: string; title: string; author: string; coverImage: string }) => ({ id: b.id, title: b.title, author: b.author, coverImage: b.coverImage })));
-      } catch (error) {
-        console.error('Error loading local books:', error);
-        // If even local books fail, set empty array
-        setTop([]);
-      }
+      // fallback to local books - ensure we always have content
+      const fallbackBooks = [...localBooks]
+        .sort(()=> Math.random() - 0.5)
+        .slice(0, 7)
+        .map((b: { id: string; title: string; author: string; coverImage: string }) => ({ 
+        id: b.id, 
+        title: b.title, 
+        author: b.author, 
+        coverImage: b.coverImage 
+      }));
+      setTop(fallbackBooks);
+      setLoading(false);
     };
     load();
   }, []);
 
-  useEffect(() => {
-    if (top.length === 0) return;
-    const i = setInterval(() => {
-      setIndex((prev) => (prev + 1) % Math.min(7, top.length));
-    }, 3500);
-    return () => clearInterval(i);
-  }, [top]);
+  // No timer-based scrolling; animation is pure CSS marquee
 
-  const visible = useMemo(() => {
+  // Build a 7-item list, looping if needed
+  const sevenBooks = useMemo(() => {
     if (top.length === 0) return [] as BookItem[];
-    const arr: BookItem[] = [];
-    for (let i = 0; i < 3; i++) {
-      arr.push(top[(index + i) % top.length]);
-    }
-    return arr;
-  }, [top, index]);
+    const base = top.length >= 7 ? top.slice(0,7) : Array.from({length:7}, (_,i)=> top[i % top.length]);
+    return base;
+  }, [top]);
 
   const coverSrc = (b: BookItem) => {
     if (b.cover_url) return b.cover_url;
     return coverImages[b.coverImage || ""] || "";
   };
 
+  // Duplicate list for seamless marquee (hooks must be before any return)
+  const marqueeBooks = useMemo(() => {
+    if (sevenBooks.length === 0) return [] as BookItem[];
+    return [...sevenBooks, ...sevenBooks];
+  }, [sevenBooks]);
+
+  if (loading) {
+    return (
+      <section className="container mx-auto px-4 py-12">
+        <h2 className="text-4xl font-bold text-center mb-4 text-primary">Top Books</h2>
+        <p className="text-center text-muted-foreground mb-8">Most read books right now</p>
+        <div className="flex justify-center items-center h-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="container mx-auto px-4 py-12">
       <h2 className="text-4xl font-bold text-center mb-4 text-primary">Top Books</h2>
       <p className="text-center text-muted-foreground mb-8">Most read books right now</p>
-      
-      {/* Smooth Sliding Carousel */}
       <div className="relative overflow-hidden rounded-2xl">
-        <div 
-          className="flex transition-transform duration-700 ease-in-out"
-          style={{
-            transform: `translateX(-${index * (100 / 3)}%)`,
-            width: `${(top.length * 100) / 3}%`
-          }}
-        >
-          {top.map((b, idx) => (
-            <div key={`${b.id}-${idx}`} className="w-1/3 px-3">
-              <Link 
-                to={`/book/${b.id}`} 
-                className="group block rounded-2xl bg-card shadow-md hover:shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-2"
+        <div className="topbooks-marquee">
+          {marqueeBooks.map((b, idx) => (
+            <div key={`${b.id}-${idx}`} className="px-3">
+              <Link
+                to={`/book/${b.id}`}
+                className="group block rounded-2xl bg-card shadow-md hover:shadow-xl transition-all duration-500 w-[320px]"
               >
                 <div className="flex items-center gap-4 p-6">
                   <div className="w-20 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow duration-300">
-                    <img 
-                      src={coverSrc(b)} 
-                      alt={b.title} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                    <img
+                      src={coverSrc(b)}
+                      alt={b.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                   <div className="flex-1">
@@ -116,52 +123,29 @@ export const TopBooks = () => {
                         by {b.author}
                       </p>
                     )}
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                      <span className="text-xs text-muted-foreground">Trending</span>
-                    </div>
                   </div>
                 </div>
               </Link>
             </div>
           ))}
         </div>
-        
-        {/* Navigation Arrows */}
-        <button
-          onClick={() => setIndex(Math.max(0, index - 1))}
-          disabled={index === 0}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 hover:bg-background border border-border shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center group"
-          aria-label="Previous books"
-        >
-          <ChevronLeft className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-        </button>
-        
-        <button
-          onClick={() => setIndex(Math.min(Math.ceil(top.length / 3) - 1, index + 1))}
-          disabled={index >= Math.ceil(top.length / 3) - 1}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/80 hover:bg-background border border-border shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center group"
-          aria-label="Next books"
-        >
-          <ChevronRight className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-        </button>
-        
-        {/* Navigation Indicators */}
-        <div className="flex justify-center mt-6 gap-2">
-          {top.slice(0, Math.ceil(top.length / 3)).map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setIndex(idx)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                idx === index 
-                  ? 'bg-primary scale-125' 
-                  : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
-              }`}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
-        </div>
       </div>
+
+      {/* Local styles for continuous marquee */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .topbooks-marquee {
+          display: flex;
+          gap: 12px;
+          width: max-content;
+          animation: topbooks-marquee 30s linear infinite;
+          will-change: transform;
+        }
+        .topbooks-marquee:hover { animation-play-state: paused; }
+        @keyframes topbooks-marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}} />
     </section>
   );
 };
