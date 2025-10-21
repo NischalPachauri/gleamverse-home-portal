@@ -5,6 +5,7 @@ import { books } from "@/data/books";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -22,6 +23,7 @@ const coverImages: Record<string, string> = {
 
 export const ReadingList = () => {
   const [readingList, setReadingList] = useState<string[]>([]);
+  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.2 });
   const [sessionId] = useState(() => {
     let id = localStorage.getItem("sessionId");
     if (!id) {
@@ -78,7 +80,7 @@ export const ReadingList = () => {
 
   if (libraryBooks.length === 0) {
     return (
-      <section className="py-12 bg-muted/30">
+      <section ref={sectionRef} className={`py-12 bg-muted/30 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-3 mb-8">
             <BookOpen className="w-8 h-8 text-primary" />
@@ -93,18 +95,21 @@ export const ReadingList = () => {
   }
 
   return (
-    <section className="py-12 bg-muted/30">
+    <section ref={sectionRef} className={`py-12 bg-muted/30 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-center gap-3 mb-8 animate-fade-in">
+        <div className="flex items-center justify-center gap-3 mb-8">
           <BookOpen className="w-8 h-8 text-primary" />
           <h2 className="text-4xl font-bold text-foreground">Your Library</h2>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {libraryBooks.map((book) => (
+          {libraryBooks.map((book, index) => (
             <div
               key={book.id}
-              className="group relative animate-fade-in hover-scale"
+              className={`group relative hover-scale transition-all duration-500 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
               <Link to={`/book/${book.id}`}>
                 <img

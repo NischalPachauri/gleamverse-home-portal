@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { books as localBooks } from "@/data/books";
 import { Link } from "react-router-dom";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -28,6 +29,7 @@ interface BookItem {
 export const TopBooks = () => {
   const [top, setTop] = useState<BookItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.2 });
 
   useEffect(() => {
     const load = async () => {
@@ -95,7 +97,7 @@ export const TopBooks = () => {
   }
 
   return (
-    <section className="container mx-auto px-4 py-12">
+    <section ref={sectionRef} className={`container mx-auto px-4 py-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       <h2 className="text-4xl font-bold text-center mb-4 text-primary">Top Books</h2>
       <p className="text-center text-muted-foreground mb-8">Most read books right now</p>
       <div className="relative overflow-hidden rounded-2xl">

@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import libraryBg from "@/assets/library-background.jpg";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 
 // Fallback component in case of errors
 const IndexFallback = () => (
@@ -27,6 +28,7 @@ const IndexFallback = () => (
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const { ref: categoriesRef, isVisible } = useScrollReveal({ threshold: 0.2 });
   
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -175,22 +177,33 @@ const Index = () => {
       </main>
 
       {/* Browse Categories Section */}
-      <section id="categories" className="container mx-auto px-4 py-16">
-        <h2 className="text-5xl font-bold text-center mb-4 text-primary animate-fade-in">
-          Browse Categories
-        </h2>
-        <div className="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto mb-12 rounded-full"></div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {categoryData.map((cat, idx) => (
-            <CategoryCard
-              key={cat.name}
-              icon={cat.icon}
-              title={cat.name}
-              onClick={() => setSelectedCategory(cat.name)}
-              isActive={selectedCategory === cat.name}
-            />
-          ))}
+      <section ref={categoriesRef} id="categories" className="container mx-auto px-4 py-16">
+        <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <h2 className="text-5xl font-bold text-center mb-4 text-primary">
+            Browse Categories
+          </h2>
+          <div className="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto mb-12 rounded-full"></div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {categoryData.map((cat, idx) => (
+              <div
+                key={cat.name}
+                className="transition-all duration-700"
+                style={{ 
+                  transitionDelay: `${idx * 100}ms`,
+                  opacity: isVisible ? 1 : 0,
+                  transform: isVisible ? 'translateY(0)' : 'translateY(20px)'
+                }}
+              >
+                <CategoryCard
+                  icon={cat.icon}
+                  title={cat.name}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  isActive={selectedCategory === cat.name}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
