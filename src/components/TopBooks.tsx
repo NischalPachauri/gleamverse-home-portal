@@ -39,24 +39,29 @@ export const TopBooks = () => {
           .order("read_count", { ascending: false })
           .limit(24);
         if (!error && data && data.length > 0) {
-          // Randomize then take 7
-          const shuffled = [...data].sort(() => Math.random() - 0.5);
-          setTop(shuffled as BookItem[]);
-          return;
+          // Filter for Harry Potter books only
+          const harryPotterBooks = data.filter(book => 
+            book.title.toLowerCase().includes('harry potter')
+          );
+          if (harryPotterBooks.length > 0) {
+            setTop(harryPotterBooks as BookItem[]);
+            setLoading(false);
+            return;
+          }
         }
       } catch (error) {
         console.error('Error loading top books:', error);
       }
-      // fallback to local books - ensure we always have content
-      const fallbackBooks = [...localBooks]
-        .sort(()=> Math.random() - 0.5)
+      // fallback to local Harry Potter books only
+      const harryPotterBooks = localBooks
+        .filter(book => book.title.toLowerCase().includes('harry potter'))
         .map((b: { id: string; title: string; author: string; coverImage: string }) => ({ 
-        id: b.id, 
-        title: b.title, 
-        author: b.author, 
-        coverImage: b.coverImage 
-      }));
-      setTop(fallbackBooks);
+          id: b.id, 
+          title: b.title, 
+          author: b.author, 
+          coverImage: b.coverImage 
+        }));
+      setTop(harryPotterBooks);
       setLoading(false);
     };
     load();
@@ -88,7 +93,11 @@ export const TopBooks = () => {
 
   const coverSrc = (b: BookItem) => {
     if (b.cover_url) return b.cover_url;
-    return coverImages[b.coverImage || ""] || "";
+    // For Harry Potter books, use the imported covers
+    if (b.coverImage && coverImages[b.coverImage]) {
+      return coverImages[b.coverImage];
+    }
+    return "";
   };
 
   // Build duplicated list for a seamless continuous loop

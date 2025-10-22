@@ -67,7 +67,7 @@ const Index = () => {
   try {
 
   const filteredBooks = useMemo(() => {
-    return books.filter((book) => {
+    const filtered = books.filter((book) => {
       const matchesSearch =
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -76,6 +76,18 @@ const Index = () => {
       const matchesCategory = selectedCategory === "All" || book.genre === selectedCategory;
       
       return matchesSearch && matchesCategory;
+    });
+    
+    // Sort to ensure Harry Potter books come first
+    return filtered.sort((a, b) => {
+      const aIsHarryPotter = a.title.toLowerCase().includes('harry potter');
+      const bIsHarryPotter = b.title.toLowerCase().includes('harry potter');
+      
+      if (aIsHarryPotter && !bIsHarryPotter) return -1;
+      if (!aIsHarryPotter && bIsHarryPotter) return 1;
+      
+      // If both are Harry Potter or both are not, sort by title
+      return a.title.localeCompare(b.title);
     });
   }, [searchQuery, selectedCategory]);
 
@@ -90,14 +102,20 @@ const Index = () => {
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(prev => prev + 1);
-      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth' });
+      // Scroll to top of browse section
+      setTimeout(() => {
+        document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(prev => prev - 1);
-      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth' });
+      // Scroll to top of browse section
+      setTimeout(() => {
+        document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
     }
   };
 

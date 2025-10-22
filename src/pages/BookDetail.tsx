@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PDFReader } from "@/components/PDFReader";
 import { books } from "@/data/books";
 
-// Import all cover images
+// Import Harry Potter covers
 import hp1 from "@/assets/covers/hp1.jpg";
 import hp2 from "@/assets/covers/hp2.jpg";
 import hp3 from "@/assets/covers/hp3.jpg";
@@ -14,8 +14,28 @@ import hp6 from "@/assets/covers/hp6.jpg";
 import hp7 from "@/assets/covers/hp7.jpg";
 import hp8 from "@/assets/covers/hp8.jpg";
 
-const coverImages: Record<string, string> = {
+const harryPotterCovers: Record<string, string> = {
   hp1, hp2, hp3, hp4, hp5, hp6, hp7, hp8
+};
+
+// Function to get cover image path
+const getCoverImage = (coverImage: string) => {
+  // For Harry Potter covers, use the imported images
+  if (harryPotterCovers[coverImage]) {
+    return harryPotterCovers[coverImage];
+  }
+  
+  // For placeholder covers, use the generated SVG files
+  if (coverImage === 'placeholder' || coverImage.startsWith('book-')) {
+    return `/src/assets/covers/${coverImage}.svg`;
+  }
+  
+  // For existing covers, try to import them
+  try {
+    return `/src/assets/covers/${coverImage}.jpg`;
+  } catch {
+    return '/src/assets/placeholder.svg';
+  }
 };
 
 const BookDetail = () => {
@@ -48,7 +68,7 @@ const BookDetail = () => {
           </Link>
           <div className="flex items-center gap-4 flex-1">
             <img
-              src={coverImages[book.coverImage]}
+              src={getCoverImage(book.coverImage)}
               alt={book.title}
               className="h-16 w-auto rounded shadow-md"
             />
