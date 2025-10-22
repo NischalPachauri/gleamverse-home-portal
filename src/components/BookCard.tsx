@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
-import { Download, BookOpen, MoreVertical, Check } from "lucide-react";
+import { 
+  Download, BookOpen, MoreVertical, Check, Sparkles, Heart, BookMarked, Baby, 
+  Landmark, FlaskConical, Globe, Scroll, Swords, Brain, Users, GraduationCap,
+  Castle, Fingerprint, Scale, Briefcase, Rocket, TreePine, Palette, Music
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
@@ -37,6 +41,45 @@ const getCoverImage = (coverImage: string) => {
   } catch {
     return '/src/assets/placeholder.svg';
   }
+};
+
+const isPlaceholderCover = (coverImage: string) => {
+  if (harryPotterCovers[coverImage]) return false;
+  return coverImage === 'placeholder' || coverImage.startsWith('book-');
+};
+
+const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
+  const g = genre.toLowerCase();
+  const t = title.toLowerCase();
+  const cls = "w-10 h-10 md:w-12 md:h-12 text-primary";
+  
+  // Specific book/series icons
+  if (t.includes('harry potter')) return <Sparkles className={cls} />;
+  if (t.includes('crime') || t.includes('punishment')) return <Scale className={cls} />;
+  if (t.includes('love') || t.includes('girlfriend') || t.includes('crush')) return <Heart className={cls} />;
+  if (t.includes('wings of fire') || t.includes('rocket')) return <Rocket className={cls} />;
+  if (t.includes('secret') || t.includes('mystery')) return <Fingerprint className={cls} />;
+  if (t.includes('palace') || t.includes('castle')) return <Castle className={cls} />;
+  if (t.includes('jungle book') || t.includes('grandma')) return <TreePine className={cls} />;
+  if (t.includes('three musketeers') || t.includes('sword')) return <Swords className={cls} />;
+  if (t.includes('philosophy') || t.includes('gita')) return <Scroll className={cls} />;
+  if (t.includes('biography') || t.includes('life')) return <Users className={cls} />;
+  if (t.includes('student') || t.includes('college') || t.includes('school')) return <GraduationCap className={cls} />;
+  if (t.includes('business') || t.includes('job')) return <Briefcase className={cls} />;
+  if (t.includes('art') || t.includes('paint')) return <Palette className={cls} />;
+  if (t.includes('music') || t.includes('song')) return <Music className={cls} />;
+  if (t.includes('mind') || t.includes('brain') || t.includes('think')) return <Brain className={cls} />;
+  
+  // Genre-based fallbacks
+  if (g.includes('fantasy')) return <Sparkles className={cls} />;
+  if (g.includes('romance')) return <Heart className={cls} />;
+  if (g.includes("children")) return <Baby className={cls} />;
+  if (g.includes('philosophy')) return <Landmark className={cls} />;
+  if (g.includes('mystery')) return <FlaskConical className={cls} />;
+  if (g.includes('non-fiction')) return <Globe className={cls} />;
+  if (g.includes('biography')) return <BookMarked className={cls} />;
+  
+  return <BookOpen className={cls} />;
 };
 
 interface BookCardProps {
@@ -120,14 +163,20 @@ export const BookCard = ({ book }: BookCardProps) => {
     <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
       <Link to={`/book/${book.id}`} className="block">
         <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
-          <img
-            src={getCoverImage(book.coverImage)}
-            alt={book.title}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={(e) => {
-              e.currentTarget.src = '/src/assets/placeholder.svg';
-            }}
-          />
+          {isPlaceholderCover(book.coverImage) ? (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+              <GenreIcon genre={book.genre} title={book.title} />
+            </div>
+          ) : (
+            <img
+              src={getCoverImage(book.coverImage)}
+              alt={book.title}
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              onError={(e) => {
+                e.currentTarget.src = '/src/assets/placeholder.svg';
+              }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           {/* Three-dot status menu */}
           <div className="absolute top-2 right-2 z-30" data-book-id={book.id}>

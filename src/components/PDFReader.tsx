@@ -39,6 +39,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   // Remove page turning state to avoid flicker
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  // Page turning animation removed
   
   // Music state management
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
@@ -144,23 +145,23 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   const goToPrevPage = () => {
     if (pageNumber <= 1) return;
     setPageNumber((prev) => {
-        if (twoPageMode) {
-          const nextPage = Math.max(prev - 2, 1);
-          return nextPage % 2 === 0 ? nextPage - 1 : nextPage;
-        }
-        return Math.max(prev - 1, 1);
-      });
+      if (twoPageMode) {
+        const nextPage = Math.max(prev - 2, 1);
+        return nextPage % 2 === 0 ? nextPage - 1 : nextPage;
+      }
+      return Math.max(prev - 1, 1);
+    });
   };
 
   const goToNextPage = () => {
     if (pageNumber >= numPages) return;
     setPageNumber((prev) => {
-        if (twoPageMode) {
-          const nextLeft = Math.min(prev + 2, numPages);
-          return nextLeft % 2 === 0 ? nextLeft - 1 : nextLeft;
-        }
-        return Math.min(prev + 1, numPages);
-      });
+      if (twoPageMode) {
+        const nextLeft = Math.min(prev + 2, numPages);
+        return nextLeft % 2 === 0 ? nextLeft - 1 : nextLeft;
+      }
+      return Math.min(prev + 1, numPages);
+    });
   };
 
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.0));
@@ -516,14 +517,25 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           <div className="flex items-center gap-2 ml-4">
             <span className="text-sm font-medium">Go to:</span>
             <input
-              type="number"
+              type="text"
               min="1"
               max={numPages}
               value={pageNumber}
               onChange={(e) => {
-                const page = parseInt(e.target.value);
-                if (page >= 1 && page <= numPages) {
+                const value = e.target.value;
+                // Allow empty string for backspace support
+                if (value === '') {
+                  return;
+                }
+                const page = parseInt(value);
+                if (!isNaN(page) && page >= 1 && page <= numPages) {
                   setPageNumber(page);
+                }
+              }}
+              onKeyDown={(e) => {
+                // Allow backspace to work normally
+                if (e.key === 'Backspace') {
+                  e.stopPropagation();
                 }
               }}
               className="w-16 px-2 py-1 text-sm border border-border rounded bg-background text-foreground"
@@ -636,7 +648,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             >
               {twoPageMode ? (
                 <div className="two-page-spread">
-                  <div className={`pdf-page`}>
+                  <div className="pdf-page">
                     <Page
                       pageNumber={pageNumber}
                       scale={scale}
@@ -646,7 +658,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
                     />
                   </div>
                   {pageNumber + 1 <= numPages && (
-                    <div className={`pdf-page`}>
+                    <div className="pdf-page">
                       <Page
                         pageNumber={pageNumber + 1}
                         scale={scale}
@@ -658,14 +670,16 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
                   )}
                 </div>
               ) : (
-                <div className={`pdf-page`}>
-                  <Page
-                    pageNumber={pageNumber}
-                    scale={scale}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={true}
-                    className={`shadow-2xl ${nightMode ? "invert" : ""}`}
-                  />
+                <div className="single-page-container">
+                  <div className="pdf-page">
+                    <Page
+                      pageNumber={pageNumber}
+                      scale={scale}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={true}
+                      className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                    />
+                  </div>
                 </div>
               )}
             </Document>
@@ -688,13 +702,22 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           display: flex;
           gap: 8px;
           align-items: flex-start;
+          position: relative;
         }
+        
+        .single-page-container {
+          position: relative;
+          display: inline-block;
+        }
+        
         .pdf-page {
           margin-bottom: 0;
           padding-bottom: 0;
           max-height: 80vh;
           overflow: hidden;
+          position: relative;
         }
+        
         .pdf-page canvas {
           display: block;
           margin: 0 auto;

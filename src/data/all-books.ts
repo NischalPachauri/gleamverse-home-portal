@@ -10,107 +10,28 @@ export interface Book {
   genre: string;
 }
 
-// Function to get the correct cover image for Harry Potter books
-const getHarryPotterCover = (title: string) => {
-  if (title.includes("Philosopher's Stone")) return "hp1";
-  if (title.includes("Chamber of Secrets")) return "hp2";
-  if (title.includes("Prisoner of Azkaban")) return "hp3";
-  if (title.includes("Goblet of Fire")) return "hp4";
-  if (title.includes("Order of the Phoenix")) return "hp5";
-  if (title.includes("Half-Blood Prince")) return "hp6";
-  if (title.includes("Deathly Hallows")) return "hp7";
-  if (title.includes("Cursed Child")) return "hp8";
-  return "placeholder";
-};
-
 export const allBooks: Book[] = [
   {
-    "id": "harry-potter-and-the-chamber-of-secrets",
-    "title": "Harry Potter and the Chamber of Secrets",
-    "author": "J.K. Rowling",
-    "description": "Harry's second year at Hogwarts is filled with mystery as the Chamber of Secrets is opened and students are being petrified.",
-    "coverImage": "hp2",
-    "pdfPath": "/books/harry-potter-2-chamber-of-secrets.pdf",
-    "year": 2017,
-    "pages": "131",
-    "genre": "Fantasy"
+    "id": "10waystowritemoreeffective",
+    "title": "10-Ways-to-Write-More-Effective",
+    "author": "Ways-to-Write-More-Effective-Ads",
+    "description": "A captivating fiction book by Ways-to-Write-More-Effective-Ads that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/10-Ways-to-Write-More-Effective-Ads.pdf",
+    "year": 2010,
+    "pages": "465",
+    "genre": "Fiction"
   },
   {
-    "id": "harry-potter-and-the-cursed-child",
-    "title": "Harry Potter and the Cursed Child",
-    "author": "J.K. Rowling",
-    "description": "The next generation story follows Harry's son Albus as he struggles with his family legacy at Hogwarts.",
-    "coverImage": "hp8",
-    "pdfPath": "/books/harry-potter-8-cursed-child.pdf",
-    "year": 2008,
-    "pages": "309",
-    "genre": "Fantasy"
-  },
-  {
-    "id": "harry-potter-and-the-deathly-hallows",
-    "title": "Harry Potter and the Deathly Hallows",
-    "author": "J.K. Rowling",
-    "description": "The epic conclusion as Harry, Ron, and Hermione hunt for Horcruxes and face the final battle against Voldemort.",
-    "coverImage": "hp7",
-    "pdfPath": "/books/harry-potter-7-deathly-hallows.pdf",
-    "year": 2019,
-    "pages": "316",
-    "genre": "Fantasy"
-  },
-  {
-    "id": "harry-potter-and-the-goblet-of-fire",
-    "title": "Harry Potter and the Goblet of Fire",
-    "author": "J.K. Rowling",
-    "description": "Harry competes in the dangerous Triwizard Tournament and witnesses the return of Lord Voldemort.",
-    "coverImage": "hp4",
-    "pdfPath": "/books/harry-potter-4-goblet-of-fire.pdf",
-    "year": 2016,
-    "pages": "353",
-    "genre": "Fantasy"
-  },
-  {
-    "id": "harry-potter-and-the-halfblood-prince",
-    "title": "Harry Potter and the Half-Blood Prince",
-    "author": "J.K. Rowling",
-    "description": "Harry learns about Voldemort's past through Dumbledore's memories and discovers the Half-Blood Prince's secrets.",
-    "coverImage": "hp6",
-    "pdfPath": "/books/harry-potter-6-half-blood-prince.pdf",
-    "year": 2002,
-    "pages": "522",
-    "genre": "Fantasy"
-  },
-  {
-    "id": "harry-potter-and-the-order-of-the-phoenix",
-    "title": "Harry Potter and the Order of the Phoenix",
-    "author": "J.K. Rowling",
-    "description": "Harry forms Dumbledore's Army and fights against the Ministry's denial of Voldemort's return.",
-    "coverImage": "hp5",
-    "pdfPath": "/books/harry-potter-5-order-of-phoenix.pdf",
-    "year": 1995,
-    "pages": "377",
-    "genre": "Fantasy"
-  },
-  {
-    "id": "harry-potter-and-the-philosophers-stone",
-    "title": "Harry Potter and the Philosopher's Stone",
-    "author": "J.K. Rowling",
-    "description": "The first adventure begins as Harry discovers he's a wizard and enters the magical world of Hogwarts School of Witchcraft and Wizardry.",
-    "coverImage": "hp1",
-    "pdfPath": "/books/harry-potter-1-philosophers-stone.pdf",
-    "year": 2019,
-    "pages": "285",
-    "genre": "Fantasy"
-  },
-  {
-    "id": "harry-potter-and-the-prisoner-of-azkaban",
-    "title": "Harry Potter and the Prisoner of Azkaban",
-    "author": "J.K. Rowling",
-    "description": "Harry learns about his past and faces the escaped prisoner Sirius Black while discovering new magical abilities.",
-    "coverImage": "hp3",
-    "pdfPath": "/books/harry-potter-3-prisoner-of-azkaban.pdf",
-    "year": 2006,
-    "pages": "181",
-    "genre": "Fantasy"
+    "id": "10booksin1memoryspeedreadnotetakingessaywritingho",
+    "title": "10_Books_in_1_Memory,_Speed_Read,_Note_Taking,_Essay_Writing,_Ho",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/10_Books_in_1_Memory,_Speed_Read,_Note_Taking,_Essay_Writing,_Ho.pdf",
+    "year": 2001,
+    "pages": "337",
+    "genre": "Fiction"
   },
   {
     "id": "12th-fail",
@@ -119,19 +40,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Hindi Novel that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/12Th Fail (Hindi Novel).pdf",
-    "year": 2006,
-    "pages": "126",
+    "year": 2017,
+    "pages": "498",
     "genre": "Fiction"
   },
   {
-    "id": "2-states-the-story-of-my-marriage",
-    "title": "2 States: The Story of My Marriage",
+    "id": "2statesthestoryofmymarriagebychetan",
+    "title": "2-states-the-story-of-my-marriage-by-chetan",
     "author": "Chetan Bhagat",
-    "description": "A love story about a couple from two different Indian states who want to get married.",
+    "description": "A captivating fiction book by Chetan Bhagat that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/2-states-the-story-of-my-marriage-by-chetan-bhagat.pdf",
-    "year": 2015,
-    "pages": "146",
+    "year": 2000,
+    "pages": "259",
     "genre": "Fiction"
   },
   {
@@ -141,8 +62,52 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/2015.308704.Saket.pdf",
-    "year": 2011,
-    "pages": "484",
+    "year": 2010,
+    "pages": "184",
+    "genre": "Fiction"
+  },
+  {
+    "id": "348947gunahon",
+    "title": "348947.Gunahon",
+    "author": "Ka",
+    "description": "A captivating fiction book by Ka that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/2015.348947.Gunahon-Ka.pdf",
+    "year": 2004,
+    "pages": "133",
+    "genre": "Fiction"
+  },
+  {
+    "id": "441965hast",
+    "title": "441965.Hast",
+    "author": "Rekha",
+    "description": "A captivating fiction book by Rekha that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/2015.441965.Hast-Rekha.pdf",
+    "year": 2004,
+    "pages": "155",
+    "genre": "Fiction"
+  },
+  {
+    "id": "6anuragdobail",
+    "title": "6-anurag-do-bail",
+    "author": "anurag-do-bail-premchand",
+    "description": "A captivating fiction book by anurag-do-bail-premchand that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/6-anurag-do-bail-premchand.pdf",
+    "year": 2009,
+    "pages": "400",
+    "genre": "Fiction"
+  },
+  {
+    "id": "a-little-life-a-novel-hanya-yanagihara-z",
+    "title": "A Little Life A Novel (Hanya Yanagihara) (z",
+    "author": "lib.org).epub",
+    "description": "A captivating fiction book by lib.org).epub that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/A Little Life A Novel (Hanya Yanagihara) (z-lib.org).epub.pdf",
+    "year": 2012,
+    "pages": "518",
     "genre": "Fiction"
   },
   {
@@ -152,8 +117,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/A Second Chance.pdf",
-    "year": 2001,
-    "pages": "531",
+    "year": 2018,
+    "pages": "201",
     "genre": "Fiction"
   },
   {
@@ -163,8 +128,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/A Text Book of Dravyaguna Vijnana.pdf",
-    "year": 1990,
-    "pages": "313",
+    "year": 1998,
+    "pages": "233",
     "genre": "Fiction"
   },
   {
@@ -174,8 +139,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Nikita Singh that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Accidentally in Love -Nikita Singh.pdf",
-    "year": 2016,
-    "pages": "353",
+    "year": 2015,
+    "pages": "306",
     "genre": "Romance"
   },
   {
@@ -185,8 +150,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by _Gary_Soto that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Accidental_Love_-_Gary_Soto.pdf",
-    "year": 1999,
-    "pages": "265",
+    "year": 2016,
+    "pages": "155",
     "genre": "Romance"
   },
   {
@@ -196,8 +161,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by _The_Ritual that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Adam_Nevill_-_The_Ritual.pdf",
-    "year": 2017,
-    "pages": "236",
+    "year": 1997,
+    "pages": "268",
     "genre": "Fiction"
   },
   {
@@ -207,53 +172,108 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Madhuri Banerjee that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Advantage Love - Madhuri Banerjee.pdf",
-    "year": 1993,
-    "pages": "280",
+    "year": 2013,
+    "pages": "484",
     "genre": "Romance"
   },
   {
-    "id": "albert-einstein-a-biography",
-    "title": "Albert Einstein: A Biography",
+    "id": "albert-einstein",
+    "title": "Albert Einstein",
     "author": "Albert Einstein",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Albert Einstein.pdf",
-    "year": 2000,
-    "pages": "319",
+    "year": 2009,
+    "pages": "484",
     "genre": "Biography"
   },
   {
-    "id": "angels-demons",
-    "title": "Angels & Demons",
+    "id": "allenbtuckercomputerscienceandengineeringhandbookc",
+    "title": "Allen_B_Tucker_Computer_Science_and_Engineering_Handbook_Chapman",
     "author": "Unknown Author",
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
-    "pdfPath": "/books/Angels  Demons.pdf",
-    "year": 2014,
-    "pages": "477",
+    "pdfPath": "/books/Allen_B_Tucker_Computer_Science_and_Engineering_Handbook_Chapman.pdf",
+    "year": 2019,
+    "pages": "156",
     "genre": "Fiction"
+  },
+  {
+    "id": "an-unexpected-gift-by-ajay-k-pandey",
+    "title": "An Unexpected Gift By Ajay K Pandey",
+    "author": "Ajay K Pandey",
+    "description": "A captivating fiction book by Ajay K Pandey that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/An Unexpected Gift By Ajay K Pandey.pdf",
+    "year": 2003,
+    "pages": "429",
+    "genre": "Fiction"
+  },
+  {
+    "id": "angels-demons",
+    "title": "Angels Demons",
+    "author": "Unknown Author",
+    "description": "A gripping thriller by Unknown Author that will keep you on the edge of your seat with its twists and turns.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Angels  Demons.pdf",
+    "year": 2001,
+    "pages": "319",
+    "genre": "Mystery"
+  },
+  {
+    "id": "ankur-warikoo-get-epic-shit-done",
+    "title": "Ankur Warikoo - Get Epic Shit Done",
+    "author": "Get Epic Shit Done-Juggernaut Books (2022)",
+    "description": "A captivating fiction book by Get Epic Shit Done-Juggernaut Books (2022) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Ankur Warikoo - Get Epic Shit Done-Juggernaut Books (2022).pdf",
+    "year": 2011,
+    "pages": "466",
+    "genre": "Fiction"
+  },
+  {
+    "id": "anintroductiontobuddhismcoreteachingsofdalailamabo",
+    "title": "An_Introduction_to_Buddhism_Core_Teachings_of_Dalai_Lama_Book_3",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/An_Introduction_to_Buddhism_Core_Teachings_of_Dalai_Lama_Book_3.pdf",
+    "year": 2018,
+    "pages": "364",
+    "genre": "Fiction"
+  },
+  {
+    "id": "apjabdulkalamwitharuntiwariwingsoffireanautobiogra",
+    "title": "APJ_Abdul_Kalam_with_Arun_Tiwari_Wings_of_Fire_An_Autobiography",
+    "author": "Unknown Author",
+    "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/APJ_Abdul_Kalam_with_Arun_Tiwari_Wings_of_Fire_An_Autobiography.pdf",
+    "year": 1994,
+    "pages": "403",
+    "genre": "Biography"
   },
   {
     "id": "ayurveda-treatment-for-beginner",
     "title": "Ayurveda Treatment for Beginner",
     "author": "Kathleen Hanson",
-    "description": "A captivating fiction book by Kathleen Hanson that offers an engaging reading experience.",
+    "description": "An insightful work by Kathleen Hanson that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Ayurveda Treatment for Beginner - Kathleen Hanson.pdf",
-    "year": 2015,
-    "pages": "156",
-    "genre": "Fiction"
+    "year": 1998,
+    "pages": "553",
+    "genre": "Non-Fiction"
   },
   {
     "id": "ayurvedathedivinescience",
     "title": "Ayurveda_The_Divine_Science",
     "author": "Unknown Author",
-    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "description": "An insightful work by Unknown Author that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Ayurveda_The_Divine_Science.pdf",
-    "year": 2011,
-    "pages": "381",
-    "genre": "Fiction"
+    "year": 2013,
+    "pages": "382",
+    "genre": "Non-Fiction"
   },
   {
     "id": "ahalfbakedlovestory",
@@ -262,9 +282,20 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by _Anurag_Garg that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/A_Half_Baked_Love_Story_-_Anurag_Garg.pdf",
-    "year": 2006,
-    "pages": "478",
+    "year": 1997,
+    "pages": "367",
     "genre": "Romance"
+  },
+  {
+    "id": "apgodsedagodsemicroprocessors-microcontrollersyste",
+    "title": "A_P_Godse,_D_A_Godse_Microprocessors_ _Microcontroller_Systems_2",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/A_P_Godse,_D_A_Godse_Microprocessors_ _Microcontroller_Systems_2.pdf",
+    "year": 1996,
+    "pages": "415",
+    "genre": "Fiction"
   },
   {
     "id": "bared-to-you",
@@ -273,42 +304,75 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Bared to You.pdf",
-    "year": 2009,
-    "pages": "505",
+    "year": 2001,
+    "pages": "220",
     "genre": "Fiction"
   },
   {
-    "id": "bhagavad-gita",
-    "title": "Bhagavad Gita",
+    "id": "becomingyourbest",
+    "title": "Becoming-Your-Best",
+    "author": "Your-Best-Self",
+    "description": "A captivating fiction book by Your-Best-Self that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Becoming-Your-Best-Self.pdf",
+    "year": 2019,
+    "pages": "285",
+    "genre": "Fiction"
+  },
+  {
+    "id": "bhagavad",
+    "title": "Bhagavad",
     "author": "Gita (Hindi))",
-    "description": "Ancient Hindu scripture on philosophy, spirituality, and the path to enlightenment.",
+    "description": "A thought-provoking work by Gita (Hindi)) that explores deep questions about life, spirituality, and human existence.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Bhagavad-Gita (Hindi)).pdf",
-    "year": 2016,
-    "pages": "453",
+    "year": 1998,
+    "pages": "262",
     "genre": "Philosophy"
   },
   {
     "id": "biograph-of-charlie-chaplin",
     "title": "Biograph of Charlie Chaplin",
-    "author": "Unknown Author",
-    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "author": "Charlie Chaplin",
+    "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Biograph of Charlie Chaplin.pdf",
-    "year": 2015,
-    "pages": "582",
-    "genre": "Fiction"
+    "year": 2012,
+    "pages": "264",
+    "genre": "Biography"
   },
   {
     "id": "biography-of-swami-vivekananda",
     "title": "Biography of Swami Vivekananda",
-    "author": "Unknown Author",
+    "author": "Swami Vivekananda",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Biography of Swami Vivekananda.pdf",
-    "year": 1997,
-    "pages": "351",
+    "year": 2000,
+    "pages": "432",
     "genre": "Biography"
+  },
+  {
+    "id": "buddhasbrainthepracticalneuroscienceofhappinesslov",
+    "title": "Buddhas_Brain_The_Practical_Neuroscience_of_Happiness,_Love,_and",
+    "author": "Unknown Author",
+    "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Buddhas_Brain_The_Practical_Neuroscience_of_Happiness,_Love,_and.pdf",
+    "year": 2005,
+    "pages": "558",
+    "genre": "Romance"
+  },
+  {
+    "id": "can-love-happen-twice",
+    "title": "Can Love Happen Twice_",
+    "author": "Ravinder Singh",
+    "description": "A beautiful love story by Ravinder Singh that explores the complexities of relationships and human emotions.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Can Love Happen Twice_ - Ravinder Singh_freebooksplanet.com.pdf",
+    "year": 1999,
+    "pages": "293",
+    "genre": "Romance"
   },
   {
     "id": "canlovehappentwiceebookfull",
@@ -317,19 +381,30 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/can_love_happentwice_ebook_full.pdf",
-    "year": 2008,
-    "pages": "103",
+    "year": 1997,
+    "pages": "516",
     "genre": "Romance"
   },
   {
-    "id": "one-night-the-call-center",
-    "title": "One Night @ The Call Center",
+    "id": "charitraheencharacterlessnovelinhindibysharatchand",
+    "title": "Charitraheen_Characterless_Novel_in_Hindi_by_Sharatchandra_Chatt",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Charitraheen_Characterless_Novel_in_Hindi_by_Sharatchandra_Chatt.pdf",
+    "year": 1995,
+    "pages": "273",
+    "genre": "Fiction"
+  },
+  {
+    "id": "chetan-bhagat",
+    "title": "Chetan Bhagat",
     "author": "Chetan Bhagat",
-    "description": "Six people working at a call center experience a life-changing night.",
+    "description": "A captivating fiction book by Chetan Bhagat that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Chetan Bhagat- One Night @ The Call Center.pdf",
-    "year": 2005,
-    "pages": "395",
+    "year": 2009,
+    "pages": "159",
     "genre": "Fiction"
   },
   {
@@ -339,8 +414,30 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Chicot the Jester.pdf",
-    "year": 2017,
-    "pages": "136",
+    "year": 2013,
+    "pages": "561",
+    "genre": "Fiction"
+  },
+  {
+    "id": "chikkitsasutrakc",
+    "title": "chikkitsasutraKC",
+    "author": "..ajeet_",
+    "description": "A captivating fiction book by ..ajeet_ that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/chikkitsasutraKC-..ajeet_.pdf",
+    "year": 2008,
+    "pages": "248",
+    "genre": "Fiction"
+  },
+  {
+    "id": "coronavirus",
+    "title": "CORONAVIRUS",
+    "author": "Osler",
+    "description": "A captivating fiction book by Osler that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/CORONAVIRUS-Osler.pdf",
+    "year": 1998,
+    "pages": "228",
     "genre": "Fiction"
   },
   {
@@ -350,8 +447,30 @@ export const allBooks: Book[] = [
     "description": "A psychological thriller about guilt, redemption, and the human condition.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Crime and Punishment -  Fyodor Dostoyevsky.pdf",
-    "year": 2005,
-    "pages": "299",
+    "year": 2004,
+    "pages": "214",
+    "genre": "Fiction"
+  },
+  {
+    "id": "daniel-goleman-goleman",
+    "title": "Daniel Goleman_ Goleman",
+    "author": "Emotional Intelligence)",
+    "description": "A captivating fiction book by Emotional Intelligence) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Daniel Goleman_ Goleman - Emotional Intelligence).pdf",
+    "year": 2008,
+    "pages": "535",
+    "genre": "Fiction"
+  },
+  {
+    "id": "daniellemoorejasongraystopoverthinking3booksin1ove",
+    "title": "Danielle_Moore,_Jason_Gray_STOP_OVERTHINKING_3_Books_In_1_Overth",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Danielle_Moore,_Jason_Gray_STOP_OVERTHINKING_3_Books_In_1_Overth.pdf",
+    "year": 1994,
+    "pages": "342",
     "genre": "Fiction"
   },
   {
@@ -361,8 +480,63 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by _origin that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/dan_brown_-_origin.pdf",
-    "year": 2010,
-    "pages": "176",
+    "year": 2012,
+    "pages": "457",
+    "genre": "Fiction"
+  },
+  {
+    "id": "daviddeidathewayofthesuperiormanaspiritualguidetom",
+    "title": "David_Deida_The_Way_of_the_Superior_Man_A_Spiritual_Guide_to_Mas",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/David_Deida_The_Way_of_the_Superior_Man_A_Spiritual_Guide_to_Mas.pdf",
+    "year": 2002,
+    "pages": "316",
+    "genre": "Fiction"
+  },
+  {
+    "id": "dicklyleswinninghabits4secretsthatwillchangetheres",
+    "title": "Dick_Lyles_Winning_Habits_4_Secrets_That_Will_Change_the_Rest_of",
+    "author": "Unknown Author",
+    "description": "Discover the law of attraction and how to use it to achieve your goals.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Dick_Lyles_Winning_Habits_4_Secrets_That_Will_Change_the_Rest_of.pdf",
+    "year": 1992,
+    "pages": "142",
+    "genre": "Philosophy"
+  },
+  {
+    "id": "don-tfeedthemonkeymindhowtostopthecycleofanxietyfe",
+    "title": "Don t_Feed_the_Monkey_Mind_How_to_Stop_the_Cycle_of_Anxiety,_Fea",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Don t_Feed_the_Monkey_Mind_How_to_Stop_the_Cycle_of_Anxiety,_Fea.pdf",
+    "year": 2017,
+    "pages": "554",
+    "genre": "Fiction"
+  },
+  {
+    "id": "dokadamaursahihindieditionbyrahatindorizliborg",
+    "title": "Do_Kadam_Aur_Sahi_Hindi_Edition_by_Rahat_Indori_z_lib_org",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Do_Kadam_Aur_Sahi_Hindi_Edition_by_Rahat_Indori_z_lib_org.pdf",
+    "year": 2015,
+    "pages": "330",
+    "genre": "Fiction"
+  },
+  {
+    "id": "drawing-cartoons-comics-for-dummies",
+    "title": "Drawing Cartoons Comics for Dummies",
+    "author": "PDF",
+    "description": "A captivating fiction book by PDF that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Drawing Cartoons   Comics for Dummies ( PDF).pdf",
+    "year": 2007,
+    "pages": "429",
     "genre": "Fiction"
   },
   {
@@ -372,8 +546,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Datta - Of Course I Love You.pdf",
-    "year": 2002,
-    "pages": "549",
+    "year": 2016,
+    "pages": "467",
     "genre": "Romance"
   },
   {
@@ -383,30 +557,30 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Datta - She Broke Up I Didn t.pdf",
-    "year": 2014,
-    "pages": "369",
+    "year": 2001,
+    "pages": "433",
     "genre": "Romance"
   },
   {
-    "id": "till-the-last-breath",
-    "title": "Till The Last Breath",
+    "id": "durjoy-datta",
+    "title": "Durjoy Datta",
     "author": "Durjoy Datta",
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Datta - Till The Last Breath.pdf",
-    "year": 1993,
-    "pages": "101",
+    "year": 2001,
+    "pages": "317",
     "genre": "Romance"
   },
   {
-    "id": "worlds-best-boyfriend",
-    "title": "World's Best Boyfriend",
+    "id": "durjoy-datta",
+    "title": "Durjoy Datta",
     "author": "Durjoy Datta",
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Datta - World s Best Boyfriend.pdf",
-    "year": 1995,
-    "pages": "551",
+    "year": 2016,
+    "pages": "547",
     "genre": "Romance"
   },
   {
@@ -416,8 +590,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Datta - You Were My Crush Hindi.pdf",
-    "year": 1993,
-    "pages": "339",
+    "year": 1999,
+    "pages": "502",
     "genre": "Romance"
   },
   {
@@ -427,8 +601,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Datta - You Were My Crush.pdf",
-    "year": 2004,
-    "pages": "175",
+    "year": 2007,
+    "pages": "286",
     "genre": "Romance"
   },
   {
@@ -438,8 +612,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Dutta - HOLD MY HAND.pdf",
-    "year": 1993,
-    "pages": "129",
+    "year": 1999,
+    "pages": "465",
     "genre": "Romance"
   },
   {
@@ -449,8 +623,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Dutta - Now That You re Rich.pdf",
-    "year": 2007,
-    "pages": "570",
+    "year": 1991,
+    "pages": "581",
     "genre": "Romance"
   },
   {
@@ -460,8 +634,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Dutta - Oh Yes I m Single.pdf",
-    "year": 1999,
-    "pages": "573",
+    "year": 2008,
+    "pages": "468",
     "genre": "Romance"
   },
   {
@@ -471,8 +645,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Dutta - Our IMPossible Love.pdf",
-    "year": 1995,
-    "pages": "386",
+    "year": 2018,
+    "pages": "197",
     "genre": "Romance"
   },
   {
@@ -482,8 +656,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Dutta - Someone Like You.pdf",
-    "year": 2019,
-    "pages": "149",
+    "year": 1994,
+    "pages": "284",
     "genre": "Romance"
   },
   {
@@ -493,19 +667,30 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Durjoy Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Durjoy Dutta - Tell The Last Breath.pdf",
-    "year": 1990,
-    "pages": "229",
+    "year": 2016,
+    "pages": "401",
     "genre": "Romance"
   },
   {
-    "id": "eleven-minutes",
-    "title": "Eleven Minutes",
+    "id": "ego-is-the-enenmy-by-ryan-holiday-z",
+    "title": "Ego is the Enenmy by Ryan Holiday (z",
+    "author": "Ryan Holiday (z-lib.org)",
+    "description": "A captivating fiction book by Ryan Holiday (z-lib.org) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Ego is the Enenmy by Ryan Holiday (z-lib.org).pdf",
+    "year": 1990,
+    "pages": "598",
+    "genre": "Fiction"
+  },
+  {
+    "id": "elevenminutes",
+    "title": "eleven_minutes",
     "author": "Unknown Author",
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/eleven_minutes.pdf",
-    "year": 1991,
-    "pages": "590",
+    "year": 2019,
+    "pages": "366",
     "genre": "Fiction"
   },
   {
@@ -515,30 +700,41 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Sudeep Nagarkar that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Few Things Left Unsaid- Sudeep Nagarkar.pdf",
-    "year": 1991,
-    "pages": "367",
+    "year": 2006,
+    "pages": "313",
     "genre": "Fiction"
   },
   {
-    "id": "five-point-someone",
-    "title": "Five Point Someone",
+    "id": "finishwhatyoustarttheartoffollowingthroughtakingac",
+    "title": "Finish_What_You_Start_The_Art_of_Following_Through,_Taking_Actio",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Finish_What_You_Start_The_Art_of_Following_Through,_Taking_Actio.pdf",
+    "year": 1991,
+    "pages": "132",
+    "genre": "Fiction"
+  },
+  {
+    "id": "fivepointsomeonechetan",
+    "title": "five-point-someone-chetan",
     "author": "Chetan Bhagat",
-    "description": "The story of three friends and their struggles in India's top engineering college.",
+    "description": "A captivating fiction book by Chetan Bhagat that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/five-point-someone-chetan-bhagat_ebook.pdf",
-    "year": 2016,
-    "pages": "361",
+    "year": 1999,
+    "pages": "225",
     "genre": "Fiction"
   },
   {
-    "id": "frankenstein",
-    "title": "Frankenstein",
+    "id": "frankensteinnt",
+    "title": "Frankenstein_NT",
     "author": "Unknown Author",
     "description": "The classic tale of a scientist who creates a living being with disastrous consequences.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Frankenstein_NT.pdf",
-    "year": 2010,
-    "pages": "356",
+    "year": 2008,
+    "pages": "589",
     "genre": "Fiction"
   },
   {
@@ -548,8 +744,52 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Franny and Zooey.pdf",
-    "year": 2000,
-    "pages": "171",
+    "year": 2010,
+    "pages": "453",
+    "genre": "Fiction"
+  },
+  {
+    "id": "fundamentaltheoriesofphysics96valeripfrolovigordno",
+    "title": "Fundamental_Theories_of_Physics_96_Valeri_P_Frolov,_Igor_D_Novik",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Fundamental_Theories_of_Physics_96_Valeri_P_Frolov,_Igor_D_Novik.pdf",
+    "year": 2014,
+    "pages": "238",
+    "genre": "Fiction"
+  },
+  {
+    "id": "gaminisinglahowitoppedtheupscandhowyoucantoowhatit",
+    "title": "Gamini_Singla_HOW_I_TOPPED_THE_UPSC_AND_HOW_YOU_CAN_TOO_What_It",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Gamini_Singla_HOW_I_TOPPED_THE_UPSC_AND_HOW_YOU_CAN_TOO_What_It.pdf",
+    "year": 2009,
+    "pages": "110",
+    "genre": "Fiction"
+  },
+  {
+    "id": "geniusfoodsbecomesmarterhappierandmoreproductivewh",
+    "title": "Genius_Foods_Become_Smarter,_Happier,_and_More_Productive_While",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Genius_Foods_Become_Smarter,_Happier,_and_More_Productive_While.pdf",
+    "year": 1990,
+    "pages": "164",
+    "genre": "Fiction"
+  },
+  {
+    "id": "give-and-take-why-helping-others-drives-our-succes",
+    "title": "Give and Take_ WHY HELPING OTHERS DRIVES OUR SUCCESS",
+    "author": "PDF",
+    "description": "A captivating fiction book by PDF that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Give and Take_ WHY HELPING OTHERS DRIVES OUR SUCCESS ( PDF ).pdf",
+    "year": 2012,
+    "pages": "150",
     "genre": "Fiction"
   },
   {
@@ -559,19 +799,19 @@ export const allBooks: Book[] = [
     "description": "A psychological thriller about a marriage gone terribly wrong.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Gone Girl.pdf",
-    "year": 2002,
-    "pages": "326",
+    "year": 2013,
+    "pages": "137",
     "genre": "Mystery"
   },
   {
-    "id": "grandmas-bag-of-stories",
-    "title": "Grandma's Bag of Stories",
+    "id": "grandma-sbagofstoriesbysudhamurty",
+    "title": "Grandma s_Bag_of_Stories_By_Sudha_Murty",
     "author": "Unknown Author",
     "description": "A collection of wonderful stories told by a grandmother to her grandchildren.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Grandma s_Bag_of_Stories_By_Sudha_Murty.pdf",
-    "year": 1997,
-    "pages": "214",
+    "year": 2003,
+    "pages": "474",
     "genre": "Children's"
   },
   {
@@ -581,8 +821,107 @@ export const allBooks: Book[] = [
     "description": "A beautiful tale of love between a rural boy and an urban girl, exploring the complexities of relationships.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Half Girlfriend by Chetan Bhagat.pdf",
-    "year": 1999,
-    "pages": "584",
+    "year": 1997,
+    "pages": "295",
+    "genre": "Fiction"
+  },
+  {
+    "id": "harry-potter-and-the-philosophers-stone",
+    "title": "Harry Potter and the Philosopher's Stone",
+    "author": "potter-1-philosophers-stone",
+    "description": "The first adventure begins as Harry discovers he's a wizard and enters the magical world of Hogwarts School of Witchcraft and Wizardry.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-1-philosophers-stone.pdf",
+    "year": 1995,
+    "pages": "468",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-chamber-of-secrets",
+    "title": "Harry Potter and the Chamber of Secrets",
+    "author": "potter-2-chamber-of-secrets",
+    "description": "Harry's second year at Hogwarts is filled with mystery as the Chamber of Secrets is opened and students are being petrified.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-2-chamber-of-secrets.pdf",
+    "year": 2008,
+    "pages": "556",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-prisoner-of-azkaban",
+    "title": "Harry Potter and the Prisoner of Azkaban",
+    "author": "potter-3-prisoner-of-azkaban",
+    "description": "Harry learns about his past and faces the escaped prisoner Sirius Black while discovering new magical abilities.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-3-prisoner-of-azkaban.pdf",
+    "year": 1996,
+    "pages": "506",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-goblet-of-fire",
+    "title": "Harry Potter and the Goblet of Fire",
+    "author": "potter-4-goblet-of-fire",
+    "description": "Harry competes in the dangerous Triwizard Tournament and witnesses the return of Lord Voldemort.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-4-goblet-of-fire.pdf",
+    "year": 2001,
+    "pages": "341",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-order-of-the-phoenix",
+    "title": "Harry Potter and the Order of the Phoenix",
+    "author": "potter-5-order-of-phoenix",
+    "description": "Harry forms Dumbledore's Army and fights against the Ministry's denial of Voldemort's return.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-5-order-of-phoenix.pdf",
+    "year": 2017,
+    "pages": "532",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-halfblood-prince",
+    "title": "Harry Potter and the Half-Blood Prince",
+    "author": "potter-6-half-blood-prince",
+    "description": "Harry learns about Voldemort's past through Dumbledore's memories and discovers the Half-Blood Prince's secrets.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-6-half-blood-prince.pdf",
+    "year": 1991,
+    "pages": "121",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-deathly-hallows",
+    "title": "Harry Potter and the Deathly Hallows",
+    "author": "potter-7-deathly-hallows",
+    "description": "The epic conclusion as Harry, Ron, and Hermione hunt for Horcruxes and face the final battle against Voldemort.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-7-deathly-hallows.pdf",
+    "year": 2008,
+    "pages": "152",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harry-potter-and-the-cursed-child",
+    "title": "Harry Potter and the Cursed Child",
+    "author": "potter-8-cursed-child",
+    "description": "The next generation story follows Harry's son Albus as he struggles with his family legacy at Hogwarts.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/harry-potter-8-cursed-child.pdf",
+    "year": 1990,
+    "pages": "533",
+    "genre": "Fantasy"
+  },
+  {
+    "id": "harunyahyageneralknowledgefronthequr-an2003libgenl",
+    "title": "Harun_Yahya_General_Knowledge_fron_the_Qur an_2003_libgen_lc",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Harun_Yahya_General_Knowledge_fron_the_Qur an_2003_libgen_lc.pdf",
+    "year": 2008,
+    "pages": "410",
     "genre": "Fiction"
   },
   {
@@ -592,8 +931,8 @@ export const allBooks: Book[] = [
     "description": "An insightful work by Unknown Author that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Healing_Depression.pdf",
-    "year": 2001,
-    "pages": "118",
+    "year": 1995,
+    "pages": "212",
     "genre": "Non-Fiction"
   },
   {
@@ -603,8 +942,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Hold_my_Hand_Penguin_Metro_Rea_Durjoy.pdf",
-    "year": 1995,
-    "pages": "534",
+    "year": 2009,
+    "pages": "122",
     "genre": "Fiction"
   },
   {
@@ -614,8 +953,8 @@ export const allBooks: Book[] = [
     "description": "A gripping drama set in a luxury hotel over five eventful days.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Hotel by Arthur Hailey.pdf",
-    "year": 2006,
-    "pages": "531",
+    "year": 2001,
+    "pages": "131",
     "genre": "Fiction"
   },
   {
@@ -625,19 +964,74 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/House_of_Cards_A_Novel_By_Sudha_Murty.pdf",
-    "year": 2006,
-    "pages": "250",
+    "year": 2009,
+    "pages": "201",
+    "genre": "Fiction"
+  },
+  {
+    "id": "how-to-become-a-straight",
+    "title": "How to Become a Straight",
+    "author": "A Student",
+    "description": "A captivating fiction book by A Student that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/How to Become a Straight-A Student.pdf",
+    "year": 2018,
+    "pages": "552",
+    "genre": "Fiction"
+  },
+  {
+    "id": "how-to-win-every-argument",
+    "title": "How to Win Every Argument",
+    "author": "PDF",
+    "description": "A captivating fiction book by PDF that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/How to Win Every Argument ( PDF).pdf",
+    "year": 1994,
+    "pages": "490",
+    "genre": "Fiction"
+  },
+  {
+    "id": "howtoanalyzepeople13lawsaboutthemanipulationoftheh",
+    "title": "How_To_Analyze_People_13_Laws_About_the_Manipulation_of_the_Huma",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/How_To_Analyze_People_13_Laws_About_the_Manipulation_of_the_Huma.pdf",
+    "year": 2010,
+    "pages": "188",
+    "genre": "Fiction"
+  },
+  {
+    "id": "howtoreadpeoplelikeabookaguidetospeedreadingpeople",
+    "title": "How_to_Read_People_Like_a_Book_A_Guide_to_Speed_Reading_People,",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/How_to_Read_People_Like_a_Book_A_Guide_to_Speed_Reading_People,.pdf",
+    "year": 2013,
+    "pages": "275",
     "genre": "Fiction"
   },
   {
     "id": "i-too-had-a-love-story",
-    "title": "I Too Had A Love Story",
+    "title": "I Too had a Love Story",
+    "author": "Ravinder Singh",
+    "description": "A heart-wrenching true love story that will leave you in tears.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/I Too had a Love Story by Ravinder Singh.pdf",
+    "year": 2004,
+    "pages": "584",
+    "genre": "Romance"
+  },
+  {
+    "id": "i-too-had-a-love-storypdf",
+    "title": "I Too Had A Love Story-pdf",
     "author": "Ravinder Singh",
     "description": "A heart-wrenching true love story that will leave you in tears.",
     "coverImage": "placeholder",
     "pdfPath": "/books/I Too Had A Love Story-pdf-Ravinder Singh.pdf",
-    "year": 2013,
-    "pages": "128",
+    "year": 2009,
+    "pages": "518",
     "genre": "Romance"
   },
   {
@@ -647,30 +1041,30 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/If_It_s_Not_Forever_Durjoy_Datta.pdf",
-    "year": 2018,
-    "pages": "504",
+    "year": 2009,
+    "pages": "132",
     "genre": "Fiction"
   },
   {
     "id": "india-that-is-bharat",
-    "title": "India That Is Bharat",
+    "title": "India that is Bharat",
     "author": "J Sai Deepak",
     "description": "An examination of India's civilizational identity and colonial influences.",
     "coverImage": "placeholder",
     "pdfPath": "/books/India that is Bharat by J Sai Deepak.pdf",
-    "year": 2012,
-    "pages": "294",
+    "year": 2003,
+    "pages": "566",
     "genre": "Fiction"
   },
   {
-    "id": "inferno",
-    "title": "Inferno",
+    "id": "infernoby",
+    "title": "Inferno-by",
     "author": "by-BrownDan",
     "description": "A captivating fiction book by by-BrownDan that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Inferno-by-BrownDan.pdf",
-    "year": 2010,
-    "pages": "223",
+    "year": 2019,
+    "pages": "373",
     "genre": "Fiction"
   },
   {
@@ -680,8 +1074,8 @@ export const allBooks: Book[] = [
     "description": "A touching story about difficult choices and finding your path.",
     "coverImage": "placeholder",
     "pdfPath": "/books/It Happens for a Reason - Preeti Shenoy.pdf",
-    "year": 1991,
-    "pages": "412",
+    "year": 2007,
+    "pages": "467",
     "genre": "Non-Fiction"
   },
   {
@@ -691,8 +1085,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Sudeep Nagarkar that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/It Started with a Friend Request- Sudeep Nagarkar.pdf",
-    "year": 2010,
-    "pages": "319",
+    "year": 1991,
+    "pages": "141",
     "genre": "Fiction"
   },
   {
@@ -702,8 +1096,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Its_All_In_The_Planets_by_Preeti_Shenoy.pdf",
-    "year": 2007,
-    "pages": "244",
+    "year": 2001,
+    "pages": "444",
     "genre": "Fiction"
   },
   {
@@ -713,8 +1107,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/It_Happens_for_A_Reason_by_Preeti_Shenoy.pdf",
-    "year": 2003,
-    "pages": "222",
+    "year": 1995,
+    "pages": "175",
     "genre": "Fiction"
   },
   {
@@ -724,8 +1118,52 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/It_Started_with_a_Friend_Reques.pdf",
-    "year": 1990,
-    "pages": "169",
+    "year": 1996,
+    "pages": "128",
+    "genre": "Fiction"
+  },
+  {
+    "id": "j-r-r-tolkien",
+    "title": "J. R. R. Tolkien",
+    "author": "Adventures of Tom Bombadil (1978)",
+    "description": "A captivating fiction book by Adventures of Tom Bombadil (1978) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/J. R. R. Tolkien - Adventures of Tom Bombadil (1978).pdf",
+    "year": 2003,
+    "pages": "359",
+    "genre": "Fiction"
+  },
+  {
+    "id": "james-clear",
+    "title": "James clear",
+    "author": "atomic habits (2022)",
+    "description": "A captivating fiction book by atomic habits (2022) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/James clear - atomic habits (2022).pdf",
+    "year": 2004,
+    "pages": "505",
+    "genre": "Fiction"
+  },
+  {
+    "id": "jayshettythinklikeamonktrainyourmindforpeaceandpur",
+    "title": "Jay_Shetty_Think_Like_a_Monk_Train_Your_Mind_for_Peace_and_Purpo",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Jay_Shetty_Think_Like_a_Monk_Train_Your_Mind_for_Peace_and_Purpo.pdf",
+    "year": 2001,
+    "pages": "106",
+    "genre": "Fiction"
+  },
+  {
+    "id": "jeffkellerattitudeiseverythinginternationalnetwork",
+    "title": "Jeff_Keller_Attitude_is_Everything_International_Network_Trainin",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Jeff_Keller_Attitude_is_Everything_International_Network_Trainin.pdf",
+    "year": 1994,
+    "pages": "236",
     "genre": "Fiction"
   },
   {
@@ -735,9 +1173,20 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Julius Caesar  The Colossus of Rome.pdf",
-    "year": 2016,
-    "pages": "380",
+    "year": 2002,
+    "pages": "377",
     "genre": "Fiction"
+  },
+  {
+    "id": "katieinlovefulllengtheroticromancenovelbythurlowch",
+    "title": "Katie_In_Love_full_length_erotic_romance_novel_by_Thurlow,_Chloe",
+    "author": "Unknown Author",
+    "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Katie_In_Love_full_length_erotic_romance_novel_by_Thurlow,_Chloe.pdf",
+    "year": 1998,
+    "pages": "299",
+    "genre": "Romance"
   },
   {
     "id": "konark-hindi-novel",
@@ -746,20 +1195,53 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Konark Hindi Novel.pdf",
-    "year": 2018,
-    "pages": "588",
+    "year": 1990,
+    "pages": "130",
     "genre": "Fiction"
   },
   {
-    "id": "life-is-what-you-make-it",
-    "title": "Life Is What You Make It",
+    "id": "lambchristinayousafzaimalalaiammalalathegirlwhosto",
+    "title": "Lamb,_Christina_Yousafzai,_Malala_I_am_Malala_the_girl_who_stood",
     "author": "Unknown Author",
-    "description": "An inspiring story about mental health, resilience, and finding happiness.",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Lamb,_Christina_Yousafzai,_Malala_I_am_Malala_the_girl_who_stood.pdf",
+    "year": 2012,
+    "pages": "195",
+    "genre": "Fiction"
+  },
+  {
+    "id": "legaleaglesstoriesofthetopsevenindianlawyersbyindu",
+    "title": "Legal_Eagles_Stories_of_the_Top_Seven_Indian_Lawyers_by_Indu_Bha",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Legal_Eagles_Stories_of_the_Top_Seven_Indian_Lawyers_by_Indu_Bha.pdf",
+    "year": 2005,
+    "pages": "406",
+    "genre": "Fiction"
+  },
+  {
+    "id": "leillowndeshowtotalktoanyone92littletricksforbigsu",
+    "title": "Leil_Lowndes_How_to_Talk_to_Anyone_92_Little_Tricks_for_Big_Succ",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Leil_Lowndes_How_to_Talk_to_Anyone_92_Little_Tricks_for_Big_Succ.pdf",
+    "year": 2012,
+    "pages": "479",
+    "genre": "Fiction"
+  },
+  {
+    "id": "lifeiswhatyoumakeitbypreetishenoy",
+    "title": "Life_Is_What_You_Make_It_by_Preeti_Shenoy",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Life_Is_What_You_Make_It_by_Preeti_Shenoy.pdf",
-    "year": 2010,
-    "pages": "224",
-    "genre": "Non-Fiction"
+    "year": 2018,
+    "pages": "390",
+    "genre": "Fiction"
   },
   {
     "id": "likeithappened",
@@ -768,20 +1250,31 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by It-Happened-Yesterday that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Like-It-Happened-Yesterday.pdf",
-    "year": 1990,
-    "pages": "557",
+    "year": 1993,
+    "pages": "361",
     "genre": "Fiction"
   },
   {
-    "id": "long-walk-to-freedom",
-    "title": "Long Walk to Freedom",
+    "id": "lippincottwilliams-wilkinskarenrascatiessentialsof",
+    "title": "Lippincott_Williams_ _Wilkins_Karen_Rascati_Essentials_of_Pharma",
     "author": "Unknown Author",
-    "description": "The autobiography of one of the greatest moral and political leaders of our time.",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Lippincott_Williams_ _Wilkins_Karen_Rascati_Essentials_of_Pharma.pdf",
+    "year": 1994,
+    "pages": "154",
+    "genre": "Fiction"
+  },
+  {
+    "id": "longwalktofreedomtheautobiographyofnelsonmandelaby",
+    "title": "Long_Walk_to_Freedom_The_Autobiography_of_Nelson_Mandela_by_Nels",
+    "author": "Unknown Author",
+    "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Long_Walk_to_Freedom_The_Autobiography_of_Nelson_Mandela_by_Nels.pdf",
-    "year": 2008,
-    "pages": "324",
-    "genre": "Fiction"
+    "year": 1996,
+    "pages": "567",
+    "genre": "Biography"
   },
   {
     "id": "losing-my-virginity-and-other-d",
@@ -790,8 +1283,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Banerjee_ Madhuri that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Losing My Virginity and Other D - Banerjee_ Madhuri.pdf",
-    "year": 1996,
-    "pages": "421",
+    "year": 1997,
+    "pages": "258",
     "genre": "Fiction"
   },
   {
@@ -801,8 +1294,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Love _Kisses_And_All_Things_Warm_by_Preeti_Shenoy.pdf",
-    "year": 2011,
-    "pages": "462",
+    "year": 2007,
+    "pages": "286",
     "genre": "Romance"
   },
   {
@@ -812,31 +1305,42 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by singh nikita that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/love@facebook - singh nikita.pdf",
-    "year": 2007,
-    "pages": "572",
+    "year": 1996,
+    "pages": "258",
     "genre": "Romance"
+  },
+  {
+    "id": "lynngrabhorndeargodwhat-shappeningtoushaltingeonso",
+    "title": "Lynn_Grabhorn_Dear_God,_What s_Happening_to_Us_Halting_Eons_of_M",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Lynn_Grabhorn_Dear_God,_What s_Happening_to_Us_Halting_Eons_of_M.pdf",
+    "year": 1992,
+    "pages": "487",
+    "genre": "Fiction"
   },
   {
     "id": "mahabharata",
     "title": "Mahabharata",
-    "author": "Veda Vyasa (eng)",
-    "description": "A captivating fiction book by Veda Vyasa (eng) that offers an engaging reading experience.",
+    "author": "Veda Vyasa",
+    "description": "A thought-provoking work by Veda Vyasa that explores deep questions about life, spirituality, and human existence.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Mahabharata - Veda Vyasa (eng).pdf",
-    "year": 2004,
-    "pages": "500",
-    "genre": "Fiction"
+    "year": 2007,
+    "pages": "409",
+    "genre": "Philosophy"
   },
   {
     "id": "mahabharathindipriyadarshiprakash",
     "title": "Mahabharat_महभरत_Hindi_Priyadarshi_Prakash",
     "author": "Unknown Author",
-    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "description": "A thought-provoking work by Unknown Author that explores deep questions about life, spirituality, and human existence.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Mahabharat_महभरत_Hindi_Priyadarshi_Prakash.pdf",
-    "year": 2003,
-    "pages": "320",
-    "genre": "Fiction"
+    "year": 2013,
+    "pages": "469",
+    "genre": "Philosophy"
   },
   {
     "id": "mahayoddha-kalki-sword-of-shiva",
@@ -845,20 +1349,53 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Kevin Missal that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Mahayoddha Kalki_ Sword of Shiva by Kevin Missal.pdf",
-    "year": 1994,
-    "pages": "358",
+    "year": 1990,
+    "pages": "264",
+    "genre": "Fiction"
+  },
+  {
+    "id": "maurivaltonenhannukarttunenthethreebodyproblemcamb",
+    "title": "Mauri_Valtonen,_Hannu_Karttunen_The_three_body_problem_Cambridge",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Mauri_Valtonen,_Hannu_Karttunen_The_three_body_problem_Cambridge.pdf",
+    "year": 2001,
+    "pages": "202",
+    "genre": "Fiction"
+  },
+  {
+    "id": "melrobbinsthe5secondruletransformyourlifeworkandco",
+    "title": "Mel_Robbins_The_5_Second_Rule_Transform_your_Life,_Work,_and_Con",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Mel_Robbins_The_5_Second_Rule_Transform_your_Life,_Work,_and_Con.pdf",
+    "year": 2011,
+    "pages": "145",
     "genre": "Fiction"
   },
   {
     "id": "michael-jordan-a-biography",
     "title": "Michael Jordan A Biography",
-    "author": "Unknown Author",
+    "author": "Michael Jordan",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Michael Jordan A Biography.pdf",
-    "year": 2015,
-    "pages": "502",
+    "year": 1996,
+    "pages": "476",
     "genre": "Biography"
+  },
+  {
+    "id": "midnights-children",
+    "title": "Midnights children",
+    "author": "Salman Rushdie ()",
+    "description": "A captivating fiction book by Salman Rushdie () that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Midnights children by Salman Rushdie ().pdf",
+    "year": 2006,
+    "pages": "464",
+    "genre": "Fiction"
   },
   {
     "id": "mistakes-like-love-and-sex",
@@ -868,51 +1405,73 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/Mistakes Like Love and Sex - Madhuri Banerjee.pdf",
     "year": 2002,
-    "pages": "545",
+    "pages": "568",
     "genre": "Romance"
   },
   {
-    "id": "mother-teresa-a-biography",
-    "title": "Mother Teresa: A Biography",
+    "id": "moonwalkingwitheinsteintheartandscienceofrememberi",
+    "title": "Moonwalking_with_Einstein_the_art_and_science_of_remembering_eve",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Moonwalking_with_Einstein_the_art_and_science_of_remembering_eve.pdf",
+    "year": 2019,
+    "pages": "353",
+    "genre": "Fiction"
+  },
+  {
+    "id": "morganhouselthepsychologyofmoneytimelesslessonsonw",
+    "title": "Morgan_Housel_The_Psychology_of_Money_Timeless_Lessons_on_Wealth",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Morgan_Housel_The_Psychology_of_Money_Timeless_Lessons_on_Wealth.pdf",
+    "year": 2013,
+    "pages": "146",
+    "genre": "Fiction"
+  },
+  {
+    "id": "mother-teresa",
+    "title": "Mother Teresa",
     "author": "Mother Teresa",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Mother Teresa - A Biography.pdf",
-    "year": 1995,
-    "pages": "216",
+    "year": 2015,
+    "pages": "505",
     "genre": "Biography"
   },
   {
     "id": "my-clingy-girlfriend",
     "title": "MY CLINGY GIRLFRIEND",
-    "author": "Madhuri Banerjee",
-    "description": "A beautiful love story by Madhuri Banerjee that explores the complexities of relationships and human emotions.",
+    "author": "MADHURI BANERJEE",
+    "description": "A beautiful love story by MADHURI BANERJEE that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/MY CLINGY GIRLFRIEND - MADHURI BANERJEE.pdf",
-    "year": 1990,
-    "pages": "438",
+    "year": 1998,
+    "pages": "518",
     "genre": "Romance"
   },
   {
     "id": "napoleon-a-biography",
     "title": "Napoleon A Biography",
-    "author": "Unknown Author",
+    "author": "Napoleon Bonaparte",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Napoleon A Biography.pdf",
-    "year": 2019,
-    "pages": "364",
+    "year": 2006,
+    "pages": "150",
     "genre": "Biography"
   },
   {
     "id": "narendra-modi-a-political-biography",
-    "title": "Narendra Modi: A Political Biography",
+    "title": "Narendra Modi A Political Biography",
     "author": "Narendra Modi",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Narendra Modi A Political Biography.pdf",
-    "year": 1995,
-    "pages": "450",
+    "year": 2016,
+    "pages": "191",
     "genre": "Biography"
   },
   {
@@ -922,19 +1481,19 @@ export const allBooks: Book[] = [
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Nelson Mandela A Biography.pdf",
-    "year": 1994,
-    "pages": "111",
+    "year": 1999,
+    "pages": "240",
     "genre": "Biography"
   },
   {
-    "id": "of-course-i-love-you",
-    "title": "Of Course I Love You",
+    "id": "ofcourseilove",
+    "title": "Of-Course-I-Love",
     "author": "Course-I-Love-You",
     "description": "A beautiful love story by Course-I-Love-You that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Of-Course-I-Love-You.pdf",
-    "year": 2016,
-    "pages": "360",
+    "year": 1990,
+    "pages": "531",
     "genre": "Romance"
   },
   {
@@ -945,7 +1504,7 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/Of_Course_I_Love_You!__Till_I_f.pdf",
     "year": 1995,
-    "pages": "552",
+    "pages": "100",
     "genre": "Romance"
   },
   {
@@ -955,8 +1514,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Ohh_Yes__I_m_Single__And_so_is_Datta_.pdf",
-    "year": 1997,
-    "pages": "162",
+    "year": 2010,
+    "pages": "520",
     "genre": "Fiction"
   },
   {
@@ -967,7 +1526,7 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/One Arranged Murder by Chetan Bhagat.pdf",
     "year": 2002,
-    "pages": "286",
+    "pages": "550",
     "genre": "Fiction"
   },
   {
@@ -977,31 +1536,31 @@ export const allBooks: Book[] = [
     "description": "Six people working at a call center experience a life-changing night.",
     "coverImage": "placeholder",
     "pdfPath": "/books/One Night at call center by Chetan Bhagat.pdf",
-    "year": 1994,
-    "pages": "386",
+    "year": 1992,
+    "pages": "305",
     "genre": "Fiction"
   },
   {
-    "id": "one-hundred-years-of-solitude",
-    "title": "One Hundred Years of Solitude",
+    "id": "onehundredyearsof",
+    "title": "one-hundred-years-of",
     "author": "hundred-years-of-solitude",
-    "description": "A magical realist masterpiece chronicling the Buendía family.",
+    "description": "A captivating fiction book by hundred-years-of-solitude that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/one-hundred-years-of-solitude.pdf",
-    "year": 1999,
-    "pages": "351",
+    "year": 1991,
+    "pages": "172",
     "genre": "Fiction"
   },
   {
-    "id": "one-indian-girl",
-    "title": "One Indian Girl",
+    "id": "oneindian",
+    "title": "One-Indian",
     "author": "Indian-Girl",
-    "description": "The story of an independent, financially secure Indian girl and her journey to find love.",
+    "description": "A captivating fiction book by Indian-Girl that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/One-Indian-Girl.pdf",
-    "year": 1995,
-    "pages": "259",
-    "genre": "Romance"
+    "year": 1999,
+    "pages": "585",
+    "genre": "Fiction"
   },
   {
     "id": "oneindiangirl",
@@ -1010,8 +1569,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by _Chetan_Bhagat that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/One_Indian_Girl_-_Chetan_Bhagat.pdf",
-    "year": 1992,
-    "pages": "284",
+    "year": 1993,
+    "pages": "451",
+    "genre": "Fiction"
+  },
+  {
+    "id": "oshooshointernationalfoundationlifeisasoapbubble10",
+    "title": "Osho,_Osho_International_Foundation_Life_is_a_soap_bubble_100_wa",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Osho,_Osho_International_Foundation_Life_is_a_soap_bubble_100_wa.pdf",
+    "year": 2017,
+    "pages": "173",
     "genre": "Fiction"
   },
   {
@@ -1021,20 +1591,31 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by _Sudeep_Nagarkar that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Our_Story_Needs_No_Filter_-_Sudeep_Nagarkar.pdf",
-    "year": 2015,
-    "pages": "502",
+    "year": 1993,
+    "pages": "175",
     "genre": "Fiction"
   },
   {
     "id": "p-m-nair",
     "title": "P M Nair",
-    "author": "The Kalam Effect",
-    "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
+    "author": "P M Nair",
+    "description": "A captivating fiction book by P M Nair that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/P M Nair- The Kalam Effect.pdf",
-    "year": 2006,
-    "pages": "304",
-    "genre": "Biography"
+    "year": 2002,
+    "pages": "238",
+    "genre": "Fiction"
+  },
+  {
+    "id": "paulo-coelho-the-alchemist-1993-",
+    "title": "Paulo Coelho - The Alchemist (1993) -",
+    "author": "Paulo Coelho",
+    "description": "A magical tale about following your dreams and listening to your heart.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Paulo Coelho - The Alchemist (1993) -.pdf",
+    "year": 1992,
+    "pages": "550",
+    "genre": "Philosophy"
   },
   {
     "id": "paulocoelhoawarriorslife",
@@ -1043,8 +1624,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Paulo_Coelho._A_Warrior_s_Life.pdf",
-    "year": 2011,
-    "pages": "372",
+    "year": 1992,
+    "pages": "170",
     "genre": "Fiction"
   },
   {
@@ -1054,8 +1635,8 @@ export const allBooks: Book[] = [
     "description": "A young boy discovers he's the son of a Greek god and must prevent a war among the gods.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Percy Jackson and The Battle of the Labyrinth.pdf",
-    "year": 2019,
-    "pages": "390",
+    "year": 1994,
+    "pages": "453",
     "genre": "Children's"
   },
   {
@@ -1065,8 +1646,8 @@ export const allBooks: Book[] = [
     "description": "A young boy discovers he's the son of a Greek god and must prevent a war among the gods.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Percy Jackson and The Last Olympian.pdf",
-    "year": 2001,
-    "pages": "205",
+    "year": 1996,
+    "pages": "508",
     "genre": "Children's"
   },
   {
@@ -1076,8 +1657,8 @@ export const allBooks: Book[] = [
     "description": "A young boy discovers he's the son of a Greek god and must prevent a war among the gods.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Percy Jackson and The Lightning Thief.pdf",
-    "year": 2005,
-    "pages": "492",
+    "year": 2003,
+    "pages": "335",
     "genre": "Children's"
   },
   {
@@ -1087,8 +1668,8 @@ export const allBooks: Book[] = [
     "description": "A young boy discovers he's the son of a Greek god and must prevent a war among the gods.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Percy Jackson and The Sea of Monsters.pdf",
-    "year": 2010,
-    "pages": "341",
+    "year": 1998,
+    "pages": "227",
     "genre": "Children's"
   },
   {
@@ -1098,9 +1679,20 @@ export const allBooks: Book[] = [
     "description": "A young boy discovers he's the son of a Greek god and must prevent a war among the gods.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Percy Jackson and The Titan s Curse.pdf",
-    "year": 2008,
-    "pages": "488",
+    "year": 1997,
+    "pages": "442",
     "genre": "Children's"
+  },
+  {
+    "id": "picturedictionarylongmanchildrenspicturedictionary",
+    "title": "Picture_Dictionary,_Longman_Childrens_Picture_Dictionary_by_Pear",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Picture_Dictionary,_Longman_Childrens_Picture_Dictionary_by_Pear.pdf",
+    "year": 2000,
+    "pages": "129",
+    "genre": "Fiction"
   },
   {
     "id": "pingpdfcomthegirlofmydreams",
@@ -1109,8 +1701,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by girl-of-my-dreams-infocopain that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/pingpdf.com_the-girl-of-my-dreams-infocopain.pdf",
-    "year": 2003,
-    "pages": "314",
+    "year": 2001,
+    "pages": "153",
     "genre": "Fiction"
   },
   {
@@ -1120,20 +1712,42 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Prem Purana_ Mythological Love Stories.pdf",
-    "year": 2014,
-    "pages": "162",
+    "year": 1995,
+    "pages": "322",
     "genre": "Romance"
   },
   {
-    "id": "steve-jobs-presentation-secrets",
-    "title": "Steve Jobs: Presentation Secrets",
+    "id": "presentation-secrets-of-steve-jobs",
+    "title": "Presentation Secrets Of Steve Jobs",
     "author": "Steve Jobs",
     "description": "Discover the law of attraction and how to use it to achieve your goals.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Presentation Secrets Of Steve Jobs.pdf",
-    "year": 1995,
-    "pages": "494",
+    "year": 2001,
+    "pages": "529",
     "genre": "Biography"
+  },
+  {
+    "id": "pythonapidevelopmentfundamentalsdevelopafullstackw",
+    "title": "Python_API_Development_Fundamentals_Develop_a_full_stack_web_app",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Python_API_Development_Fundamentals_Develop_a_full_stack_web_app.pdf",
+    "year": 2018,
+    "pages": "563",
+    "genre": "Fiction"
+  },
+  {
+    "id": "rajeshbhatiarattanlalichhpujaniessentialsofmedical",
+    "title": "Rajesh_Bhatia,_Rattan_Lal_Ichhpujani_Essentials_of_Medical_Micro",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Rajesh_Bhatia,_Rattan_Lal_Ichhpujani_Essentials_of_Medical_Micro.pdf",
+    "year": 2012,
+    "pages": "302",
+    "genre": "Fiction"
   },
   {
     "id": "rebecca",
@@ -1142,8 +1756,30 @@ export const allBooks: Book[] = [
     "description": "A haunting tale of jealousy, mystery, and obsession.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Rebecca.pdf",
-    "year": 2001,
-    "pages": "455",
+    "year": 1997,
+    "pages": "464",
+    "genre": "Fiction"
+  },
+  {
+    "id": "reconsideringreddauthoritypowerandlawinthegreeneco",
+    "title": "Reconsidering_REDD+_Authority,_Power_and_Law_in_the_Green_Econom",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Reconsidering_REDD+_Authority,_Power_and_Law_in_the_Green_Econom.pdf",
+    "year": 2014,
+    "pages": "385",
+    "genre": "Fiction"
+  },
+  {
+    "id": "reflections-of-a-man",
+    "title": "Reflections Of A Man",
+    "author": "Amari Soul",
+    "description": "A captivating fiction book by Amari Soul that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Reflections Of A Man - Amari Soul.pdf",
+    "year": 2012,
+    "pages": "504",
     "genre": "Fiction"
   },
   {
@@ -1153,31 +1789,64 @@ export const allBooks: Book[] = [
     "description": "An insightful work by Unknown Author that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Religious_Therapeutics_Body.pdf",
-    "year": 1994,
-    "pages": "278",
+    "year": 1999,
+    "pages": "180",
     "genre": "Non-Fiction"
   },
   {
-    "id": "revolution-2020",
-    "title": "Revolution 2020",
+    "id": "revolution2020bychetan",
+    "title": "revolution-2020-by-chetan",
     "author": "Chetan Bhagat",
-    "description": "A story of love, corruption, and ambition set in the Indian education system.",
+    "description": "A captivating fiction book by Chetan Bhagat that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/revolution-2020-by-chetan-bhagat.pdf",
-    "year": 2017,
-    "pages": "594",
+    "year": 1990,
+    "pages": "224",
+    "genre": "Fiction"
+  },
+  {
+    "id": "richdadsincreaseyourfinancialiqgetsmarterwithyourm",
+    "title": "Rich_Dads_Increase_Your_Financial_IQ_Get_Smarter_with_Your_Money",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Rich_Dads_Increase_Your_Financial_IQ_Get_Smarter_with_Your_Money.pdf",
+    "year": 2015,
+    "pages": "521",
     "genre": "Fiction"
   },
   {
     "id": "right-here-right-now",
     "title": "Right Here Right Now",
-    "author": "Nikita Singh",
-    "description": "A beautiful love story by Nikita Singh that explores the complexities of relationships and human emotions.",
+    "author": "NIKITA SINGH NOVEL",
+    "description": "A beautiful love story by NIKITA SINGH NOVEL that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Right Here Right Now - NIKITA SINGH NOVEL.pdf",
-    "year": 2008,
-    "pages": "359",
+    "year": 2012,
+    "pages": "163",
     "genre": "Romance"
+  },
+  {
+    "id": "robertgreenfieldadayinthelifeonefamilythebeautiful",
+    "title": "Robert_Greenfield_A_Day_in_the_Life_One_Family,_the_Beautiful_Pe",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Robert_Greenfield_A_Day_in_the_Life_One_Family,_the_Beautiful_Pe.pdf",
+    "year": 2016,
+    "pages": "110",
+    "genre": "Fiction"
+  },
+  {
+    "id": "robinssharmathemonkwhosoldhisferrariafableaboutful",
+    "title": "Robin_S_Sharma_The_Monk_Who_Sold_His_Ferrari_A_Fable_About_Fulfi",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Robin_S_Sharma_The_Monk_Who_Sold_His_Ferrari_A_Fable_About_Fulfi.pdf",
+    "year": 2003,
+    "pages": "182",
+    "genre": "Fiction"
   },
   {
     "id": "ruk-jaana-nahin",
@@ -1186,19 +1855,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Nishant Jain that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Ruk Jaana Nahin - Nishant Jain.pdf",
-    "year": 2002,
-    "pages": "530",
+    "year": 1992,
+    "pages": "249",
     "genre": "Fiction"
   },
   {
-    "id": "sacred-games",
-    "title": "Sacred Games",
+    "id": "sacred-games-a-novel",
+    "title": "Sacred Games_ A Novel",
     "author": "Unknown Author",
     "description": "An epic crime thriller set in the underworld of Mumbai.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Sacred Games_ A Novel.pdf",
-    "year": 2009,
-    "pages": "179",
+    "year": 2002,
+    "pages": "120",
     "genre": "Fiction"
   },
   {
@@ -1208,19 +1877,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Kevin Missal that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Satyayoddha Kalki_ Eye of Brahma by Kevin Missal.pdf",
-    "year": 2003,
-    "pages": "428",
+    "year": 1991,
+    "pages": "164",
     "genre": "Fiction"
   },
   {
-    "id": "scion-of-ikshvaku",
-    "title": "Scion of Ikshvaku",
+    "id": "scion-of-ikshvaku-ram-chandra",
+    "title": "Scion of Ikshvaku (Ram Chandra",
     "author": "Amish Tripathi",
     "description": "The story of Lord Ram, reimagined in this epic tale.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Scion of Ikshvaku (Ram Chandra - Amish Tripathi.pdf",
-    "year": 2018,
-    "pages": "107",
+    "year": 2011,
+    "pages": "415",
     "genre": "Fiction"
   },
   {
@@ -1230,8 +1899,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Broke-Up-I-Didnt-I-Just-Kissed-Someone-Else that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/She-Broke-Up-I-Didnt-I-Just-Kissed-Someone-Else.pdf",
-    "year": 2007,
-    "pages": "305",
+    "year": 1991,
+    "pages": "433",
     "genre": "Fiction"
   },
   {
@@ -1241,20 +1910,20 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/She_Broke_Up__I_Didn_t__I_Just_Durjoy.pdf",
-    "year": 2003,
-    "pages": "128",
+    "year": 2012,
+    "pages": "460",
     "genre": "Fiction"
   },
   {
     "id": "shri-ramcharitmanas",
     "title": "Shri Ramcharitmanas",
     "author": "(Hindi)",
-    "description": "A captivating fiction book by (Hindi) that offers an engaging reading experience.",
+    "description": "A thought-provoking work by (Hindi) that explores deep questions about life, spirituality, and human existence.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Shri Ramcharitmanas - (Hindi).pdf",
-    "year": 2016,
-    "pages": "342",
-    "genre": "Fiction"
+    "year": 1999,
+    "pages": "538",
+    "genre": "Philosophy"
   },
   {
     "id": "shutter-island",
@@ -1263,30 +1932,52 @@ export const allBooks: Book[] = [
     "description": "A gripping thriller by Unknown Author that will keep you on the edge of your seat with its twists and turns.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Shutter Island.pdf",
-    "year": 2017,
-    "pages": "438",
+    "year": 2003,
+    "pages": "475",
     "genre": "Mystery"
+  },
+  {
+    "id": "sir-arthur-conan-doyle",
+    "title": "Sir Arthur Conan Doyle",
+    "author": "Complete Sherlock Holmes (1960)",
+    "description": "A captivating fiction book by Complete Sherlock Holmes (1960) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Sir Arthur Conan Doyle - Complete Sherlock Holmes (1960).pdf",
+    "year": 2000,
+    "pages": "409",
+    "genre": "Fiction"
+  },
+  {
+    "id": "smallsizedrawingthehuman",
+    "title": "small-size-drawing-the-human",
+    "author": "size-drawing-the-human-body",
+    "description": "A captivating fiction book by size-drawing-the-human-body that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/small-size-drawing-the-human-body.pdf",
+    "year": 1993,
+    "pages": "124",
+    "genre": "Fiction"
   },
   {
     "id": "somainyogaandayurveda",
     "title": "Soma_in_Yoga_and_Ayurveda",
     "author": "Unknown Author",
-    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "description": "An insightful work by Unknown Author that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Soma_in_Yoga_and_Ayurveda.pdf",
-    "year": 1997,
-    "pages": "595",
-    "genre": "Fiction"
+    "year": 1999,
+    "pages": "588",
+    "genre": "Non-Fiction"
   },
   {
-    "id": "someone-like-you",
-    "title": "Someone Like You",
+    "id": "someonelike",
+    "title": "Someone-Like",
     "author": "Like-You",
     "description": "A captivating fiction book by Like-You that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Someone-Like-You.pdf",
-    "year": 2011,
-    "pages": "527",
+    "year": 2005,
+    "pages": "417",
     "genre": "Fiction"
   },
   {
@@ -1296,8 +1987,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Someone_Like_You_Durjoy__Datta_i.pdf",
-    "year": 2003,
-    "pages": "225",
+    "year": 2012,
+    "pages": "448",
     "genre": "Fiction"
   },
   {
@@ -1307,8 +1998,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Something_I_Never_Told_You_by_Bhinder_Shravya_@BOOKHOUSE1.pdf",
-    "year": 2010,
-    "pages": "300",
+    "year": 2018,
+    "pages": "409",
     "genre": "Fiction"
   },
   {
@@ -1318,8 +2009,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Sudeep Nagarkar that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Sorry, You are not my Type by Sudeep Nagarkar.pdf",
-    "year": 2008,
-    "pages": "570",
+    "year": 2004,
+    "pages": "591",
     "genre": "Fiction"
   },
   {
@@ -1329,19 +2020,74 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by youre-not-my-type that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/sorry-youre-not-my-type.pdf",
-    "year": 2000,
-    "pages": "203",
+    "year": 1996,
+    "pages": "511",
     "genre": "Fiction"
   },
   {
     "id": "sri-ramcharitmanas-english-all-pages",
     "title": "Sri Ramcharitmanas English All pages",
     "author": "Unknown Author",
-    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "description": "A thought-provoking work by Unknown Author that explores deep questions about life, spirituality, and human existence.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Sri Ramcharitmanas English All pages.pdf",
-    "year": 2019,
-    "pages": "543",
+    "year": 1990,
+    "pages": "576",
+    "genre": "Philosophy"
+  },
+  {
+    "id": "stealtheshowfromspeechestojobinterviewstodealclosi",
+    "title": "Steal_the_Show_From_Speeches_to_Job_Interviews_to_Deal_Closing_P",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Steal_the_Show_From_Speeches_to_Job_Interviews_to_Deal_Closing_P.pdf",
+    "year": 2014,
+    "pages": "457",
+    "genre": "Fiction"
+  },
+  {
+    "id": "stephenwhawkingthetheoryofeverything2006phoenixboo",
+    "title": "Stephen_W_Hawking_The_theory_of_everything_2006,_Phoenix_Books_l",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Stephen_W_Hawking_The_theory_of_everything_2006,_Phoenix_Books_l.pdf",
+    "year": 2003,
+    "pages": "378",
+    "genre": "Fiction"
+  },
+  {
+    "id": "storycraftthecompleteguidetowritingnarrativenonfic",
+    "title": "Storycraft_the_complete_guide_to_writing_narrative_nonfiction_by",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Storycraft_the_complete_guide_to_writing_narrative_nonfiction_by.pdf",
+    "year": 2015,
+    "pages": "363",
+    "genre": "Fiction"
+  },
+  {
+    "id": "superimmunitytheessentialnutritionguideforboosting",
+    "title": "Super_Immunity_The_Essential_Nutrition_Guide_for_Boosting_Your_B",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Super_Immunity_The_Essential_Nutrition_Guide_for_Boosting_Your_B.pdf",
+    "year": 2003,
+    "pages": "363",
+    "genre": "Fiction"
+  },
+  {
+    "id": "swadeshichikitsa",
+    "title": "SwadeshiChikitsa",
+    "author": "1",
+    "description": "A captivating fiction book by 1 that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/SwadeshiChikitsa-1.pdf",
+    "year": 2011,
+    "pages": "442",
     "genre": "Fiction"
   },
   {
@@ -1351,8 +2097,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Sweet nothings.pdf",
-    "year": 2018,
-    "pages": "294",
+    "year": 2000,
+    "pages": "390",
+    "genre": "Fiction"
+  },
+  {
+    "id": "sweet",
+    "title": "sweet",
+    "author": "sixteen",
+    "description": "A captivating fiction book by sixteen that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/sweet-sixteen.pdf",
+    "year": 2011,
+    "pages": "447",
     "genre": "Fiction"
   },
   {
@@ -1362,8 +2119,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Shenoy_ Preeti that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Tea for Two and a Piece of Cake - Shenoy_ Preeti.pdf",
-    "year": 2019,
-    "pages": "121",
+    "year": 2010,
+    "pages": "408",
+    "genre": "Fiction"
+  },
+  {
+    "id": "tejgurusirshreetejparkhijimuktiselfliberationfromf",
+    "title": "Tejguru_Sirshree_Tejparkhiji_Mukti_Self_Liberation_From_Fear_Wor",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Tejguru_Sirshree_Tejparkhiji_Mukti_Self_Liberation_From_Fear_Wor.pdf",
+    "year": 1995,
+    "pages": "384",
     "genre": "Fiction"
   },
   {
@@ -1374,19 +2142,19 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/Ten Years Later.pdf",
     "year": 2000,
-    "pages": "451",
+    "pages": "369",
     "genre": "Fiction"
   },
   {
     "id": "textbookofayurveda",
     "title": "Textbook_of_Ayurveda",
     "author": "Unknown Author",
-    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "description": "An insightful work by Unknown Author that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Textbook_of_Ayurveda.pdf",
-    "year": 2013,
-    "pages": "506",
-    "genre": "Fiction"
+    "year": 2008,
+    "pages": "299",
+    "genre": "Non-Fiction"
   },
   {
     "id": "thatsthewaywemetby",
@@ -1395,8 +2163,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by The-Way-We-Met-by-N that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Thats-The-Way-We-Met-by-N.pdf",
-    "year": 2017,
-    "pages": "493",
+    "year": 2014,
+    "pages": "355",
     "genre": "Fiction"
   },
   {
@@ -1407,7 +2175,29 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/Thats_The_Way_We_Met_-_Sudeep_Nagarkar.pdf",
     "year": 2002,
-    "pages": "286",
+    "pages": "302",
+    "genre": "Fiction"
+  },
+  {
+    "id": "the-3-three-mistakes-of-my-life",
+    "title": "The 3 (Three) Mistakes of My Life",
+    "author": "Chetan Bhagat",
+    "description": "A captivating fiction book by Chetan Bhagat that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The 3 (Three) Mistakes of My Life by Chetan Bhagat (z).pdf",
+    "year": 1990,
+    "pages": "555",
+    "genre": "Fiction"
+  },
+  {
+    "id": "the-5am-club",
+    "title": "The 5AM Club",
+    "author": "Robin Sharma (z)",
+    "description": "A captivating fiction book by Robin Sharma (z) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The 5AM Club by Robin Sharma (z).pdf",
+    "year": 2011,
+    "pages": "366",
     "genre": "Fiction"
   },
   {
@@ -1417,8 +2207,8 @@ export const allBooks: Book[] = [
     "description": "A magical tale about following your dreams and listening to your heart.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Alchemist by Paulo Coelho.pdf",
-    "year": 1998,
-    "pages": "211",
+    "year": 1994,
+    "pages": "502",
     "genre": "Philosophy"
   },
   {
@@ -1428,8 +2218,8 @@ export const allBooks: Book[] = [
     "description": "Ancient Hindu scripture on philosophy, spirituality, and the path to enlightenment.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Bhagavad Gita A Biography.pdf",
-    "year": 2016,
-    "pages": "359",
+    "year": 2003,
+    "pages": "396",
     "genre": "Biography"
   },
   {
@@ -1439,30 +2229,30 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by D. Boyne that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Boy in The Striped Pajamas - D. Boyne.pdf",
-    "year": 1995,
-    "pages": "499",
+    "year": 2012,
+    "pages": "245",
     "genre": "Fiction"
   },
   {
-    "id": "the-count-of-monte-cristo",
-    "title": "The Count of Monte Cristo",
+    "id": "the-count-of-montecristo",
+    "title": "The Count Of MonteCristo",
     "author": "Unknown Author",
-    "description": "An epic tale of wrongful imprisonment, escape, and revenge.",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Count Of MonteCristo.pdf",
-    "year": 2018,
-    "pages": "246",
+    "year": 2008,
+    "pages": "181",
     "genre": "Fiction"
   },
   {
-    "id": "the-da-vinci-code",
-    "title": "The Da Vinci Code",
+    "id": "the-davinci-code",
+    "title": "The DaVinci Code",
     "author": "Dan Brown",
-    "description": "A gripping thriller about secret societies, ancient mysteries, and religious conspiracies.",
+    "description": "A gripping thriller by Dan Brown that will keep you on the edge of your seat with its twists and turns.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The DaVinci Code by Dan Brown.pdf",
-    "year": 1992,
-    "pages": "176",
+    "year": 2004,
+    "pages": "326",
     "genre": "Mystery"
   },
   {
@@ -1472,8 +2262,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Day of the Jackal.pdf",
-    "year": 2016,
-    "pages": "369",
+    "year": 2002,
+    "pages": "286",
     "genre": "Fiction"
   },
   {
@@ -1483,8 +2273,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Five Guardsmen that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Forty-Five Guardsmen.pdf",
-    "year": 2014,
-    "pages": "534",
+    "year": 1998,
+    "pages": "467",
     "genre": "Fiction"
   },
   {
@@ -1494,8 +2284,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Frederick Forsyth that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Fox by Frederick Forsyth.pdf",
-    "year": 2004,
-    "pages": "445",
+    "year": 1999,
+    "pages": "140",
+    "genre": "Fiction"
+  },
+  {
+    "id": "the-gifts-of-imperfection-embrace-who-you-are",
+    "title": "The Gifts of Imperfection_ Embrace Who You Are",
+    "author": "PDFDrive",
+    "description": "A captivating fiction book by PDFDrive that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The Gifts of Imperfection_ Embrace Who You Are ( PDFDrive ).pdf",
+    "year": 1996,
+    "pages": "346",
     "genre": "Fiction"
   },
   {
@@ -1505,8 +2306,8 @@ export const allBooks: Book[] = [
     "description": "A thrilling mystery about love, obsession, and murder.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Girl in Room 105 by Chetan Bhagat.pdf",
-    "year": 2001,
-    "pages": "368",
+    "year": 2011,
+    "pages": "439",
     "genre": "Fiction"
   },
   {
@@ -1516,8 +2317,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The House That BJ Built.pdf",
-    "year": 2013,
-    "pages": "504",
+    "year": 2005,
+    "pages": "249",
     "genre": "Fiction"
   },
   {
@@ -1528,18 +2329,18 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/The Lost Symbol.pdf",
     "year": 1999,
-    "pages": "162",
+    "pages": "135",
     "genre": "Fiction"
   },
   {
     "id": "the-one-you-cannot-have-by-pree",
     "title": "THE ONE YOU CANNOT HAVE BY PREE",
-    "author": "Preeti Shenoy",
-    "description": "An insightful work by Preeti Shenoy that provides valuable knowledge and practical wisdom.",
+    "author": "PREE - PREETI SHENOY",
+    "description": "An insightful work by PREE - PREETI SHENOY that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/THE ONE YOU CANNOT HAVE BY PREE - PREETI SHENOY.pdf",
-    "year": 2010,
-    "pages": "550",
+    "year": 2007,
+    "pages": "200",
     "genre": "Non-Fiction"
   },
   {
@@ -1549,8 +2350,19 @@ export const allBooks: Book[] = [
     "description": "The Mahabharata retold from Draupadi's perspective.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Palace of Illusions.pdf",
-    "year": 2010,
-    "pages": "156",
+    "year": 2004,
+    "pages": "282",
+    "genre": "Fiction"
+  },
+  {
+    "id": "the-paradoxical-prime-minister",
+    "title": "The Paradoxical Prime Minister",
+    "author": "Shashi Tharoor (z)",
+    "description": "A captivating fiction book by Shashi Tharoor (z) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The Paradoxical Prime Minister by Shashi Tharoor (z).pdf",
+    "year": 2017,
+    "pages": "406",
     "genre": "Fiction"
   },
   {
@@ -1560,8 +2372,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Nikita Singh that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Promise by Nikita Singh_indianauthornovels.blogspot.in.pdf",
-    "year": 2006,
-    "pages": "352",
+    "year": 2005,
+    "pages": "525",
     "genre": "Romance"
   },
   {
@@ -1571,8 +2383,8 @@ export const allBooks: Book[] = [
     "description": "Discover the law of attraction and how to use it to achieve your goals.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Secret wish List - Shenoy_ Preeti.pdf",
-    "year": 2001,
-    "pages": "133",
+    "year": 2000,
+    "pages": "258",
     "genre": "Philosophy"
   },
   {
@@ -1582,8 +2394,8 @@ export const allBooks: Book[] = [
     "description": "A woman shoots her husband and then never speaks again. A psychotherapist becomes obsessed with uncovering the truth.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Silent Patient by Alex Michaelides.pdf",
-    "year": 1990,
-    "pages": "556",
+    "year": 1995,
+    "pages": "184",
     "genre": "Mystery"
   },
   {
@@ -1593,8 +2405,19 @@ export const allBooks: Book[] = [
     "description": "A swashbuckling adventure of friendship, honor, and loyalty.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Three Musketeers.pdf",
-    "year": 2019,
-    "pages": "576",
+    "year": 1993,
+    "pages": "178",
+    "genre": "Fiction"
+  },
+  {
+    "id": "the-wheel-of-time",
+    "title": "The Wheel of Time",
+    "author": "Robert Jordan  Brandon Sanderson (z)",
+    "description": "A captivating fiction book by Robert Jordan  Brandon Sanderson (z) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The Wheel of Time by Robert Jordan  Brandon Sanderson (z).pdf",
+    "year": 2007,
+    "pages": "263",
     "genre": "Fiction"
   },
   {
@@ -1604,8 +2427,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The Zoya Factor.pdf",
-    "year": 1997,
-    "pages": "283",
+    "year": 1995,
+    "pages": "423",
     "genre": "Fiction"
   },
   {
@@ -1615,20 +2438,31 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Fisher-Queens-Dynasty that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The-Fisher-Queens-Dynasty.pdf",
-    "year": 1992,
-    "pages": "173",
+    "year": 2004,
+    "pages": "273",
     "genre": "Fiction"
   },
   {
-    "id": "the-secret",
-    "title": "The Secret",
-    "author": "Rhonda Byrne",
+    "id": "thesecretbyrhonda",
+    "title": "The-Secret-by-Rhonda",
+    "author": "Secret-by-Rhonda-Byrne",
     "description": "Discover the law of attraction and how to use it to achieve your goals.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The-Secret-by-Rhonda-Byrne.pdf",
-    "year": 2011,
-    "pages": "423",
+    "year": 2009,
+    "pages": "359",
     "genre": "Philosophy"
+  },
+  {
+    "id": "thethree",
+    "title": "The-Three",
+    "author": "Three-Musketeers",
+    "description": "A captivating fiction book by Three-Musketeers that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The-Three-Musketeers.pdf",
+    "year": 1992,
+    "pages": "200",
+    "genre": "Fiction"
   },
   {
     "id": "theworldsbest",
@@ -1637,8 +2471,30 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Worlds-Best-Boyfriend that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The-Worlds-Best-Boyfriend.pdf",
-    "year": 2001,
-    "pages": "380",
+    "year": 1993,
+    "pages": "212",
+    "genre": "Fiction"
+  },
+  {
+    "id": "the5secondruletransformyourlifeworkandconfidencewi",
+    "title": "The_5_Second_Rule_Transform_your_Life,_Work,_and_Confidence_with",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_5_Second_Rule_Transform_your_Life,_Work,_and_Confidence_with.pdf",
+    "year": 2004,
+    "pages": "175",
+    "genre": "Fiction"
+  },
+  {
+    "id": "theartofpublicspeakingtheoriginaltoolforimprovingp",
+    "title": "The_Art_of_Public_Speaking_The_Original_Tool_for_Improving_Publi",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Art_of_Public_Speaking_The_Original_Tool_for_Improving_Publi.pdf",
+    "year": 1998,
+    "pages": "366",
     "genre": "Fiction"
   },
   {
@@ -1648,8 +2504,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by _Durjoy_Datta that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Boy_with_a_Broken_Heart_-_Durjoy_Datta.pdf",
-    "year": 2015,
-    "pages": "124",
+    "year": 2000,
+    "pages": "157",
+    "genre": "Fiction"
+  },
+  {
+    "id": "thecouragetobedislikedhowtochangeyourlifeandachiev",
+    "title": "The_Courage_to_be_Disliked_How_to_Change_Your_Life_and_Achieve_R",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Courage_to_be_Disliked_How_to_Change_Your_Life_and_Achieve_R.pdf",
+    "year": 1999,
+    "pages": "357",
     "genre": "Fiction"
   },
   {
@@ -1659,20 +2526,75 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by _Smita_Kaushik that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Girl_I_Last_Loved_-_Smita_Kaushik.pdf",
-    "year": 1997,
-    "pages": "413",
+    "year": 1999,
+    "pages": "123",
     "genre": "Romance"
   },
   {
-    "id": "the-jungle-book",
-    "title": "The Jungle Book",
+    "id": "theintelligentinvestorthedefinitivebookonvalueinve",
+    "title": "The_Intelligent_Investor_The_Definitive_Book_On_Value_Investing",
     "author": "Unknown Author",
-    "description": "The classic tale of Mowgli, a boy raised by wolves in the Indian jungle.",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Intelligent_Investor_The_Definitive_Book_On_Value_Investing.pdf",
+    "year": 2017,
+    "pages": "316",
+    "genre": "Fiction"
+  },
+  {
+    "id": "thejunglebooknt",
+    "title": "The_Jungle_Book_NT",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Jungle_Book_NT.pdf",
-    "year": 2016,
-    "pages": "243",
-    "genre": "Children's"
+    "year": 2009,
+    "pages": "277",
+    "genre": "Fiction"
+  },
+  {
+    "id": "thelordoftherings-01jrrtolkienthefellowshipofthe",
+    "title": "The_Lord_of_the_Rings ,_01_J_R_R_Tolkien_The_Fellowship_of_the",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Lord_of_the_Rings  ,_01_J_R_R_Tolkien_The_Fellowship_of_the.pdf",
+    "year": 2005,
+    "pages": "293",
+    "genre": "Fiction"
+  },
+  {
+    "id": "thelordoftherings-2jrrtolkienlordoftheringspart",
+    "title": "The_Lord_of_the_Rings ,_2_J_R_R_Tolkien_Lord_of_the_Rings,_Part",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Lord_of_the_Rings  ,_2_J_R_R_Tolkien_Lord_of_the_Rings,_Part.pdf",
+    "year": 1998,
+    "pages": "432",
+    "genre": "Fiction"
+  },
+  {
+    "id": "thelordoftherings-3jrrtolkienlordoftheringspart",
+    "title": "The_Lord_of_The_Rings ,_3_J_R_R_Tolkien_Lord_of_The_Rings,_Part",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Lord_of_The_Rings  ,_3_J_R_R_Tolkien_Lord_of_The_Rings,_Part.pdf",
+    "year": 2013,
+    "pages": "190",
+    "genre": "Fiction"
+  },
+  {
+    "id": "themanwhosavedindiasardarpatelandhisideaofindiabyh",
+    "title": "The_Man_Who_Saved_India_Sardar_Patel_and_His_Idea_of_India_by_Hi",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/The_Man_Who_Saved_India_Sardar_Patel_and_His_Idea_of_India_by_Hi.pdf",
+    "year": 2011,
+    "pages": "384",
+    "genre": "Fiction"
   },
   {
     "id": "themerryadventuresofrobinhoodnt",
@@ -1681,8 +2603,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Merry_Adventures_of_Robin_Hood_NT.pdf",
-    "year": 2015,
-    "pages": "469",
+    "year": 2011,
+    "pages": "337",
     "genre": "Fiction"
   },
   {
@@ -1692,8 +2614,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/the_mother_i_never_knew_Sudha_Murthy.pdf",
-    "year": 2008,
-    "pages": "475",
+    "year": 2012,
+    "pages": "133",
     "genre": "Fiction"
   },
   {
@@ -1703,8 +2625,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_One_You_Cannot_Have_by_Preeti_Shenoy.pdf",
-    "year": 2016,
-    "pages": "183",
+    "year": 2007,
+    "pages": "346",
     "genre": "Fiction"
   },
   {
@@ -1714,8 +2636,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Pilgrimage.pdf",
-    "year": 1996,
-    "pages": "319",
+    "year": 2004,
+    "pages": "479",
     "genre": "Fiction"
   },
   {
@@ -1725,8 +2647,8 @@ export const allBooks: Book[] = [
     "description": "An insightful work by Unknown Author that provides valuable knowledge and practical wisdom.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Science_of_Self_Healing.pdf",
-    "year": 2002,
-    "pages": "357",
+    "year": 1997,
+    "pages": "288",
     "genre": "Non-Fiction"
   },
   {
@@ -1736,19 +2658,41 @@ export const allBooks: Book[] = [
     "description": "Discover the law of attraction and how to use it to achieve your goals.",
     "coverImage": "placeholder",
     "pdfPath": "/books/The_Secret_Wishlist_by_Preeti_shenoy.pdf",
-    "year": 2008,
-    "pages": "453",
+    "year": 2015,
+    "pages": "133",
     "genre": "Philosophy"
   },
   {
-    "id": "the-3-mistakes-of-my-life",
-    "title": "The 3 Mistakes of My Life",
+    "id": "this-love-that-feels-right-",
+    "title": "This Love that Feels Right . . .",
+    "author": "Ravinder Singh",
+    "description": "A beautiful love story by Ravinder Singh that explores the complexities of relationships and human emotions.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/This Love that Feels Right . . . - Ravinder Singh_2105155939.pdf",
+    "year": 2004,
+    "pages": "571",
+    "genre": "Romance"
+  },
+  {
+    "id": "three-mistakes-of-my-life",
+    "title": "Three mistakes of my life",
     "author": "Chetan Bhagat",
-    "description": "A story of friendship, dreams, and the mistakes that change everything.",
+    "description": "A captivating fiction book by Chetan Bhagat that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Three mistakes of my life- Chetan Bhagat.pdf",
-    "year": 2008,
-    "pages": "342",
+    "year": 2001,
+    "pages": "405",
+    "genre": "Fiction"
+  },
+  {
+    "id": "threemistakesofmy",
+    "title": "Three-Mistakes-of-My",
+    "author": "Mistakes-of-My-Life",
+    "description": "A captivating fiction book by Mistakes-of-My-Life that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Three-Mistakes-of-My-Life.pdf",
+    "year": 2018,
+    "pages": "195",
     "genre": "Fiction"
   },
   {
@@ -1758,8 +2702,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Three_Ghost_Stories_NT.pdf",
-    "year": 2017,
-    "pages": "402",
+    "year": 2004,
+    "pages": "550",
     "genre": "Fiction"
   },
   {
@@ -1769,8 +2713,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Till_the_Last_Breath_Durjoy_Datt.pdf",
-    "year": 1990,
-    "pages": "106",
+    "year": 2001,
+    "pages": "410",
     "genre": "Fiction"
   },
   {
@@ -1780,8 +2724,63 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Ruskin Bond that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Time Stops At Shamli Other Stories - Ruskin Bond.pdf",
-    "year": 2001,
-    "pages": "447",
+    "year": 1999,
+    "pages": "279",
+    "genre": "Fiction"
+  },
+  {
+    "id": "trade-and-grow-rich",
+    "title": "Trade and Grow Rich",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Trade and Grow Rich.pdf",
+    "year": 2003,
+    "pages": "290",
+    "genre": "Fiction"
+  },
+  {
+    "id": "tradingpriceactiontradingrangestechnicalanalysisof",
+    "title": "Trading_Price_Action_Trading_Ranges_Technical_Analysis_of_Price",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Trading_Price_Action_Trading_Ranges_Technical_Analysis_of_Price.pdf",
+    "year": 2009,
+    "pages": "115",
+    "genre": "Fiction"
+  },
+  {
+    "id": "tylervolkwhatisdeathascientistlooksatthecycleoflif",
+    "title": "Tyler_Volk_What_Is_Death_A_Scientist_Looks_at_the_Cycle_of_Life",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Tyler_Volk_What_Is_Death_A_Scientist_Looks_at_the_Cycle_of_Life.pdf",
+    "year": 2008,
+    "pages": "572",
+    "genre": "Fiction"
+  },
+  {
+    "id": "undergraduatetopicsincomputerscienceanttilaaksonen",
+    "title": "Undergraduate_topics_in_computer_science_Antti_Laaksonen_Guide_t",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Undergraduate_topics_in_computer_science_Antti_Laaksonen_Guide_t.pdf",
+    "year": 2011,
+    "pages": "181",
+    "genre": "Fiction"
+  },
+  {
+    "id": "universal-magick",
+    "title": "Universal Magick",
+    "author": "Hargrove, Corwin (z)",
+    "description": "A captivating fiction book by Hargrove, Corwin (z) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Universal Magick (2021) by Hargrove, Corwin (z).pdf",
+    "year": 2002,
+    "pages": "430",
     "genre": "Fiction"
   },
   {
@@ -1791,8 +2790,19 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by _Paulo_Coelho that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Veronika_Decides_to_Die_-_Paulo_Coelho.pdf",
-    "year": 2019,
-    "pages": "363",
+    "year": 2004,
+    "pages": "389",
+    "genre": "Fiction"
+  },
+  {
+    "id": "veryhungrycaterpillar",
+    "title": "Very-Hungry-Caterpillar",
+    "author": "Hungry-Caterpillar-FINAL (1)",
+    "description": "A captivating fiction book by Hungry-Caterpillar-FINAL (1) that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Very-Hungry-Caterpillar-FINAL (1).pdf",
+    "year": 2014,
+    "pages": "413",
     "genre": "Fiction"
   },
   {
@@ -1802,19 +2812,30 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Vicomte de Bragelonne.pdf",
-    "year": 1999,
-    "pages": "354",
+    "year": 1995,
+    "pages": "244",
     "genre": "Fiction"
   },
   {
     "id": "vladimir-nabokov-lolita-penguin-modern-classics-20",
     "title": "Vladimir Nabokov Lolita Penguin Modern Classics 2000",
-    "author": "1",
-    "description": "A captivating fiction book by 1 that offers an engaging reading experience.",
+    "author": "Vladimir Nabokov",
+    "description": "A captivating fiction book by Vladimir Nabokov that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Vladimir Nabokov Lolita Penguin Modern Classics 2000 (1).pdf",
-    "year": 1990,
-    "pages": "144",
+    "year": 1991,
+    "pages": "133",
+    "genre": "Fiction"
+  },
+  {
+    "id": "wabisabijapanesewisdomforaperfectlyimperfectlifebe",
+    "title": "Wabi_Sabi_Japanese_Wisdom_for_a_Perfectly_Imperfect_Life_Beth_Ke",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Wabi_Sabi_Japanese_Wisdom_for_a_Perfectly_Imperfect_Life_Beth_Ke.pdf",
+    "year": 2006,
+    "pages": "395",
     "genre": "Fiction"
   },
   {
@@ -1825,7 +2846,7 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/when-dimple-met-rishi.pdf",
     "year": 2007,
-    "pages": "499",
+    "pages": "528",
     "genre": "Fiction"
   },
   {
@@ -1835,8 +2856,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by _Durjoy_Datta that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/When_Only_Love_Remains_-_Durjoy_Datta.pdf",
-    "year": 2008,
-    "pages": "204",
+    "year": 2003,
+    "pages": "117",
     "genre": "Romance"
   },
   {
@@ -1846,30 +2867,41 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/When_Only_Love_Remains_Durjoy_Da.pdf",
-    "year": 1995,
-    "pages": "226",
+    "year": 1999,
+    "pages": "194",
+    "genre": "Romance"
+  },
+  {
+    "id": "will-you-still-love-me-by-ravinder-singh",
+    "title": "Will You Still Love Me By Ravinder Singh",
+    "author": "Ravinder Singh",
+    "description": "A beautiful love story by Ravinder Singh that explores the complexities of relationships and human emotions.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Will You Still Love Me By Ravinder Singh.pdf",
+    "year": 2008,
+    "pages": "117",
     "genre": "Romance"
   },
   {
     "id": "william-shakespeare-a-biography",
     "title": "William Shakespeare_ A Biography",
-    "author": "Unknown Author",
+    "author": "William Shakespeare",
     "description": "An inspiring biography that chronicles the remarkable life and achievements of a notable figure.",
     "coverImage": "placeholder",
     "pdfPath": "/books/William Shakespeare_ A Biography.pdf",
-    "year": 2014,
-    "pages": "434",
+    "year": 2019,
+    "pages": "254",
     "genre": "Biography"
   },
   {
-    "id": "wings-of-fire-an-autobiography",
-    "title": "Wings of Fire: An Autobiography",
+    "id": "wings-of-fire-an-autobiography-of-apj-abdul-kalam",
+    "title": "Wings of Fire_ An Autobiography of APJ Abdul Kalam",
     "author": "APJ Abdul Kalam",
     "description": "The inspiring autobiography of India's Missile Man and former President.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Wings of Fire_ An Autobiography of APJ Abdul Kalam.pdf",
-    "year": 2001,
-    "pages": "356",
+    "year": 1993,
+    "pages": "527",
     "genre": "Biography"
   },
   {
@@ -1879,8 +2911,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/World_s_Best_Boyfriend_Durjoy_Da.pdf",
-    "year": 2014,
-    "pages": "579",
+    "year": 1998,
+    "pages": "130",
     "genre": "Fiction"
   },
   {
@@ -1891,7 +2923,7 @@ export const allBooks: Book[] = [
     "coverImage": "placeholder",
     "pdfPath": "/books/You re Trending in my Dreams- Sudeep Nagarkar.pdf",
     "year": 2006,
-    "pages": "265",
+    "pages": "185",
     "genre": "Fiction"
   },
   {
@@ -1901,20 +2933,31 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by are-trending-in-my-dreams-novel that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/you-are-trending-in-my-dreams-novel.pdf",
-    "year": 2011,
-    "pages": "458",
+    "year": 2005,
+    "pages": "155",
     "genre": "Fiction"
+  },
+  {
+    "id": "your-dreams-are-mine-now",
+    "title": "Your Dreams Are Mine Now",
+    "author": "Ravinder Singh",
+    "description": "A beautiful love story by Ravinder Singh that explores the complexities of relationships and human emotions.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/Your Dreams Are Mine Now - Ravinder Singh.pdf",
+    "year": 1997,
+    "pages": "115",
+    "genre": "Romance"
   },
   {
     "id": "yourdreamsareminenownovelravindersinghin",
     "title": "Your-Dreams-Are-Mine-Now-Novel-Ravinder-Singh-in",
-    "author": "Ravinder Singh",
-    "description": "A beautiful love story by Ravinder Singh that explores the complexities of relationships and human emotions.",
+    "author": "Dreams-Are-Mine-Now-Novel-Ravinder-Singh-in-pdf",
+    "description": "A captivating fiction book by Dreams-Are-Mine-Now-Novel-Ravinder-Singh-in-pdf that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/Your-Dreams-Are-Mine-Now-Novel-Ravinder-Singh-in-pdf.pdf",
-    "year": 2007,
-    "pages": "460",
-    "genre": "Romance"
+    "year": 1992,
+    "pages": "191",
+    "genre": "Fiction"
   },
   {
     "id": "yourethepasswordtomylifesudeep",
@@ -1923,8 +2966,8 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Sudeep Nagarkar that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/youre-the-password-to-my-life-sudeep-nagarkar.pdf",
-    "year": 1992,
-    "pages": "499",
+    "year": 2008,
+    "pages": "202",
     "genre": "Fiction"
   },
   {
@@ -1934,8 +2977,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by _Ajay_Pandey that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/You_are_the_Best_Wife__A_True_Love_Story_-_Ajay_Pandey.pdf",
-    "year": 2019,
-    "pages": "281",
+    "year": 2013,
+    "pages": "233",
     "genre": "Romance"
   },
   {
@@ -1945,8 +2988,8 @@ export const allBooks: Book[] = [
     "description": "A beautiful love story by Unknown Author that explores the complexities of relationships and human emotions.",
     "coverImage": "placeholder",
     "pdfPath": "/books/You_Were_My_Crush__Till_You_Sai.pdf",
-    "year": 2003,
-    "pages": "537",
+    "year": 2008,
+    "pages": "246",
     "genre": "Romance"
   },
   {
@@ -1956,8 +2999,30 @@ export const allBooks: Book[] = [
     "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
     "coverImage": "placeholder",
     "pdfPath": "/books/अकबर और बरबल.pdf",
-    "year": 2012,
-    "pages": "429",
+    "year": 1995,
+    "pages": "206",
+    "genre": "Fiction"
+  },
+  {
+    "id": "gunahonkadevtabydharamvirbharatiz",
+    "title": "गनह_क_दवत_Gunahon_Ka_Devta_by_भरत_Dharamvir_Bharatiz",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/गनह_क_दवत_Gunahon_Ka_Devta_by_भरत_Dharamvir_Bharatiz.pdf",
+    "year": 1996,
+    "pages": "558",
+    "genre": "Fiction"
+  },
+  {
+    "id": "hrdfoundationnewdelhi",
+    "title": "यन_फरडम_परयवरण_और_आतम_नरभरत_HRD_Foundation,_New_Delhi",
+    "author": "Unknown Author",
+    "description": "A captivating fiction book by Unknown Author that offers an engaging reading experience.",
+    "coverImage": "placeholder",
+    "pdfPath": "/books/यन_फरडम_परयवरण_और_आतम_नरभरत_HRD_Foundation,_New_Delhi.pdf",
+    "year": 1999,
+    "pages": "514",
     "genre": "Fiction"
   }
 ];

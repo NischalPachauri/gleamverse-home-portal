@@ -1,19 +1,34 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { BookCard } from "@/components/BookCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Footer } from "@/components/Footer";
 import { TopBooks } from "@/components/TopBooks";
 import { ReadingList } from "@/components/ReadingList";
 import { books } from "@/data/books";
-import { Search, Sparkles, Book, Globe, FlaskConical, Landmark, User, Laptop, Palette, Baby, Moon, Sun, BookMarked } from "lucide-react";
+import { 
+  Search, Sparkles, Book, Globe, FlaskConical, Landmark, Laptop, 
+  Baby, Heart, Scroll, Scale, Users, User, LogIn,
+  GraduationCap, Briefcase, TreePine, Home, BookMarked, Moon, Sun
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import libraryBg from "@/assets/library-background.jpg";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/auth/AuthModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Fallback component in case of errors
 const IndexFallback = () => (
@@ -28,16 +43,19 @@ const IndexFallback = () => (
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const { ref: categoriesRef, isVisible } = useScrollReveal({ threshold: 0.2 });
-  const [controlsVisible, setControlsVisible] = useState(true);
-  const [currentPage, setCurrentPage] = useState(0);
-  
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const isVisible = useScrollReveal();
+  const categoriesRef = useRef<HTMLElement>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const { theme, toggleTheme } = useTheme();
+  const { user, signOut, isAuthenticated } = useAuth();
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
 
   const BOOKS_PER_PAGE = 16;
 
-  // Fade controls on scroll for mobile/tablet
+  // Fade controls on scroll
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -48,20 +66,57 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success('Signed out successfully');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  const getUserInitials = () => {
+    if (user?.user_metadata?.full_name) {
+      return user.user_metadata.full_name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user?.email?.slice(0, 2).toUpperCase() || 'U';
+  };
+
   const categoryData = [
+    { name: "All", icon: Home },
     { name: "Fantasy", icon: Sparkles },
-    { name: "Romance", icon: Book },
-    { name: "Biography", icon: User },
-    { name: "Fiction", icon: Globe },
+    { name: "Romance", icon: Heart },
+    { name: "Fiction", icon: Book },
     { name: "Mystery", icon: FlaskConical },
-    { name: "Philosophy", icon: Landmark },
+    { name: "Biography", icon: Users },
+    { name: "Philosophy", icon: Scroll },
+    { name: "Non-Fiction", icon: Globe },
     { name: "Children's", icon: Baby },
-    { name: "Non-Fiction", icon: Laptop },
+    { name: "Science", icon: Laptop },
+    { name: "History", icon: Landmark },
+    { name: "Thriller", icon: Scale },
+    { name: "Educational", icon: GraduationCap },
+    { name: "Business", icon: Briefcase },
+    { name: "Adventure", icon: TreePine },
   ];
 
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(books.map(book => book.genre)));
-    return ["All", ...uniqueCategories.sort()];
+    const allGenres = new Set<string>();
+    books.forEach(book => {
+      // Add the main genre
+      if (book.genre) allGenres.add(book.genre);
+      // Add all genres from the genres array
+      if (book.genres && Array.isArray(book.genres)) {
+        book.genres.forEach(g => allGenres.add(g));
+      }
+    });
+    const uniqueCategories = Array.from(allGenres).sort();
+    return ["All", ...uniqueCategories];
   }, []);
   
   try {
@@ -73,7 +128,10 @@ const Index = () => {
         book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.description.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesCategory = selectedCategory === "All" || book.genre === selectedCategory;
+      // Check if book matches the selected category - now checking multiple genres
+      const matchesCategory = selectedCategory === "All" || 
+        book.genre === selectedCategory || 
+        (book.genres && book.genres.includes(selectedCategory));
       
       return matchesSearch && matchesCategory;
     });
@@ -101,21 +159,21 @@ const Index = () => {
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
-      setCurrentPage(prev => prev + 1);
+      setCurrentPage(currentPage + 1);
       // Scroll to top of browse section
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+      });
     }
   };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
-      setCurrentPage(prev => prev - 1);
+      setCurrentPage(currentPage - 1);
       // Scroll to top of browse section
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+      });
     }
   };
 
@@ -135,17 +193,64 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Theme Toggle, Login and Bookmarks - Visible on all devices with fade on scroll */}
+      {/* Theme Toggle, Sign In/Profile and Bookmarks - Visible on all devices with fade on scroll */}
       <div className={`fixed top-4 right-4 z-50 flex gap-2 transition-opacity duration-500 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <Button
-          onClick={() => navigate('/login')}
-          variant="outline"
-          size="sm"
-          className="bg-background/80 backdrop-blur-sm"
-        >
-          <span className="hidden sm:inline">Login</span>
-          <User className="w-4 h-4 sm:hidden" />
-        </Button>
+        {isAuthenticated ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-background/80 backdrop-blur-sm"
+              >
+                <Avatar className="h-5 w-5">
+                  <AvatarFallback className="text-xs">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {user?.user_metadata?.full_name || 'User'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/bookmarks')}>
+                <BookMarked className="mr-2 h-4 w-4" />
+                My Bookmarks
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/reading-history')}>
+                <Book className="mr-2 h-4 w-4" />
+                Reading History
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            onClick={() => {
+              setAuthModalMode('login');
+              setAuthModalOpen(true);
+            }}
+            variant="outline"
+            size="sm"
+            className="bg-background/80 backdrop-blur-sm"
+          >
+            <span className="hidden sm:inline">Sign In</span>
+            <LogIn className="w-4 h-4 sm:hidden" />
+          </Button>
+        )}
         <Button
           onClick={() => navigate('/bookmarks')}
           size="sm"
@@ -162,6 +267,13 @@ const Index = () => {
           {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </Button>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authModalMode}
+      />
 
       {/* Hero Section with Library Background */}
       <header className="relative h-[500px] overflow-hidden">
@@ -225,16 +337,18 @@ const Index = () => {
             </h2>
             <p className="text-muted-foreground">
               Showing {paginatedBooks.length} of {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"}
-              {totalPages > 1 && ` (Page ${currentPage + 1} of ${totalPages})`}
             </p>
           </div>
         </div>
 
         {filteredBooks.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {paginatedBooks.map((book) => (
-                <BookCard key={book.id} book={book} />
+            <div 
+              key={`page-${currentPage}`}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+            >
+              {paginatedBooks.slice(0, BOOKS_PER_PAGE).map((book, index) => (
+                <BookCard key={`${book.id}-${currentPage}-${index}`} book={book} />
               ))}
             </div>
             
@@ -302,13 +416,13 @@ const Index = () => {
           </h2>
           <div className="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto mb-12 rounded-full"></div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
             {categoryData.map((cat, idx) => (
               <div
                 key={cat.name}
                 className="transition-all duration-700"
                 style={{ 
-                  transitionDelay: `${idx * 100}ms`,
+                  transitionDelay: `${idx * 50}ms`,
                   opacity: isVisible ? 1 : 0,
                   transform: isVisible ? 'translateY(0)' : 'translateY(20px)'
                 }}
@@ -316,7 +430,13 @@ const Index = () => {
                 <CategoryCard
                   icon={cat.icon}
                   title={cat.name}
-                  onClick={() => setSelectedCategory(cat.name)}
+                  onClick={() => {
+                    setSelectedCategory(cat.name);
+                    // Scroll to browse section when category is selected
+                    setTimeout(() => {
+                      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                  }}
                   isActive={selectedCategory === cat.name}
                 />
               </div>

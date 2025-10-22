@@ -12,7 +12,7 @@ export const CategoryCard = ({ icon: Icon, title, onClick, isActive }: CategoryC
     <div
       onClick={onClick}
       className={`
-        group relative cursor-pointer rounded-xl p-8 border
+        group relative cursor-pointer rounded-xl p-6 border
         transition-all duration-300 hover:scale-[1.03]
         ${isActive 
           ? 'bg-primary text-primary-foreground shadow-lg border-primary' 
@@ -26,15 +26,15 @@ export const CategoryCard = ({ icon: Icon, title, onClick, isActive }: CategoryC
         perspective: "1000px"
       }}
     >
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-3">
         <div className={`
-          p-4 rounded-full transition-all duration-500
+          p-3 rounded-full transition-all duration-500
           ${isActive ? 'bg-white/20' : 'bg-primary/10 group-hover:bg-primary/20'}
           transform group-hover:rotate-12 group-hover:scale-110
         `}>
-          <Icon className={`w-12 h-12 ${isActive ? 'text-white' : 'text-primary'}`} />
+          <Icon className={`w-8 h-8 ${isActive ? 'text-white' : 'text-primary'}`} />
         </div>
-        <h3 className={`text-xl font-bold text-center ${isActive ? 'text-white' : 'text-foreground'}`}>
+        <h3 className={`text-base font-semibold text-center ${isActive ? 'text-white' : 'text-foreground'}`}>
           {title}
         </h3>
       </div>
