@@ -66,8 +66,9 @@ export default function Bookmarks() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-br from-primary/10 via-background to-accent/5 border-b border-border">
-        <div className="container mx-auto px-4 py-12">
+      <div className="relative bg-gradient-to-br from-primary/20 via-primary/5 to-background border-b border-border/50 shadow-sm">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(var(--primary-rgb),0.1),transparent_50%)]"></div>
+        <div className="container mx-auto px-4 py-12 relative">
           <Button
             onClick={() => navigate('/')}
             variant="ghost"
@@ -78,13 +79,15 @@ export default function Bookmarks() {
             Back to Library
           </Button>
           
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 rounded-xl bg-primary/10">
-              <BookMarked className="w-8 h-8 text-primary" />
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-md">
+              <BookMarked className="w-10 h-10 text-primary" />
             </div>
             <div>
-              <h1 className="text-4xl md:text-5xl font-bold">Your Bookmarks</h1>
-              <p className="text-muted-foreground mt-1">Track and organize your reading journey</p>
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                Your Bookmarks
+              </h1>
+              <p className="text-muted-foreground mt-2 text-lg">Track and organize your reading journey</p>
             </div>
           </div>
 
@@ -96,19 +99,19 @@ export default function Bookmarks() {
               return (
                 <Card
                   key={section}
-                  className="p-4 bg-card border-border/50 hover:border-primary/30 transition-colors cursor-pointer"
+                  className="p-5 bg-gradient-to-br from-card to-card/50 border-border/50 hover:border-primary/50 hover:shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-1"
                   onClick={() => scrollToSection(section)}
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToSection(section); } }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-primary/10`}>
-                      <Icon className={`w-5 h-5 ${statusColors[section]}`} />
+                    <div className={`p-2.5 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-sm`}>
+                      <Icon className={`w-6 h-6 ${statusColors[section]}`} />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{count}</p>
-                      <p className="text-xs text-muted-foreground">{section}</p>
+                      <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">{count}</p>
+                      <p className="text-xs text-muted-foreground font-medium mt-0.5">{section}</p>
                     </div>
                   </div>
                 </Card>

@@ -683,18 +683,41 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         </div>
       </div>
 
-      {/* Page animations removed per requirements */}
+      {/* Page curl effect */}
       <style dangerouslySetInnerHTML={{__html: `
         .two-page-spread {
           display: flex;
           gap: 8px;
           align-items: flex-start;
+          perspective: 1500px;
         }
         .pdf-page {
           margin-bottom: 0;
           padding-bottom: 0;
           max-height: 80vh;
           overflow: hidden;
+          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transform-style: preserve-3d;
+          position: relative;
+        }
+        .pdf-page::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 60px;
+          height: 60px;
+          background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.05) 50%);
+          pointer-events: none;
+          transition: all 0.3s ease;
+        }
+        .pdf-page:hover::after {
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, transparent 48%, rgba(0,0,0,0.08) 50%, rgba(0,0,0,0.03) 100%);
+        }
+        .pdf-page:hover {
+          transform: translateZ(10px) rotateY(-2deg);
         }
         .pdf-page canvas {
           display: block;

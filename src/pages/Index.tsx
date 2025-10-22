@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { BookCard } from "@/components/BookCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Footer } from "@/components/Footer";
 import { TopBooks } from "@/components/TopBooks";
 import { ReadingList } from "@/components/ReadingList";
 import { books } from "@/data/books";
-import { Search, Sparkles, Book, Globe, FlaskConical, Landmark, User, Laptop, Palette, Baby, Moon, Sun } from "lucide-react";
+import { Search, Sparkles, Book, Globe, FlaskConical, Landmark, User, Laptop, Palette, Baby, Moon, Sun, BookMarked } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,9 +29,21 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const { ref: categoriesRef, isVisible } = useScrollReveal({ threshold: 0.2 });
+  const [controlsVisible, setControlsVisible] = useState(true);
   
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  // Fade controls on scroll for mobile/tablet
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setControlsVisible(scrollPosition < 100);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const categoryData = [
     { name: "Fiction", icon: Book },
@@ -73,20 +85,24 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Theme Toggle, Login and Bookmarks - Hidden on mobile and tablet */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2 hidden lg:flex">
+      {/* Theme Toggle, Login and Bookmarks - Visible on all devices with fade on scroll */}
+      <div className={`fixed top-4 right-4 z-50 flex gap-2 transition-opacity duration-500 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <Button
           onClick={() => navigate('/login')}
           variant="outline"
+          size="sm"
           className="bg-background/80 backdrop-blur-sm"
         >
-          Login
+          <span className="hidden sm:inline">Login</span>
+          <User className="w-4 h-4 sm:hidden" />
         </Button>
         <Button
           onClick={() => navigate('/bookmarks')}
+          size="sm"
           className="bg-primary/80 backdrop-blur-sm"
         >
-          Bookmarks
+          <span className="hidden sm:inline">Bookmarks</span>
+          <BookMarked className="w-4 h-4 sm:hidden" />
         </Button>
         <Button
           onClick={toggleTheme}

@@ -111,18 +111,17 @@ export const TopBooks = () => {
 
   return (
     <section className="container mx-auto px-4 py-12">
-      <h2 className="text-4xl font-bold text-center mb-4 text-primary">Top Books</h2>
-      <p className="text-center text-muted-foreground mb-8">Trending books right now</p>
+      <h2 className="text-4xl font-bold text-center mb-8 text-primary">Trending books right now</h2>
       <div className="relative rounded-2xl overflow-hidden">
         <div className="topbooks-loop">
           {loopBooks.map((b, idx) => (
             <div key={`${b.id}-${idx}`} className="px-3">
               <Link
                 to={`/book/${b.id}`}
-                className="group block rounded-2xl bg-card shadow-md hover:shadow-xl transition-all duration-500 w-[320px]"
+                className="group block rounded-2xl bg-card shadow-md hover:shadow-xl transition-all duration-500 w-[280px] md:w-[320px]"
               >
-                <div className="flex items-center gap-4 p-6">
-                  <div className="w-20 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow duration-300">
+                <div className="flex items-center gap-3 md:gap-4 p-4 md:p-6">
+                  <div className="w-16 h-20 md:w-20 md:h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                     <img
                       src={coverSrc(b)}
                       alt={b.title}
