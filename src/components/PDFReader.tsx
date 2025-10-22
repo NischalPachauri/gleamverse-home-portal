@@ -184,20 +184,41 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   const toggleFullscreen = () => {
     if (!isFullscreen) {
       containerRef.current?.requestFullscreen();
-      setIsFullscreen(true);
     } else {
       document.exitFullscreen();
-      setIsFullscreen(false);
     }
   };
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isFullscreenNow = !!document.fullscreenElement;
+      setIsFullscreen(isFullscreenNow);
+      
+      // Show/hide controls based on fullscreen state
+      const controls = document.querySelector('.pdf-controls');
+      if (controls) {
+        (controls as HTMLElement).style.display = isFullscreenNow ? 'none' : 'flex';
+      }
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
+
+  // Arrow key navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goToPrevPage();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        goToNextPage();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [pageNumber, numPages, twoPageMode]);
 
   // Cleanup audio when component unmounts
   useEffect(() => {
@@ -282,7 +303,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
 
       const audio = new Audio();
       audio.loop = true;
-      audio.volume = 0.3; // Set volume to 30% for background music
+      audio.volume = 0.6; // Set volume to 60% for background music
       audio.preload = 'auto';
       audio.crossOrigin = 'anonymous';
       
@@ -363,7 +384,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
 
       const audio = new Audio();
       audio.loop = true;
-      audio.volume = 0.3;
+      audio.volume = 0.6;
       audio.preload = 'auto';
       audio.crossOrigin = 'anonymous';
       
@@ -469,9 +490,9 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   }
 
   return (
-    <div ref={containerRef} className="flex flex-col h-full bg-background">
+    <div ref={containerRef} className={`flex flex-col bg-background ${isFullscreen ? 'h-screen' : 'h-full'}`}>
       {/* Controls */}
-      <div className="sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center justify-between gap-4 flex-wrap shadow-lg">
+      <div className="pdf-controls sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center justify-between gap-4 flex-wrap shadow-lg">
         <div className="flex items-center gap-2">
           <Button
             onClick={goToPrevPage}
@@ -492,6 +513,23 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
+          <div className="flex items-center gap-2 ml-4">
+            <span className="text-sm font-medium">Go to:</span>
+            <input
+              type="number"
+              min="1"
+              max={numPages}
+              value={pageNumber}
+              onChange={(e) => {
+                const page = parseInt(e.target.value);
+                if (page >= 1 && page <= numPages) {
+                  setPageNumber(page);
+                }
+              }}
+              className="w-16 px-2 py-1 text-sm border border-border rounded bg-background text-foreground"
+              placeholder="Page"
+            />
+          </div>
         </div>
 
         <div className="flex items-center gap-2 justify-center flex-1">
@@ -559,38 +597,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             </select>
           </div>
 
-          <Button 
-            onClick={async () => {
-              console.log('Testing audio file:', musicTracks[currentTrack].url);
-              const isAccessible = await testAudioFile(musicTracks[currentTrack].url);
-              toast.info(`Track ${currentTrack + 1} is ${isAccessible ? 'accessible' : 'not accessible'}`);
-              
-              if (isAccessible) {
-                // Try to actually play a short test
-                try {
-                  const testAudio = new Audio(musicTracks[currentTrack].url);
-                  testAudio.volume = 0.1; // Very low volume for test
-                  testAudio.currentTime = 0;
-                  
-                  await testAudio.play();
-                  setTimeout(() => {
-                    testAudio.pause();
-                    testAudio.remove();
-                    toast.success("Audio test successful - sound is working!");
-                  }, 1000);
-                } catch (error) {
-                  console.error('Audio test failed:', error);
-                  toast.error("Audio test failed - check browser audio settings");
-                }
-              }
-            }}
-            size="sm" 
-            variant="outline"
-            className="gap-2"
-          >
-            <Music className="w-4 h-4" />
-            Test
-          </Button>
 
           <Button onClick={handleDownload} size="sm" className="bg-primary hover:bg-primary/90 gap-2">
             <Download className="w-4 h-4" />
@@ -606,14 +612,17 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
 
       {/* PDF Viewer - supports Single/Two-page. Duplicate text fix: text layer disabled. */}
       <div 
-        className={`flex-1 overflow-auto p-2 transition-colors ${
+        className={`flex-1 overflow-auto transition-colors ${
           nightMode ? "bg-gray-900" : "bg-muted"
-        }`}
-        style={{ maxHeight: 'calc(100vh - 200px)' }}
+        } ${isFullscreen ? 'p-0' : 'p-2'}`}
+        style={{ 
+          maxHeight: isFullscreen ? '100vh' : 'calc(100vh - 200px)',
+          height: isFullscreen ? '100vh' : 'auto'
+        }}
       >
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>
-          <div>
+        <div className={`flex flex-col items-center ${isFullscreen ? 'gap-0 fullscreen-pdf' : 'gap-1'}`}>
+          {!isFullscreen && <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>}
+          <div className={isFullscreen ? 'fullscreen-pdf' : ''}>
             <Document
               file={pdfPath}
               onLoadSuccess={onDocumentLoadSuccess}
@@ -699,6 +708,28 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         .react-pdf__Page__canvas {
           max-height: 80vh !important;
           height: auto !important;
+        }
+        /* Fullscreen styles */
+        .fullscreen-pdf .pdf-page {
+          max-height: 100vh !important;
+          height: 100vh !important;
+        }
+        .fullscreen-pdf .pdf-page canvas {
+          max-height: 100vh !important;
+          height: 100vh !important;
+          object-fit: contain;
+        }
+        .fullscreen-pdf .react-pdf__Page {
+          max-height: 100vh !important;
+          height: 100vh !important;
+        }
+        .fullscreen-pdf .react-pdf__Page__canvas {
+          max-height: 100vh !important;
+          height: 100vh !important;
+        }
+        .fullscreen-pdf .two-page-spread {
+          height: 100vh;
+          align-items: center;
         }
       `}} />
     </div>

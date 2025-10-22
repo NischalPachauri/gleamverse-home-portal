@@ -1,523 +1,621 @@
 [
   {
     "id": "TC001",
-    "title": "User Registration with Valid Data",
-    "description": "Verify that a new user can successfully register with valid email, password, and name.",
+    "title": "User Registration Success",
+    "description": "Verify that a new user can register successfully with valid email, password, and name, and receive confirmation.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the registration page."
+        "description": "Navigate to registration page"
       },
       {
         "type": "action",
-        "description": "Input a valid email address, password, and name."
+        "description": "Enter valid email, password, and name"
       },
       {
         "type": "action",
-        "description": "Submit the registration form."
+        "description": "Submit registration form"
       },
       {
         "type": "assertion",
-        "description": "Verify that registration is successful and user is redirected to the profile or homepage."
+        "description": "Registration completes successfully with confirmation message"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user profile is created and data persisted"
       }
     ]
   },
   {
     "id": "TC002",
-    "title": "User Registration with Invalid Email",
-    "description": "Verify the registration fails with an invalid email address format.",
+    "title": "User Registration Failure for Missing Fields",
+    "description": "Verify registration fails if required fields (email, password, or name) are missing.",
     "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the registration page."
+        "description": "Navigate to registration page"
       },
       {
         "type": "action",
-        "description": "Input an invalid email format, valid password, and name."
-      },
-      {
-        "type": "action",
-        "description": "Submit the registration form."
+        "description": "Submit empty registration form"
       },
       {
         "type": "assertion",
-        "description": "Verify that an appropriate error message is shown and registration is blocked."
+        "description": "Display error messages requiring all mandatory fields"
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "User Login with Correct Credentials",
-    "description": "Check that a registered user can login successfully with correct email and password.",
+    "title": "User Login Success",
+    "description": "Verify user can login successfully with valid email and password.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the login page."
+        "description": "Navigate to login page"
       },
       {
         "type": "action",
-        "description": "Enter valid registered email and correct password."
+        "description": "Enter valid registered email and correct password"
       },
       {
         "type": "action",
-        "description": "Click the login button."
+        "description": "Click login button"
       },
       {
         "type": "assertion",
-        "description": "Verify successful login and redirection to the user's dashboard or homepage."
+        "description": "User is logged in and redirected to dashboard"
       }
     ]
   },
   {
     "id": "TC004",
-    "title": "User Login with Incorrect Credentials",
-    "description": "Verify login failure when incorrect password is provided with registered email.",
+    "title": "User Login Failure with Incorrect Password",
+    "description": "Verify login fails with an incorrect password and appropriate error message is shown.",
     "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the login page."
+        "description": "Navigate to login page"
       },
       {
         "type": "action",
-        "description": "Enter registered email and incorrect password."
+        "description": "Enter registered email and incorrect password"
       },
       {
         "type": "action",
-        "description": "Click the login button."
+        "description": "Click login button"
       },
       {
         "type": "assertion",
-        "description": "Verify that login fails and appropriate error message is displayed without redirection."
+        "description": "Login fails and error message about invalid credentials is displayed"
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "Search Books by Title",
-    "description": "Verify search functionality returns correct results when searching by book title.",
+    "title": "Book Search by Title",
+    "description": "Verify that searching by book title returns relevant results matching the query.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the home or browse page."
+        "description": "Navigate to the main page"
       },
       {
         "type": "action",
-        "description": "Enter a valid book title in the search bar and submit."
+        "description": "Enter book title keyword into search bar"
+      },
+      {
+        "type": "action",
+        "description": "Execute search"
       },
       {
         "type": "assertion",
-        "description": "Verify that search results contain books matching the title queried."
+        "description": "Search results display books with matching or similar titles"
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "Search Books by Author",
-    "description": "Verify that searching by author returns appropriate books by that author.",
+    "title": "Book Search with Category Filter",
+    "description": "Verify searching books by title combined with category filter returns filtered and relevant results.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the search page."
+        "description": "Enter book title keyword in search bar"
       },
       {
         "type": "action",
-        "description": "Enter an author's name in the search bar and initiate search."
+        "description": "Select a specific book category filter"
+      },
+      {
+        "type": "action",
+        "description": "Execute search"
       },
       {
         "type": "assertion",
-        "description": "Verify that listed books include those authored by the searched author."
+        "description": "Results are limited to books within the selected category matching the query"
       }
     ]
   },
   {
     "id": "TC007",
-    "title": "Search Books by Category Filter",
-    "description": "Verify that selecting a category filter returns books only within the chosen category.",
-    "category": "functional",
-    "priority": "High",
+    "title": "Book Search Returns Empty for No Matches",
+    "description": "Verify search returns empty results or appropriate message when no books match the query.",
+    "category": "error handling",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the browse page."
+        "description": "Enter a random string or nonsense keyword into search bar"
       },
       {
         "type": "action",
-        "description": "Select a specific book category filter."
+        "description": "Execute search"
       },
       {
         "type": "assertion",
-        "description": "Verify that the books shown belong only to the selected category."
+        "description": "Display message indicating no results found"
       }
     ]
   },
   {
     "id": "TC008",
-    "title": "Random Book Suggestion Button",
-    "description": "Verify that clicking the randomize button suggests different books randomly each time.",
+    "title": "Open Book in PDF Reader",
+    "description": "Verify selecting a book opens the PDF reader with correct book content loaded.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to home or browse page."
+        "description": "Select a book from search results or library"
       },
       {
         "type": "action",
-        "description": "Click the random book suggestion button multiple times."
+        "description": "Open book for reading"
       },
       {
         "type": "assertion",
-        "description": "Verify that each click refreshes the suggested book with different selections."
+        "description": "PDF Reader interface loads with the selected book displayed"
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Top Books Carousel Functionality",
-    "description": "Verify that the top books carousel loops smoothly showing trending books with author info.",
-    "category": "ui",
-    "priority": "Medium",
+    "title": "Reading Modes Switch",
+    "description": "Validate user can toggle between single page, two-page, and full-screen reading modes.",
+    "category": "functional",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the homepage containing the top books carousel."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify carousel displays trending books with correct author info."
+        "description": "Open book in PDF reader"
       },
       {
         "type": "action",
-        "description": "Observe carousel for several loops to ensure infinite looping behavior."
+        "description": "Switch to two-page mode"
       },
       {
         "type": "assertion",
-        "description": "Verify no glitches or stops occur during carousel rotation."
+        "description": "Display shows two pages side by side"
+      },
+      {
+        "type": "action",
+        "description": "Switch to full-screen mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Reader enters full-screen with continuous view"
+      },
+      {
+        "type": "action",
+        "description": "Switch back to single page mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Display shows single page as default"
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "Open PDF Reader for a Book",
-    "description": "Verify the PDF reader opens successfully when a user selects a book to read.",
+    "title": "Page Navigation and Zoom Controls",
+    "description": "Ensure user can navigate pages forward and backward and control zoom level effectively.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Select a book from search results or library."
+        "description": "Open book in PDF reader"
       },
       {
         "type": "action",
-        "description": "Open the book to access the PDF reader."
+        "description": "Use page navigation controls to go to next page"
       },
       {
         "type": "assertion",
-        "description": "Verify the PDF reader interface loads with the book content displayed."
+        "description": "Page updates to next page"
+      },
+      {
+        "type": "action",
+        "description": "Use zoom control to zoom in the page"
+      },
+      {
+        "type": "assertion",
+        "description": "Page zooms in appropriately without distortion"
+      },
+      {
+        "type": "action",
+        "description": "Use zoom control to zoom out"
+      },
+      {
+        "type": "assertion",
+        "description": "Page zooms out appropriately"
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "PDF Reader Single Page Mode",
-    "description": "Verify that the PDF reader displays book pages correctly in single page mode.",
-    "category": "functional",
-    "priority": "High",
+    "title": "Page Curl Animation and 3D CSS Effects",
+    "description": "Verify the page-curl animation and 3D CSS effects activate properly during page turns and mode changes.",
+    "category": "ui",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Open a book in PDF reader."
+        "description": "Open book in PDF reader"
       },
       {
         "type": "action",
-        "description": "Switch or ensure reader is in single page mode."
+        "description": "Navigate page forward while observing page curling animation"
       },
       {
         "type": "assertion",
-        "description": "Verify only one page is visible at a time and page navigation works."
+        "description": "Page curl animation plays smoothly with no visual glitches"
+      },
+      {
+        "type": "action",
+        "description": "Toggle reading modes to trigger 3D CSS effects"
+      },
+      {
+        "type": "assertion",
+        "description": "3D visual effects render correctly and enhance user experience"
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "PDF Reader Two-Page Mode",
-    "description": "Confirm that two-page view mode correctly displays two pages side by side.",
+    "title": "Text-to-Speech Functionality",
+    "description": "Verify the text-to-speech feature correctly reads aloud the book content and can be paused, resumed, and stopped.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Open a book in PDF reader."
+        "description": "Open a book in the PDF reader"
       },
       {
         "type": "action",
-        "description": "Enable two-page mode."
+        "description": "Activate text-to-speech control"
       },
       {
         "type": "assertion",
-        "description": "Verify two consecutive pages are displayed side by side with correct navigation."
+        "description": "Book content is read aloud accurately"
+      },
+      {
+        "type": "action",
+        "description": "Pause text-to-speech"
+      },
+      {
+        "type": "assertion",
+        "description": "Reading audio pauses immediately"
+      },
+      {
+        "type": "action",
+        "description": "Resume text-to-speech"
+      },
+      {
+        "type": "assertion",
+        "description": "Reading audio resumes from the paused position"
+      },
+      {
+        "type": "action",
+        "description": "Stop text-to-speech"
+      },
+      {
+        "type": "assertion",
+        "description": "Reading audio stops completely"
       }
     ]
   },
   {
     "id": "TC013",
-    "title": "PDF Reader Zoom Controls",
-    "description": "Verify zoom in and zoom out controls function properly adjusting page size without distortion.",
+    "title": "Reading Progress and Bookmark Saving",
+    "description": "Verify reading progress and bookmarks are saved automatically and persist across sessions.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Open a book in PDF reader."
+        "description": "Open a book and navigate to a specific page"
       },
       {
         "type": "action",
-        "description": "Use zoom in control and observe page scaling."
+        "description": "Add a bookmark on the current page"
       },
       {
         "type": "assertion",
-        "description": "Verify page zooms in smoothly maintaining readability."
+        "description": "Bookmark appears in user's personal library dashboard"
       },
       {
         "type": "action",
-        "description": "Use zoom out control and verify proper page scaling back."
+        "description": "Close and reopen the web application, then log in"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to personal library dashboard"
       },
       {
         "type": "assertion",
-        "description": "Verify zoom out does not degrade page content visibility."
+        "description": "Previously saved reading progress and bookmarks are correctly restored"
       }
     ]
   },
   {
     "id": "TC014",
-    "title": "PDF Reader Fullscreen Toggle",
-    "description": "Verify fullscreen mode toggling works correctly within the PDF reader interface.",
-    "category": "ui",
+    "title": "Manage Personal Reading Status Shelves",
+    "description": "Verify user can categorize books into Plan to Read, Reading, On Hold, and Completed shelves, and changes persist.",
+    "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Open book in PDF reader."
-      },
-      {
-        "type": "action",
-        "description": "Activate fullscreen toggle."
+        "description": "In personal library, select a book and assign it to 'Plan to Read'"
       },
       {
         "type": "assertion",
-        "description": "Verify reader switches to fullscreen mode with interface controls still accessible."
+        "description": "Book appears in 'Plan to Read' shelf"
       },
       {
         "type": "action",
-        "description": "Deactivate fullscreen toggle."
+        "description": "Change book status to 'Reading'"
       },
       {
         "type": "assertion",
-        "description": "Verify reader returns to normal view without issues."
+        "description": "Book moves to 'Reading' shelf"
+      },
+      {
+        "type": "action",
+        "description": "Change book status to 'On Hold'"
+      },
+      {
+        "type": "assertion",
+        "description": "Book moves to 'On Hold' shelf"
+      },
+      {
+        "type": "action",
+        "description": "Change book status to 'Completed'"
+      },
+      {
+        "type": "assertion",
+        "description": "Book moves to 'Completed' shelf"
       }
     ]
   },
   {
     "id": "TC015",
-    "title": "Bookmark a Book and Verify in Personal Library",
-    "description": "Test bookmarking a book and confirm it appears in the user's personal library dashboard.",
+    "title": "User Book Upload Success",
+    "description": "Verify users can upload new books successfully and the books appear in the library for discovery.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login as a registered user."
+        "description": "Navigate to book upload interface"
       },
       {
         "type": "action",
-        "description": "Search for a book and bookmark it."
+        "description": "Fill in required book metadata fields and upload book file"
       },
       {
         "type": "action",
-        "description": "Navigate to the personal library dashboard."
+        "description": "Submit book upload form"
       },
       {
         "type": "assertion",
-        "description": "Verify the bookmarked book is listed with correct title and author."
+        "description": "Upload completes without errors and confirmation message is shown"
+      },
+      {
+        "type": "action",
+        "description": "Search or browse library for the uploaded book"
+      },
+      {
+        "type": "assertion",
+        "description": "Uploaded book is available and visible in search results"
       }
     ]
   },
   {
     "id": "TC016",
-    "title": "Update Book Reading Status",
-    "description": "Verify user can update reading status to Planning to Read, Reading, On Hold, and Completed and status persists correctly.",
+    "title": "Book Management: Update and Delete Operations",
+    "description": "Verify users can edit and delete their uploaded books and changes propagate accurately.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Login and bookmark a book."
+        "description": "Navigate to user's uploaded book listing"
       },
       {
         "type": "action",
-        "description": "Change the book's status to each available status option one by one."
+        "description": "Edit book details (e.g., title or description) and save changes"
       },
       {
         "type": "assertion",
-        "description": "After each update, verify the status is reflected correctly in the personal library."
+        "description": "Book details update successfully and changes reflect in the library"
+      },
+      {
+        "type": "action",
+        "description": "Delete the uploaded book"
+      },
+      {
+        "type": "assertion",
+        "description": "Book is removed from user's uploads and library listings"
       }
     ]
   },
   {
     "id": "TC017",
-    "title": "Automatic Saving of Last Read Page",
-    "description": "Verify the system saves the last read page automatically and restores it on next book visit.",
+    "title": "Theme Toggle and Persistence",
+    "description": "Verify toggling between light and dark themes updates the UI immediately and persists after page reload.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Open a book in PDF reader."
-      },
-      {
-        "type": "action",
-        "description": "Navigate to page 10 or any non-first page."
-      },
-      {
-        "type": "action",
-        "description": "Close the reader and reopen the same book."
+        "description": "Toggle theme switch to dark mode"
       },
       {
         "type": "assertion",
-        "description": "Verify the reader opens to the previously read page (page 10)."
+        "description": "UI updates immediately to dark theme"
+      },
+      {
+        "type": "action",
+        "description": "Reload the page"
+      },
+      {
+        "type": "assertion",
+        "description": "Dark theme persists after reload"
+      },
+      {
+        "type": "action",
+        "description": "Toggle theme switch to light mode"
+      },
+      {
+        "type": "assertion",
+        "description": "UI updates immediately to light theme"
+      },
+      {
+        "type": "action",
+        "description": "Reload the page"
+      },
+      {
+        "type": "assertion",
+        "description": "Light theme persists after reload"
       }
     ]
   },
   {
     "id": "TC018",
-    "title": "Dark/Light Theme Toggle Persistence",
-    "description": "Verify that toggling between dark and light themes saves user preference and persists across sessions.",
+    "title": "Background Music Playback and Track Selection",
+    "description": "Verify that background music can be played, paused, stopped, and user can select different tracks without disrupting reading experience.",
     "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Toggle the theme to dark mode."
+        "description": "Open a book in the reader interface"
       },
       {
         "type": "action",
-        "description": "Refresh or reopen the website in a new session."
+        "description": "Start background music playback"
       },
       {
         "type": "assertion",
-        "description": "Verify the site loads with dark theme as per last user preference."
+        "description": "Music plays in the background with controllable volume"
       },
       {
         "type": "action",
-        "description": "Toggle back to light mode and repeat verification for persistence."
+        "description": "Pause the music"
+      },
+      {
+        "type": "assertion",
+        "description": "Music playback pauses immediately"
+      },
+      {
+        "type": "action",
+        "description": "Select a different music track"
+      },
+      {
+        "type": "assertion",
+        "description": "New track starts playing without errors"
+      },
+      {
+        "type": "action",
+        "description": "Stop the music entirely"
+      },
+      {
+        "type": "assertion",
+        "description": "Music playback stops completely"
       }
     ]
   },
   {
     "id": "TC019",
-    "title": "Text-to-Speech Audio Playback",
-    "description": "Verify the text-to-speech feature reads the book content aloud without errors and supports pausing and resuming.",
-    "category": "functional",
+    "title": "Graceful Error Page Display on Network Failure",
+    "description": "Verify that when the network connection is lost or API endpoints fail, graceful fallback error pages are presented without crashing the app.",
+    "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Open a book in the PDF reader."
-      },
-      {
-        "type": "action",
-        "description": "Activate the text-to-speech feature."
+        "description": "Simulate network failure or API failure during book search"
       },
       {
         "type": "assertion",
-        "description": "Verify that the book content is read aloud correctly."
+        "description": "Display graceful fallback error page with instructions to retry or check connection"
       },
       {
         "type": "action",
-        "description": "Pause and resume audio playback."
+        "description": "Simulate network failure during book reading"
       },
       {
         "type": "assertion",
-        "description": "Verify audio pauses and resumes smoothly without glitches."
+        "description": "Display fallback UI components and error message without app crash"
       }
     ]
   },
   {
     "id": "TC020",
-    "title": "UI Animations and Effects Smoothness",
-    "description": "Verify page-curling animation, 3D cover effects, magnification, and hover interactions work smoothly on supported devices.",
-    "category": "ui",
-    "priority": "Medium",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Navigate through book pages and observe page-curling animations."
-      },
-      {
-        "type": "assertion",
-        "description": "Animations run smoothly without lag or stutter."
-      },
-      {
-        "type": "action",
-        "description": "Hover over 3D book covers and verify 3D effects activate correctly."
-      },
-      {
-        "type": "assertion",
-        "description": "Magnification and hover interactions respond instantly and correctly."
-      }
-    ]
-  },
-  {
-    "id": "TC021",
-    "title": "Error Handling for 404 Pages",
-    "description": "Verify user-friendly 404 page is displayed when a non-existent API or book resource is accessed.",
-    "category": "error handling",
+    "title": "Performance Benchmarks for Page Load and Search",
+    "description": "Verify page load times and book search response times meet defined performance criteria under normal and high load.",
+    "category": "performance",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Manually request a non-existing book or invalid endpoint."
+        "description": "Load the home page and measure load time"
       },
       {
         "type": "assertion",
-        "description": "Verify that a user-friendly 404 error page is shown."
+        "description": "Page load completes within acceptable threshold (e.g., under 2 seconds)"
       },
-      {
-        "type": "assertion",
-        "description": "Verify the application does not crash and navigation is possible."
-      }
-    ]
-  },
-  {
-    "id": "TC022",
-    "title": "Graceful Fallback on Connection Loss",
-    "description": "Verify the application handles network connection loss gracefully without crashing, showing appropriate UI messages.",
-    "category": "error handling",
-    "priority": "High",
-    "steps": [
       {
         "type": "action",
-        "description": "Simulate network disconnection while using the app."
+        "description": "Perform a book search with a common query"
       },
       {
         "type": "assertion",
-        "description": "Verify that an error message or fallback UI appears notifying the user about connection issues."
+        "description": "Search results display within acceptable threshold (e.g., under 1 second)"
+      },
+      {
+        "type": "action",
+        "description": "Simulate high load via concurrent users performing searches and reading"
       },
       {
         "type": "assertion",
-        "description": "Verify ongoing session data is preserved and user can retry operations."
+        "description": "System maintains responsive UI and search results within defined SLA"
       }
     ]
   }

@@ -89,7 +89,7 @@ export const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-muted-foreground group">
                 <Mail className="w-5 h-5 text-primary mt-0.5 group-hover:scale-110 transition-transform" />
-                <span>info@publiclibrary.org</span>
+                <span>nischalpachauriofficial@gmail.com</span>
               </li>
               <li className="flex items-start gap-3 text-muted-foreground group">
                 <Phone className="w-5 h-5 text-primary mt-0.5 group-hover:scale-110 transition-transform" />
@@ -106,7 +106,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 text-center">
           <p className="text-muted-foreground">
-            © 2024 Public Library. All rights reserved.
+            © 2025 Public Library. All rights reserved.
           </p>
           <p className="text-primary font-semibold mt-2">Where Learning Never Stops</p>
         </div>

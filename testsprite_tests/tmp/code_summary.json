@@ -9,7 +9,9 @@
     "React PDF",
     "Lucide React",
     "Sonner",
-    "Radix UI"
+    "Radix UI",
+    "Express",
+    "Node.js"
   ],
   "features": [
     {
@@ -97,8 +99,7 @@
       "description": "User login and registration with fallback local authentication",
       "files": [
         "src/pages/Login.tsx",
-        "src/pages/Register.tsx",
-        "src/integrations/supabase/client.ts"
+        "src/pages/Register.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
@@ -111,6 +112,7 @@
             "post": {
               "summary": "User login",
               "requestBody": {
+                "required": true,
                 "content": {
                   "application/json": {
                     "schema": {
@@ -134,6 +136,7 @@
             "post": {
               "summary": "User registration",
               "requestBody": {
+                "required": true,
                 "content": {
                   "application/json": {
                     "schema": {
@@ -158,50 +161,43 @@
       }
     },
     {
-      "name": "Book Status Management",
-      "description": "Manage book reading status (Planning to read, Reading, On hold, Completed)",
+      "name": "Book Management",
+      "description": "Manage books with CRUD operations and status tracking",
       "files": [
-        "src/components/BookCard.tsx",
-        "src/pages/Bookmarks.tsx"
+        "src/pages/BookDetail.tsx",
+        "src/components/BookCard.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
-          "title": "Book Status API",
+          "title": "Book Management API",
           "version": "1.0.0"
         },
         "paths": {
-          "/book/{bookId}/status": {
-            "put": {
-              "summary": "Update book status",
-              "parameters": [
-                {
-                  "name": "bookId",
-                  "in": "path",
-                  "required": true,
-                  "schema": {
-                    "type": "string"
-                  }
-                }
-              ],
-              "requestBody": {
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string",
-                          "enum": ["Planning to read", "Reading", "On hold", "Completed"]
-                        }
-                      }
-                    }
-                  }
-                }
-              },
+          "/api/books": {
+            "get": {
+              "summary": "Get all books",
               "responses": {
                 "200": {
-                  "description": "Status updated successfully"
+                  "description": "List of books"
+                }
+              }
+            }
+          },
+          "/api/books/{id}": {
+            "get": {
+              "summary": "Get book by ID",
+              "parameters": [
+                {
+                  "name": "id",
+                  "in": "path",
+                  "required": true,
+                  "schema": {"type": "string"}
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Book details"
                 }
               }
             }
@@ -210,24 +206,24 @@
       }
     },
     {
-      "name": "Top Books Carousel",
-      "description": "Display rotating carousel of top books with infinite loop",
+      "name": "Personal Library",
+      "description": "User's personal library with bookmarks and reading progress",
       "files": [
-        "src/components/TopBooks.tsx"
+        "src/pages/Bookmarks.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
-          "title": "Top Books API",
+          "title": "Personal Library API",
           "version": "1.0.0"
         },
         "paths": {
-          "/top-books": {
+          "/api/user-library": {
             "get": {
-              "summary": "Get top books for carousel",
+              "summary": "Get user's library",
               "responses": {
                 "200": {
-                  "description": "List of top books"
+                  "description": "User's library"
                 }
               }
             }
@@ -239,8 +235,7 @@
       "name": "Theme Management",
       "description": "Dark/light theme toggle with persistence",
       "files": [
-        "src/contexts/ThemeContext.tsx",
-        "src/pages/Index.tsx"
+        "src/contexts/ThemeContext.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
@@ -249,12 +244,46 @@
           "version": "1.0.0"
         },
         "paths": {
-          "/theme": {
+          "/api/theme": {
             "post": {
               "summary": "Toggle theme",
               "responses": {
                 "200": {
                   "description": "Theme toggled successfully"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Music Player",
+      "description": "Background music player with multiple tracks",
+      "files": [
+        "src/components/PDFReader.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Music Player API",
+          "version": "1.0.0"
+        },
+        "paths": {
+          "/music/{track}": {
+            "get": {
+              "summary": "Get music track",
+              "parameters": [
+                {
+                  "name": "track",
+                  "in": "path",
+                  "required": true,
+                  "schema": {"type": "string"}
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Music track file"
                 }
               }
             }

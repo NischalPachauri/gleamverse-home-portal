@@ -73,8 +73,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Theme Toggle, Login and Bookmarks */}
-      <div className="fixed top-4 right-4 z-50 flex gap-2">
+      {/* Theme Toggle, Login and Bookmarks - Hidden on mobile and tablet */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2 hidden lg:flex">
         <Button
           onClick={() => navigate('/login')}
           variant="outline"
@@ -115,10 +115,10 @@ const Index = () => {
           >
             <Sparkles className="w-10 h-10 text-white" />
           </Button>
-          <h1 className="text-5xl md:text-7xl font-bold mb-4 text-white dark:text-white animate-fade-in [animation-delay:100ms] drop-shadow-2xl">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 text-white dark:text-white animate-fade-in [animation-delay:100ms] drop-shadow-2xl">
             Public Library
           </h1>
-          <p className="text-2xl md:text-3xl font-semibold text-white dark:text-white/95 mb-2 animate-fade-in [animation-delay:200ms] drop-shadow-lg">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white dark:text-white/95 mb-2 animate-fade-in [animation-delay:200ms] drop-shadow-lg">
             Where Learning Never Stops
           </p>
           <p className="text-lg text-white/95 dark:text-white/90 max-w-2xl animate-fade-in [animation-delay:300ms] drop-shadow-md">

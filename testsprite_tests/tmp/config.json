@@ -1,16 +1,17 @@
 {
   "status": "commited",
-  "type": "frontend",
+  "type": "backend",
   "scope": "codebase",
   "localEndpoint": "http://localhost:8080",
+  "backendAuthType": "public",
   "executionArgs": {
     "projectName": "read-gleam-verse",
-    "projectPath": "C:\\Users\\nisch\\OneDrive\\Documents\\read-gleam-verse",
+    "projectPath": "C:\\Users\\nisch\\Documents\\GitHub\\read-gleam-verse",
     "testIds": [],
-    "additionalInstruction": "Test all functionality including footer navigation links, authentication system, book search, PDF reader, theme management, and API endpoints. Verify that all backend API endpoints are working correctly and returning proper JSON responses. Test the complete user journey from login to reading books.",
+    "additionalInstruction": "Test all the new features we implemented: fullscreen PDF reader with entire screen coverage, manual page navigation, arrow key navigation, increased audio volume, responsive design with hidden buttons on mobile/tablet, updated contact email, and copyright year. Verify that the PDF reader works correctly in fullscreen mode and covers the entire screen. Test the manual page navigation input field and arrow key functionality. Verify that the audio volume is increased and the responsive design changes work properly on different screen sizes.",
     "envs": {
       "API_KEY": "sk-user-rXhrsr7ogez4HE7QQ8ul6B7jZHS0KZDtpKrycr1_ltyTIuYYsCIfpwj4BSW4YgibfEq7EI0aQrgrbi8b_l1Der3LatfoxMpDTxaiHDe7NwmxJHW4WUkdkXcck81QyXIdpEY"
     }
   },
-  "proxy": "http://55673e6e-b019-419f-9ced-e8f60d73bad3:NNXdeQdcINmWCgB5xmwCfXy7yn5x4rLK@tun.testsprite.com:8080"
+  "proxy": "http://585bec06-8428-425c-a26e-9f961d8f0ec5:tLt6WmKqEYKJEmr8PB0s4fGXDIQ5t4TG@tun.testsprite.com:8080"
 }
