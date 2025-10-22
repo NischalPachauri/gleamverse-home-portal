@@ -30,9 +30,12 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const { ref: categoriesRef, isVisible } = useScrollReveal({ threshold: 0.2 });
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
   
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  const BOOKS_PER_PAGE = 16;
 
   // Fade controls on scroll for mobile/tablet
   useEffect(() => {
@@ -46,14 +49,14 @@ const Index = () => {
   }, []);
 
   const categoryData = [
-    { name: "Fiction", icon: Book },
-    { name: "Non-Fiction", icon: Globe },
-    { name: "Science", icon: FlaskConical },
-    { name: "History", icon: Landmark },
+    { name: "Fantasy", icon: Sparkles },
+    { name: "Romance", icon: Book },
     { name: "Biography", icon: User },
-    { name: "Technology", icon: Laptop },
-    { name: "Art & Design", icon: Palette },
+    { name: "Fiction", icon: Globe },
+    { name: "Mystery", icon: FlaskConical },
+    { name: "Philosophy", icon: Landmark },
     { name: "Children's", icon: Baby },
+    { name: "Non-Fiction", icon: Laptop },
   ];
 
   const categories = useMemo(() => {
@@ -63,16 +66,45 @@ const Index = () => {
   
   try {
 
-  const filteredBooks = books.filter((book) => {
-    const matchesSearch =
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = selectedCategory === "All" || book.genre === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const filteredBooks = useMemo(() => {
+    return books.filter((book) => {
+      const matchesSearch =
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.description.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesCategory = selectedCategory === "All" || book.genre === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchQuery, selectedCategory]);
+
+  // Paginated books for browsing section
+  const paginatedBooks = useMemo(() => {
+    const startIndex = currentPage * BOOKS_PER_PAGE;
+    return filteredBooks.slice(startIndex, startIndex + BOOKS_PER_PAGE);
+  }, [filteredBooks, currentPage]);
+
+  const totalPages = Math.ceil(filteredBooks.length / BOOKS_PER_PAGE);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(prev => prev + 1);
+      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchQuery, selectedCategory]);
 
   const getRandomBook = () => {
     const randomBook = books[Math.floor(Math.random() * books.length)];
@@ -168,21 +200,73 @@ const Index = () => {
 
       {/* Books Grid - Browse Collection (moved above categories and library) */}
       <main id="browse" className="container mx-auto px-4 pb-16">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-foreground mb-2">
-            {searchQuery ? "Search Results" : "Browse Collection"}
-          </h2>
-          <p className="text-muted-foreground">
-            {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"} available
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-2">
+              {searchQuery ? "Search Results" : "Browse Collection"}
+            </h2>
+            <p className="text-muted-foreground">
+              Showing {paginatedBooks.length} of {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"}
+              {totalPages > 1 && ` (Page ${currentPage + 1} of ${totalPages})`}
+            </p>
+          </div>
         </div>
 
         {filteredBooks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {filteredBooks.map((book) => (
-              <BookCard key={book.id} book={book} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {paginatedBooks.map((book) => (
+                <BookCard key={book.id} book={book} />
+              ))}
+            </div>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-12">
+                <Button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 0}
+                  size="lg"
+                  variant="outline"
+                  className="group"
+                >
+                  <svg 
+                    className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Previous
+                </Button>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                </div>
+                
+                <Button
+                  onClick={handleNextPage}
+                  disabled={currentPage >= totalPages - 1}
+                  size="lg"
+                  variant="outline"
+                  className="group"
+                >
+                  Next
+                  <svg 
+                    className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-16">
             <p className="text-xl text-muted-foreground">
