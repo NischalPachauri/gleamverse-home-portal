@@ -16,7 +16,7 @@ export const Footer = () => {
               About Us
             </h3>
             <p className="text-muted-foreground leading-relaxed">
-              Public Library is a digital public library offering free access to thousands of books across all genres. Our mission is to make knowledge accessible to everyone.
+              GleamVerse is a digital library offering free access to thousands of books across all genres. Our mission is to make knowledge accessible to everyone.
             </p>
             <div className="flex gap-3 pt-4">
               <a href="#" className="p-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110">
@@ -106,7 +106,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-border mt-12 pt-8 text-center">
           <p className="text-muted-foreground">
-            © 2025 Public Library. All rights reserved.
+            © 2025 GleamVerse. All rights reserved.
           </p>
           <p className="text-primary font-semibold mt-2">Where Learning Never Stops</p>
         </div>

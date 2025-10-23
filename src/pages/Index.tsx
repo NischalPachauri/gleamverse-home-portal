@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import libraryBg from "@/assets/library-background.jpg";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,12 +28,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import libraryBg from "@/assets/library-background.jpg";
 
 // Fallback component in case of errors
 const IndexFallback = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
     <div className="text-center">
-      <h1 className="text-4xl font-bold mb-4">Public Library</h1>
+      <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_12px_35px_rgba(99,102,241,0.45)]">GleamVerse</h1>
       <p className="text-lg text-muted-foreground">Loading...</p>
     </div>
   </div>
@@ -277,14 +277,17 @@ const Index = () => {
 
       {/* Hero Section with Library Background */}
       <header className="relative h-[500px] overflow-hidden">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${libraryBg})` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/60 to-background"></div>
+        <div className="absolute inset-0">
+          <img
+            src={libraryBg}
+            alt="Library shelves background"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
         </div>
-        
+        <div className="absolute inset-0 bg-gradient-to-b from-[#5b21b6]/40 via-[#4338ca]/35 to-[#1e1b4b]/60"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10"></div>
+
         <div className="relative h-full container mx-auto px-4 flex flex-col items-center justify-center text-center">
           <Button
             onClick={getRandomBook}
@@ -293,13 +296,26 @@ const Index = () => {
           >
             <Sparkles className="w-10 h-10 text-white" />
           </Button>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 text-white dark:text-white animate-fade-in [animation-delay:100ms] drop-shadow-2xl">
-            Public Library
+          <h1
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 animate-fade-in [animation-delay:100ms] relative inline-block"
+            style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.5)" }}
+          >
+            <span className="relative z-10 whitespace-nowrap animate-pulse-slow">
+              <span className="bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#4338ca] bg-clip-text text-transparent drop-shadow-[0_12px_35px_rgba(99,102,241,0.45)]">Gleam</span>
+              <span className="bg-gradient-to-r from-[#4338ca] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_12px_35px_rgba(59,130,246,0.45)]">Verse</span>
+            </span>
+            <div className="pointer-events-none absolute -inset-3 bg-gradient-to-r from-[#8b5cf6]/35 via-[#4338ca]/20 to-[#0ea5e9]/30 rounded-[2.25rem] blur-[58px] opacity-60 animate-pulse"></div>
           </h1>
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white dark:text-white/95 mb-2 animate-fade-in [animation-delay:200ms] drop-shadow-lg">
+          <p
+            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-2 animate-fade-in [animation-delay:200ms]"
+            style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.5)" }}
+          >
             Where Learning Never Stops
           </p>
-          <p className="text-lg text-white/95 dark:text-white/90 max-w-2xl animate-fade-in [animation-delay:300ms] drop-shadow-md">
+          <p
+            className="text-lg text-slate-100 max-w-2xl animate-fade-in [animation-delay:300ms]"
+            style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.5)" }}
+          >
             Explore a vibrant collection with a calmer, modern gradient theme
           </p>
         </div>

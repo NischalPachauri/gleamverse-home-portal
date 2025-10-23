@@ -903,17 +903,6 @@ export const allBooks: Book[] = [
     "genre": "Fantasy"
   },
   {
-    "id": "harry-potter-and-the-cursed-child",
-    "title": "Harry Potter and the Cursed Child",
-    "author": "potter-8-cursed-child",
-    "description": "The next generation story follows Harry's son Albus as he struggles with his family legacy at Hogwarts.",
-    "coverImage": "placeholder",
-    "pdfPath": "/books/harry-potter-8-cursed-child.pdf",
-    "year": 1990,
-    "pages": "533",
-    "genre": "Fantasy"
-  },
-  {
     "id": "harunyahyageneralknowledgefronthequr-an2003libgenl",
     "title": "Harun_Yahya_General_Knowledge_fron_the_Qur an_2003_libgen_lc",
     "author": "Unknown Author",
