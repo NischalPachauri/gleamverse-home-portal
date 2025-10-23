@@ -4,6 +4,7 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { Footer } from "@/components/Footer";
 import { TopBooks } from "@/components/TopBooks";
 import { ReadingList } from "@/components/ReadingList";
+import { HeroSection } from "@/components/HeroSection";
 import { books } from "@/data/books";
 import { 
   Search, Sparkles, Book, Globe, FlaskConical, Landmark, Laptop, 
@@ -28,7 +29,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import libraryBg from "@/assets/library-background.jpg";
 
 // Fallback component in case of errors
 const IndexFallback = () => (
@@ -275,69 +275,12 @@ const Index = () => {
         initialMode={authModalMode}
       />
 
-      {/* Hero Section with Library Background */}
-      <header className="relative h-[500px] overflow-hidden">
-        <div className="absolute inset-0">
-          <img
-            src={libraryBg}
-            alt="Library shelves background"
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#5b21b6]/40 via-[#4338ca]/35 to-[#1e1b4b]/60"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10"></div>
-
-        <div className="relative h-full container mx-auto px-4 flex flex-col items-center justify-center text-center">
-          <Button
-            onClick={getRandomBook}
-            size="lg"
-            className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm mb-6 animate-fade-in hover:scale-110 transition-all duration-300 hover:bg-white/30"
-          >
-            <Sparkles className="w-10 h-10 text-white" />
-          </Button>
-          <h1
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold mb-4 animate-fade-in [animation-delay:100ms] relative inline-block"
-            style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.5)" }}
-          >
-            <span className="relative z-10 whitespace-nowrap animate-pulse-slow">
-              <span className="bg-gradient-to-r from-[#8b5cf6] via-[#6366f1] to-[#4338ca] bg-clip-text text-transparent drop-shadow-[0_12px_35px_rgba(99,102,241,0.45)]">Gleam</span>
-              <span className="bg-gradient-to-r from-[#4338ca] via-[#2563eb] to-[#0ea5e9] bg-clip-text text-transparent drop-shadow-[0_12px_35px_rgba(59,130,246,0.45)]">Verse</span>
-            </span>
-            <div className="pointer-events-none absolute -inset-3 bg-gradient-to-r from-[#8b5cf6]/35 via-[#4338ca]/20 to-[#0ea5e9]/30 rounded-[2.25rem] blur-[58px] opacity-60 animate-pulse"></div>
-          </h1>
-          <p
-            className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-white mb-2 animate-fade-in [animation-delay:200ms]"
-            style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.5)" }}
-          >
-            Where Learning Never Stops
-          </p>
-          <p
-            className="text-lg text-slate-100 max-w-2xl animate-fade-in [animation-delay:300ms]"
-            style={{ textShadow: "0px 1px 3px rgba(0,0,0,0.5)" }}
-          >
-            Explore a vibrant collection with a calmer, modern gradient theme
-          </p>
-        </div>
-      </header>
-
-      {/* Search Bar */}
-      <div id="search" className="container mx-auto px-4 -mt-10 relative z-10 mb-12">
-        <div className="max-w-3xl mx-auto">
-          <div className="relative mb-6">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search by title, author, or description..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-14 h-16 text-lg shadow-2xl border-0 bg-card rounded-2xl"
-            />
-          </div>
-          
-          {/* Category Filters removed per requirements */}
-        </div>
-      </div>
+      {/* New Hero Section with Gradient Background */}
+      <HeroSection 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onRandomBook={getRandomBook}
+      />
 
       {/* Top Books Carousel */}
       <div id="top-books">
