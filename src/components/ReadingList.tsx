@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { getBookCover } from "@/utils/bookCoverGenerator";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -113,9 +114,10 @@ export const ReadingList = () => {
             >
               <Link to={`/book/${book.id}`}>
                 <img
-                  src={coverImages[book.coverImage]}
+                  src={coverImages[book.coverImage] || getBookCover(book)}
                   alt={book.title}
                   className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg transition-transform duration-300"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src=getBookCover(book); }}
                 />
               </Link>
               {statusMap[book.id] && (

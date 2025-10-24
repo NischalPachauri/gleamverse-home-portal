@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
 import { useState, useEffect } from "react";
+import { getBookCover } from "@/utils/bookCoverGenerator";
 
 // Import Harry Potter covers
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -24,28 +25,19 @@ const harryPotterCovers: Record<string, string> = {
 };
 
 // Function to get cover image path
-const getCoverImage = (coverImage: string) => {
+const getCoverImage = (book: Book) => {
   // For Harry Potter covers, use the imported images
-  if (harryPotterCovers[coverImage]) {
-    return harryPotterCovers[coverImage];
+  if (harryPotterCovers[book.coverImage]) {
+    return harryPotterCovers[book.coverImage];
   }
   
-  // For placeholder covers, use the generated SVG files
-  if (coverImage === 'placeholder' || coverImage.startsWith('book-')) {
-    return `/src/assets/covers/${coverImage}.svg`;
-  }
-  
-  // For existing covers, try to import them
-  try {
-    return `/src/assets/covers/${coverImage}.jpg`;
-  } catch {
-    return '/src/assets/placeholder.svg';
-  }
+  // Generate beautiful covers for all other books
+  return getBookCover(book);
 };
 
-const isPlaceholderCover = (coverImage: string) => {
-  if (harryPotterCovers[coverImage]) return false;
-  return coverImage === 'placeholder' || coverImage.startsWith('book-');
+const isPlaceholderCover = (book: Book) => {
+  // Only Harry Potter books have real covers
+  return !harryPotterCovers[book.coverImage];
 };
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
@@ -163,20 +155,15 @@ export const BookCard = ({ book }: BookCardProps) => {
     <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
       <Link to={`/book/${book.id}`} className="block">
         <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
-          {isPlaceholderCover(book.coverImage) ? (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-              <GenreIcon genre={book.genre} title={book.title} />
-            </div>
-          ) : (
-            <img
-              src={getCoverImage(book.coverImage)}
-              alt={book.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              onError={(e) => {
-                e.currentTarget.src = '/src/assets/placeholder.svg';
-              }}
-            />
-          )}
+          <img
+            src={getCoverImage(book)}
+            alt={book.title}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => {
+              // Fallback to generated cover if image fails to load
+              e.currentTarget.src = getBookCover(book);
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           {/* Three-dot status menu */}
           <div className="absolute top-2 right-2 z-30" data-book-id={book.id}>

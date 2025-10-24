@@ -51,14 +51,18 @@ const Login = () => {
       // Create session ID for Supabase integration
       const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      // Create or update profile in Supabase
-      await supabase
-        .from('profiles')
-        .upsert({
-          user_session_id: sessionId,
-          display_name: data.user.displayName,
-          created_at: new Date().toISOString()
-        });
+      // Create or update profile in Supabase (skip if Supabase is not configured)
+      try {
+        await supabase
+          .from('profiles')
+          .upsert({
+            user_session_id: sessionId,
+            display_name: data.user.displayName,
+            created_at: new Date().toISOString()
+          });
+      } catch (supabaseError) {
+        console.log('Supabase profile creation skipped (local mode)');
+      }
 
       // Store session in localStorage
       localStorage.setItem('user_session_id', sessionId);

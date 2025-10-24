@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookMarked, BookOpen, Clock, Pause, CheckCircle2, ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getBookCover } from "@/utils/bookCoverGenerator";
 // Import cover images used across the app
 import hp1 from "@/assets/covers/hp1.jpg";
 import hp2 from "@/assets/covers/hp2.jpg";
@@ -215,10 +216,10 @@ export default function Bookmarks() {
                           <div className="overflow-hidden bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg hover:border-violet-500/50 hover:shadow-lg hover:shadow-violet-500/20 transition-all duration-300 hover:-translate-y-1">
                             <div className="aspect-[2/3] w-full bg-slate-900/50 overflow-hidden">
                               <img 
-                                src={coverImages[b.coverImage] || '/placeholder.svg'} 
+                                src={coverImages[b.coverImage] || getBookCover(b)} 
                                 alt={b.title} 
                                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
-                                onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }} 
+                                onError={(e) => { (e.currentTarget as HTMLImageElement).src=getBookCover(b); }} 
                               />
                             </div>
                             <div className="p-3">

@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PDFReader } from "@/components/PDFReader";
 import { books } from "@/data/books";
+import { getBookCover } from "@/utils/bookCoverGenerator";
 
 // Import Harry Potter covers
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -19,23 +20,14 @@ const harryPotterCovers: Record<string, string> = {
 };
 
 // Function to get cover image path
-const getCoverImage = (coverImage: string) => {
+const getCoverImage = (book: typeof books[0]) => {
   // For Harry Potter covers, use the imported images
-  if (harryPotterCovers[coverImage]) {
-    return harryPotterCovers[coverImage];
+  if (harryPotterCovers[book.coverImage]) {
+    return harryPotterCovers[book.coverImage];
   }
   
-  // For placeholder covers, use the generated SVG files
-  if (coverImage === 'placeholder' || coverImage.startsWith('book-')) {
-    return `/src/assets/covers/${coverImage}.svg`;
-  }
-  
-  // For existing covers, try to import them
-  try {
-    return `/src/assets/covers/${coverImage}.jpg`;
-  } catch {
-    return '/src/assets/placeholder.svg';
-  }
+  // For all other books, generate beautiful covers
+  return getBookCover(book);
 };
 
 const BookDetail = () => {
@@ -68,7 +60,7 @@ const BookDetail = () => {
           </Link>
           <div className="flex items-center gap-4 flex-1">
             <img
-              src={getCoverImage(book.coverImage)}
+              src={getCoverImage(book)}
               alt={book.title}
               className="h-16 w-auto rounded shadow-md"
             />

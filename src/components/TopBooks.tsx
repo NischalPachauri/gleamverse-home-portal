@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMemo } from "react";
 import { books as localBooks } from "@/data/books";
 import { Link } from "react-router-dom";
+import { getBookCover } from "@/utils/bookCoverGenerator";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -20,103 +20,72 @@ const coverImages: Record<string, string> = {
 interface BookItem {
   id: string;
   title: string;
-  author?: string;
-  coverImage?: string; // key into assets for local fallback
-  cover_url?: string;  // url from db
+  author: string;
+  coverImage: string;
+  genre?: string;
 }
 
 export const TopBooks = () => {
-  const [top, setTop] = useState<BookItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [six, setSix] = useState<BookItem[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("books")
-          .select("id,title,author,cover_url")
-          .order("read_count", { ascending: false })
-          .limit(24);
-        if (!error && data && data.length > 0) {
-          // Filter for Harry Potter books only
-          const harryPotterBooks = data.filter(book => 
-            book.title.toLowerCase().includes('harry potter')
-          );
-          if (harryPotterBooks.length > 0) {
-            setTop(harryPotterBooks as BookItem[]);
-            setLoading(false);
-            return;
-          }
-        }
-      } catch (error) {
-        console.error('Error loading top books:', error);
-      }
-      // fallback to local Harry Potter books only
-      const harryPotterBooks = localBooks
-        .filter(book => book.title.toLowerCase().includes('harry potter'))
-        .map((b: { id: string; title: string; author: string; coverImage: string }) => ({ 
-          id: b.id, 
-          title: b.title, 
-          author: b.author, 
-          coverImage: b.coverImage 
-        }));
-      setTop(harryPotterBooks);
-      setLoading(false);
-    };
-    load();
+  // Get top trending books immediately from local data
+  const trendingBooks = useMemo(() => {
+    // Create a diverse selection of trending books
+    const popularAuthors = ['Chetan Bhagat', 'Durjoy Datta', 'J.K. Rowling', 'Dan Brown', 'Ravinder Singh'];
+    const popularGenres = ['Romance', 'Mystery', 'Fantasy', 'Fiction', 'Thriller'];
+    
+    // Get Harry Potter books first (always trending)
+    const harryPotterBooks = localBooks.filter(book => 
+      book.title.toLowerCase().includes('harry potter')
+    );
+    
+    // Get popular author books
+    const popularAuthorBooks = localBooks.filter(book => 
+      popularAuthors.some(author => book.author.toLowerCase().includes(author.toLowerCase())) &&
+      !book.title.toLowerCase().includes('harry potter')
+    );
+    
+    // Get books from popular genres
+    const genreBooks = localBooks.filter(book => 
+      popularGenres.includes(book.genre) &&
+      !popularAuthors.some(author => book.author.toLowerCase().includes(author.toLowerCase())) &&
+      !book.title.toLowerCase().includes('harry potter')
+    );
+    
+    // Combine and shuffle for variety
+    const allTrending = [...harryPotterBooks, ...popularAuthorBooks.slice(0, 10), ...genreBooks.slice(0, 10)];
+    
+    // Shuffle the array for variety
+    const shuffled = allTrending.sort(() => Math.random() - 0.5);
+    
+    // Return top 24 books
+    return shuffled.slice(0, 24).map(b => ({
+      id: b.id,
+      title: b.title,
+      author: b.author,
+      coverImage: b.coverImage,
+      genre: b.genre
+    }));
   }, []);
 
-  // Utility to pick 6 random unique books
-  const pickSix = (pool: BookItem[]) => {
-    if (pool.length === 0) return [] as BookItem[];
-    const copy = [...pool];
-    const result: BookItem[] = [];
-    for (let i = 0; i < 6; i++) {
-      if (copy.length === 0) break;
-      const idx = Math.floor(Math.random() * copy.length);
-      result.push(copy.splice(idx, 1)[0]);
-    }
-    // If fewer than 6 available, loop from start
-    while (result.length < 6 && pool.length > 0) {
-      result.push(pool[result.length % pool.length]);
-    }
-    return result;
-  };
-
-  // Choose six once when data arrives
-  useEffect(() => {
-    if (top.length > 0) {
-      setSix(pickSix(top));
-    }
-  }, [top]);
+  // Select 8 books for the carousel (will be duplicated for seamless loop)
+  const displayBooks = useMemo(() => {
+    // Take first 8 books for display
+    return trendingBooks.slice(0, 8);
+  }, [trendingBooks]);
 
   const coverSrc = (b: BookItem) => {
-    if (b.cover_url) return b.cover_url;
     // For Harry Potter books, use the imported covers
     if (b.coverImage && coverImages[b.coverImage]) {
       return coverImages[b.coverImage];
     }
-    return "";
+    // For all other books, generate beautiful covers
+    return getBookCover(b);
   };
 
   // Build duplicated list for a seamless continuous loop
   const loopBooks = useMemo(() => {
-    if (six.length === 0) return [] as BookItem[];
-    return [...six, ...six];
-  }, [six]);
-
-  if (loading) {
-    return (
-      <section className="container mx-auto px-4 py-12">
-        <h2 className="text-4xl font-bold text-center mb-4 text-primary">Top Books</h2>
-        <p className="text-center text-muted-foreground mb-8">Most read books right now</p>
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </section>
-    );
-  }
+    if (displayBooks.length === 0) return [];
+    return [...displayBooks, ...displayBooks];
+  }, [displayBooks]);
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -155,7 +124,7 @@ export const TopBooks = () => {
       </div>
 
       <style dangerouslySetInnerHTML={{__html: `
-        .topbooks-loop { display: flex; gap: 12px; width: max-content; animation: topbooks-loop 28s linear infinite; will-change: transform; }
+        .topbooks-loop { display: flex; gap: 12px; width: max-content; animation: topbooks-loop 32s linear infinite; will-change: transform; }
         .topbooks-loop:hover { animation-play-state: paused; }
         @keyframes topbooks-loop { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
       `}} />
