@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="600" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Paper texture filter -->
+    <filter id="paperTexture">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="5" result="noise" seed="5"/>
+      <feDiffuseLighting in="noise" lighting-color="white" surfaceScale="1">
+        <feDistantLight azimuth="45" elevation="60"/>
+      </feDiffuseLighting>
+    </filter>
+    
+    <!-- Vintage paper aging effect -->
+    <filter id="vintagePaper">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.5"/>
+      <feComponentTransfer>
+        <feFuncA type="discrete" tableValues="0 .5 .5 .5 .5 .5 .5 .5 .5 .5 .5 .5 .5 .5 1"/>
+      </feComponentTransfer>
+    </filter>
+    
+    <!-- Drop shadow -->
+    <filter id="shadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+    
+    <!-- Text glow -->
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Vintage paper background -->
+  <rect width="400" height="600" fill="#F5E6D3"/>
+  <rect width="400" height="600" fill="#F5E6D3" filter="url(#paperTexture)" opacity="0.3"/>
+  
+  <!-- Decorative vintage border -->
+  <g opacity="0.4">
+    <!-- Top border with ornate pattern -->
+    <path d="M10,10 Q15,5 20,10 Q15,15 10,10" fill="#8B7355"/><path d="M30,10 Q35,5 40,10 Q35,15 30,10" fill="#8B7355"/><path d="M50,10 Q55,5 60,10 Q55,15 50,10" fill="#8B7355"/><path d="M70,10 Q75,5 80,10 Q75,15 70,10" fill="#8B7355"/><path d="M90,10 Q95,5 100,10 Q95,15 90,10" fill="#8B7355"/><path d="M110,10 Q115,5 120,10 Q115,15 110,10" fill="#8B7355"/><path d="M130,10 Q135,5 140,10 Q135,15 130,10" fill="#8B7355"/><path d="M150,10 Q155,5 160,10 Q155,15 150,10" fill="#8B7355"/><path d="M170,10 Q175,5 180,10 Q175,15 170,10" fill="#8B7355"/><path d="M190,10 Q195,5 200,10 Q195,15 190,10" fill="#8B7355"/><path d="M210,10 Q215,5 220,10 Q215,15 210,10" fill="#8B7355"/><path d="M230,10 Q235,5 240,10 Q235,15 230,10" fill="#8B7355"/><path d="M250,10 Q255,5 260,10 Q255,15 250,10" fill="#8B7355"/><path d="M270,10 Q275,5 280,10 Q275,15 270,10" fill="#8B7355"/><path d="M290,10 Q295,5 300,10 Q295,15 290,10" fill="#8B7355"/><path d="M310,10 Q315,5 320,10 Q315,15 310,10" fill="#8B7355"/><path d="M330,10 Q335,5 340,10 Q335,15 330,10" fill="#8B7355"/><path d="M350,10 Q355,5 360,10 Q355,15 350,10" fill="#8B7355"/><path d="M370,10 Q375,5 380,10 Q375,15 370,10" fill="#8B7355"/><path d="M390,10 Q395,5 400,10 Q395,15 390,10" fill="#8B7355"/>
+    
+    <!-- Bottom border -->
+    <path d="M10,590 Q15,585 20,590 Q15,595 10,590" fill="#8B7355"/><path d="M30,590 Q35,585 40,590 Q35,595 30,590" fill="#8B7355"/><path d="M50,590 Q55,585 60,590 Q55,595 50,590" fill="#8B7355"/><path d="M70,590 Q75,585 80,590 Q75,595 70,590" fill="#8B7355"/><path d="M90,590 Q95,585 100,590 Q95,595 90,590" fill="#8B7355"/><path d="M110,590 Q115,585 120,590 Q115,595 110,590" fill="#8B7355"/><path d="M130,590 Q135,585 140,590 Q135,595 130,590" fill="#8B7355"/><path d="M150,590 Q155,585 160,590 Q155,595 150,590" fill="#8B7355"/><path d="M170,590 Q175,585 180,590 Q175,595 170,590" fill="#8B7355"/><path d="M190,590 Q195,585 200,590 Q195,595 190,590" fill="#8B7355"/><path d="M210,590 Q215,585 220,590 Q215,595 210,590" fill="#8B7355"/><path d="M230,590 Q235,585 240,590 Q235,595 230,590" fill="#8B7355"/><path d="M250,590 Q255,585 260,590 Q255,595 250,590" fill="#8B7355"/><path d="M270,590 Q275,585 280,590 Q275,595 270,590" fill="#8B7355"/><path d="M290,590 Q295,585 300,590 Q295,595 290,590" fill="#8B7355"/><path d="M310,590 Q315,585 320,590 Q315,595 310,590" fill="#8B7355"/><path d="M330,590 Q335,585 340,590 Q335,595 330,590" fill="#8B7355"/><path d="M350,590 Q355,585 360,590 Q355,595 350,590" fill="#8B7355"/><path d="M370,590 Q375,585 380,590 Q375,595 370,590" fill="#8B7355"/><path d="M390,590 Q395,585 400,590 Q395,595 390,590" fill="#8B7355"/>
+    
+    <!-- Side borders -->
+    
+        <path d="M10,10 Q5,15 10,20 Q15,15 10,10" fill="#8B7355"/>
+        <path d="M390,10 Q385,15 390,20 Q395,15 390,10" fill="#8B7355"/>
+      
+        <path d="M10,30 Q5,35 10,40 Q15,35 10,30" fill="#8B7355"/>
+        <path d="M390,30 Q385,35 390,40 Q395,35 390,30" fill="#8B7355"/>
+      
+        <path d="M10,50 Q5,55 10,60 Q15,55 10,50" fill="#8B7355"/>
+        <path d="M390,50 Q385,55 390,60 Q395,55 390,50" fill="#8B7355"/>
+      
+        <path d="M10,70 Q5,75 10,80 Q15,75 10,70" fill="#8B7355"/>
+        <path d="M390,70 Q385,75 390,80 Q395,75 390,70" fill="#8B7355"/>
+      
+        <path d="M10,90 Q5,95 10,100 Q15,95 10,90" fill="#8B7355"/>
+        <path d="M390,90 Q385,95 390,100 Q395,95 390,90" fill="#8B7355"/>
+      
+        <path d="M10,110 Q5,115 10,120 Q15,115 10,110" fill="#8B7355"/>
+        <path d="M390,110 Q385,115 390,120 Q395,115 390,110" fill="#8B7355"/>
+      
+        <path d="M10,130 Q5,135 10,140 Q15,135 10,130" fill="#8B7355"/>
+        <path d="M390,130 Q385,135 390,140 Q395,135 390,130" fill="#8B7355"/>
+      
+        <path d="M10,150 Q5,155 10,160 Q15,155 10,150" fill="#8B7355"/>
+        <path d="M390,150 Q385,155 390,160 Q395,155 390,150" fill="#8B7355"/>
+      
+        <path d="M10,170 Q5,175 10,180 Q15,175 10,170" fill="#8B7355"/>
+        <path d="M390,170 Q385,175 390,180 Q395,175 390,170" fill="#8B7355"/>
+      
+        <path d="M10,190 Q5,195 10,200 Q15,195 10,190" fill="#8B7355"/>
+        <path d="M390,190 Q385,195 390,200 Q395,195 390,190" fill="#8B7355"/>
+      
+        <path d="M10,210 Q5,215 10,220 Q15,215 10,210" fill="#8B7355"/>
+        <path d="M390,210 Q385,215 390,220 Q395,215 390,210" fill="#8B7355"/>
+      
+        <path d="M10,230 Q5,235 10,240 Q15,235 10,230" fill="#8B7355"/>
+        <path d="M390,230 Q385,235 390,240 Q395,235 390,230" fill="#8B7355"/>
+      
+        <path d="M10,250 Q5,255 10,260 Q15,255 10,250" fill="#8B7355"/>
+        <path d="M390,250 Q385,255 390,260 Q395,255 390,250" fill="#8B7355"/>
+      
+        <path d="M10,270 Q5,275 10,280 Q15,275 10,270" fill="#8B7355"/>
+        <path d="M390,270 Q385,275 390,280 Q395,275 390,270" fill="#8B7355"/>
+      
+        <path d="M10,290 Q5,295 10,300 Q15,295 10,290" fill="#8B7355"/>
+        <path d="M390,290 Q385,295 390,300 Q395,295 390,290" fill="#8B7355"/>
+      
+        <path d="M10,310 Q5,315 10,320 Q15,315 10,310" fill="#8B7355"/>
+        <path d="M390,310 Q385,315 390,320 Q395,315 390,310" fill="#8B7355"/>
+      
+        <path d="M10,330 Q5,335 10,340 Q15,335 10,330" fill="#8B7355"/>
+        <path d="M390,330 Q385,335 390,340 Q395,335 390,330" fill="#8B7355"/>
+      
+        <path d="M10,350 Q5,355 10,360 Q15,355 10,350" fill="#8B7355"/>
+        <path d="M390,350 Q385,355 390,360 Q395,355 390,350" fill="#8B7355"/>
+      
+        <path d="M10,370 Q5,375 10,380 Q15,375 10,370" fill="#8B7355"/>
+        <path d="M390,370 Q385,375 390,380 Q395,375 390,370" fill="#8B7355"/>
+      
+        <path d="M10,390 Q5,395 10,400 Q15,395 10,390" fill="#8B7355"/>
+        <path d="M390,390 Q385,395 390,400 Q395,395 390,390" fill="#8B7355"/>
+      
+        <path d="M10,410 Q5,415 10,420 Q15,415 10,410" fill="#8B7355"/>
+        <path d="M390,410 Q385,415 390,420 Q395,415 390,410" fill="#8B7355"/>
+      
+        <path d="M10,430 Q5,435 10,440 Q15,435 10,430" fill="#8B7355"/>
+        <path d="M390,430 Q385,435 390,440 Q395,435 390,430" fill="#8B7355"/>
+      
+        <path d="M10,450 Q5,455 10,460 Q15,455 10,450" fill="#8B7355"/>
+        <path d="M390,450 Q385,455 390,460 Q395,455 390,450" fill="#8B7355"/>
+      
+        <path d="M10,470 Q5,475 10,480 Q15,475 10,470" fill="#8B7355"/>
+        <path d="M390,470 Q385,475 390,480 Q395,475 390,470" fill="#8B7355"/>
+      
+        <path d="M10,490 Q5,495 10,500 Q15,495 10,490" fill="#8B7355"/>
+        <path d="M390,490 Q385,495 390,500 Q395,495 390,490" fill="#8B7355"/>
+      
+        <path d="M10,510 Q5,515 10,520 Q15,515 10,510" fill="#8B7355"/>
+        <path d="M390,510 Q385,515 390,520 Q395,515 390,510" fill="#8B7355"/>
+      
+        <path d="M10,530 Q5,535 10,540 Q15,535 10,530" fill="#8B7355"/>
+        <path d="M390,530 Q385,535 390,540 Q395,535 390,530" fill="#8B7355"/>
+      
+        <path d="M10,550 Q5,555 10,560 Q15,555 10,550" fill="#8B7355"/>
+        <path d="M390,550 Q385,555 390,560 Q395,555 390,550" fill="#8B7355"/>
+      
+        <path d="M10,570 Q5,575 10,580 Q15,575 10,570" fill="#8B7355"/>
+        <path d="M390,570 Q385,575 390,580 Q395,575 390,570" fill="#8B7355"/>
+      
+        <path d="M10,590 Q5,595 10,600 Q15,595 10,590" fill="#8B7355"/>
+        <path d="M390,590 Q385,595 390,600 Q395,595 390,590" fill="#8B7355"/>
+      
+  </g>
+  
+  <!-- Title in elegant typography -->
+  <text x="200" y="80" font-family="Georgia, serif" font-size="36" font-weight="bold" fill="#2C3E50" text-anchor="middle" filter="url(#shadow)">
+    Wings of Fire
+  </text>
+  
+  <!-- Author subtitle -->
+  <text x="200" y="110" font-family="Georgia, serif" font-size="18" fill="#5D4E37" text-anchor="middle">
+    Unknown Author
+  </text>
+  
+  <!-- Main illustration area with vintage frame -->
+  <g>
+    <clipPath id="vintageFrame">
+      <rect x="50" y="150" width="300" height="250" rx="15" ry="15"/>
+    </clipPath>
+    
+    <g clip-path="url(#vintageFrame)" filter="url(#vintagePaper)">
+      
+      <!-- Night sky gradient -->
+      <rect x="50" y="150" width="300" height="250" fill="#1E3A8A"/>
+      <rect x="50" y="300" width="300" height="100" fill="#FF8C00" opacity="0.3"/>
+      
+      <!-- Rocket launching with flames -->
+      <g transform="translate(250, 250)">
+        <path d="M0,-60 L-10,-40 L-10,20 L-5,30 L5,30 L10,20 L10,-40 Z" fill="#C0C0C0"/>
+        <path d="M0,-60 L-5,-45 L0,-40 L5,-45 Z" fill="#FF0000"/>
+        <ellipse cx="0" cy="30" rx="15" ry="25" fill="#FF4500" opacity="0.8"/>
+        <ellipse cx="0" cy="35" rx="10" ry="20" fill="#FFD700" opacity="0.6"/>
+        <ellipse cx="0" cy="40" rx="8" ry="15" fill="#FFFFFF" opacity="0.4"/>
+      </g>
+      
+      <!-- Abdul Kalam figure -->
+      <g transform="translate(150, 320)">
+        <ellipse cx="0" cy="-20" rx="20" ry="25" fill="#D2B48C"/>
+        <path d="M0,-45 Q-15,-50 -20,-45 Q-15,-35 0,-35 Q15,-35 20,-45 Q15,-50 0,-45" fill="#E0E0E0"/>
+        <path d="M-20,0 Q0,10 20,0 L25,60 L-25,60 Z" fill="#FFFFFF"/>
+        <rect x="-25" y="60" width="50" height="20" fill="#000080"/>
+        <rect x="-20" y="80" width="40" height="15" fill="#000080"/>
+      </g>
+      
+      <!-- Stars and constellations -->
+      <circle cx="86.38890120375649" cy="258.94215051160177" r="1.004738247472624" fill="#FFFFFF" opacity="0.7745415610744689"/><circle cx="50.638488630426835" cy="190.9616083029825" r="2.875644375999901" fill="#FFFFFF" opacity="0.9426336017817196"/><circle cx="211.873875766827" cy="287.0330701148637" r="1.6148331587233098" fill="#FFFFFF" opacity="0.7607699754711037"/><circle cx="115.01110035732685" cy="154.36113487853527" r="1.3803274637540224" fill="#FFFFFF" opacity="0.9935413263754038"/><circle cx="304.93971374781" cy="234.27126427498945" r="1.1572011134185651" fill="#FFFFFF" opacity="0.659407031123525"/><circle cx="71.40793060462738" cy="233.40467918429553" r="2.2725146403431804" fill="#FFFFFF" opacity="0.8028615320894862"/><circle cx="91.44399171813677" cy="223.8378142391877" r="2.343475094703491" fill="#FFFFFF" opacity="0.627292002089351"/><circle cx="225.48614208281523" cy="181.54420301659218" r="2.1811905422774687" fill="#FFFFFF" opacity="0.6531717063651096"/><circle cx="264.0461449840486" cy="243.24592432327148" r="2.819163502538024" fill="#FFFFFF" opacity="0.822290360415963"/><circle cx="107.5987766561873" cy="165.58348503743386" r="1.8336773524489318" fill="#FFFFFF" opacity="0.9652967262834663"/><circle cx="222.52058018213762" cy="171.58542337149174" r="2.6529816132601765" fill="#FFFFFF" opacity="0.9639258920533957"/><circle cx="123.07750058319755" cy="203.30567743851356" r="1.3184817548669485" fill="#FFFFFF" opacity="0.7468566983477125"/><circle cx="125.12599972109969" cy="256.7701161746593" r="1.3152496502497077" fill="#FFFFFF" opacity="0.982631655503505"/><circle cx="334.1524427884792" cy="159.9833981763842" r="2.2599716803139995" fill="#FFFFFF" opacity="0.6811772591866362"/><circle cx="59.64213384328873" cy="250.22384343378081" r="1.2824240988703175" fill="#FFFFFF" opacity="0.840490965312539"/><circle cx="66.17313698002043" cy="174.26801454062982" r="2.0410355645271494" fill="#FFFFFF" opacity="0.9735811358766185"/><circle cx="334.3857025229821" cy="280.56402975456876" r="2.6721246190770853" fill="#FFFFFF" opacity="0.698326502404013"/><circle cx="93.95921715540783" cy="252.79102390652616" r="1.648489201371946" fill="#FFFFFF" opacity="0.6435744240042401"/><circle cx="61.24500950946128" cy="238.01637619979076" r="1.6668416959771253" fill="#FFFFFF" opacity="0.9289001496643354"/><circle cx="305.9201251636025" cy="182.6606914139662" r="2.9032600207766293" fill="#FFFFFF" opacity="0.6671823469666824"/><circle cx="267.1692148113513" cy="156.8947719700388" r="1.3113719423357901" fill="#FFFFFF" opacity="0.6257192724228627"/><circle cx="103.68910205926349" cy="245.10472341791035" r="2.5121799242339256" fill="#FFFFFF" opacity="0.601290435172003"/><circle cx="221.96483591816255" cy="232.91761502137257" r="2.2394047990449923" fill="#FFFFFF" opacity="0.9552145452135034"/><circle cx="85.55165729167462" cy="283.7613183041259" r="2.3186295804041688" fill="#FFFFFF" opacity="0.7489863909490988"/><circle cx="285.2822392259422" cy="170.19625980695935" r="2.1159366112211524" fill="#FFFFFF" opacity="0.971784303718123"/>
+      
+      <!-- Constellation lines -->
+      <g stroke="#FFFFFF" stroke-width="0.5" opacity="0.3">
+        <line x1="80" y1="180" x2="100" y2="200"/>
+        <line x1="100" y1="200" x2="120" y2="190"/>
+        <line x1="300" y1="200" x2="320" y2="220"/>
+        <line x1="320" y1="220" x2="340" y2="210"/>
+      </g>
+    </g>
+    
+    <!-- Ornate frame around illustration -->
+    <rect x="50" y="150" width="300" height="250" rx="15" ry="15" fill="none" stroke="#8B7355" stroke-width="4"/>
+    
+    <!-- Corner decorations -->
+    <g opacity="0.6">
+      <path d="M50,150 L70,150 L50,170 Z" fill="#8B7355"/>
+      <path d="M350,150 L330,150 L350,170 Z" fill="#8B7355"/>
+      <path d="M50,400 L70,400 L50,380 Z" fill="#8B7355"/>
+      <path d="M350,400 L330,400 L350,380 Z" fill="#8B7355"/>
+    </g>
+  </g>
+  
+  <!-- Year badge -->
+  <rect x="170" y="440" width="60" height="30" rx="15" ry="15" fill="#8B7355" opacity="0.3"/>
+  <text x="200" y="460" font-family="Georgia, serif" font-size="20" font-weight="bold" fill="#5D4E37" text-anchor="middle">
+    2015
+  </text>
+  
+  <!-- Small decorative elements -->
+  <g opacity="0.3">
+    <circle cx="50" cy="50" r="3" fill="#8B7355"/>
+    <circle cx="350" cy="50" r="3" fill="#8B7355"/>
+    <circle cx="50" cy="550" r="3" fill="#8B7355"/>
+    <circle cx="350" cy="550" r="3" fill="#8B7355"/>
+    
+    <!-- Small flourishes -->
+    <path d="M30,100 Q40,100 40,110 Q40,120 30,120" fill="#8B7355"/>
+    <path d="M370,100 Q360,100 360,110 Q360,120 370,120" fill="#8B7355"/>
+    <path d="M30,480 Q40,480 40,490 Q40,500 30,500" fill="#8B7355"/>
+    <path d="M370,480 Q360,480 360,490 Q360,500 370,500" fill="#8B7355"/>
+  </g>
+</svg>

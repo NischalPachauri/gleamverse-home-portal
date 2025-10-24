@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const Login = () => {
@@ -12,68 +12,38 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
   const navigate = useNavigate();
+  const { signIn, signUp } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Try backend API first, fallback to local auth
-      let data;
-      try {
-        const response = await fetch('http://localhost:8081/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Login failed');
-        }
-
-        data = await response.json();
-      } catch (fetchError) {
-        // Fallback: Create local session without backend
-        console.log('Backend unavailable, using local auth');
-        data = {
-          user: {
-            id: `user_${Date.now()}`,
-            email: email,
-            displayName: email.split('@')[0]
-          }
-        };
-      }
-      
-      // Create session ID for Supabase integration
-      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Create or update profile in Supabase (skip if Supabase is not configured)
-      try {
-        await supabase
-          .from('profiles')
-          .upsert({
-            user_session_id: sessionId,
-            display_name: data.user.displayName,
-            created_at: new Date().toISOString()
-          });
-      } catch (supabaseError) {
-        console.log('Supabase profile creation skipped (local mode)');
-      }
-
-      // Store session in localStorage
-      localStorage.setItem('user_session_id', sessionId);
-      localStorage.setItem('user_email', email);
-      localStorage.setItem('user_id', data.user.id);
-
-      toast.success('Login successful!');
+      await signIn(email, password);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error instanceof Error ? error.message : 'Login failed. Please try again.');
+      // Error is already handled by signIn method with toast
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await signUp(registerEmail, registerPassword, registerName);
+      toast.success('Account created! Please check your email to verify.');
+      setShowRegister(false);
+    } catch (error) {
+      console.error('Register error:', error);
+      // Error is already handled by signUp method with toast
     } finally {
       setLoading(false);
     }
@@ -127,13 +97,32 @@ const Login = () => {
           {showRegister && (
             <div className="mt-6 border-t pt-4">
               <h3 className="text-sm font-semibold mb-2">Create an account</h3>
-              <div className="grid gap-3">
-                <Input type="text" placeholder="Display name" />
-                <Input type="email" placeholder="Email" />
-                <Input type="password" placeholder="Password" />
-                <Button disabled variant="secondary">Register (disabled in demo)</Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">Registration is simplified for this demo.</p>
+              <form onSubmit={handleRegister} className="grid gap-3">
+                <Input 
+                  type="text" 
+                  placeholder="Display name" 
+                  value={registerName}
+                  onChange={(e) => setRegisterName(e.target.value)}
+                  required 
+                />
+                <Input 
+                  type="email" 
+                  placeholder="Email" 
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  required 
+                />
+                <Input 
+                  type="password" 
+                  placeholder="Password" 
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  required 
+                />
+                <Button type="submit" disabled={loading}>
+                  {loading ? 'Creating account...' : 'Register'}
+                </Button>
+              </form>
             </div>
           )}
         </CardContent>

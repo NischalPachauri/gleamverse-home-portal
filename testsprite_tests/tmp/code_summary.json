@@ -4,79 +4,46 @@
     "React",
     "Vite",
     "Tailwind CSS",
-    "React Router DOM",
     "Supabase",
-    "React PDF",
-    "Lucide React",
-    "Sonner",
-    "Radix UI",
-    "Express",
-    "Node.js"
+    "React Router",
+    "TanStack Query",
+    "Shadcn/ui",
+    "Lucide React"
   ],
   "features": [
     {
-      "name": "Book Search and Filter",
-      "description": "Search books by title, author, or description with category filtering",
+      "name": "Book Catalog",
+      "description": "Display and manage a collection of 347 books with AI-generated covers, search functionality, and category filtering",
       "files": [
         "src/pages/Index.tsx",
-        "src/data/books.ts"
+        "src/components/BookCard.tsx",
+        "src/data/books.ts",
+        "src/data/all-books.ts"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
-          "title": "Book Search API",
-          "version": "1.0.0"
+          "title": "Book Catalog API",
+          "version": "1.0.0",
+          "description": "API for managing book catalog with AI-generated covers"
         },
         "paths": {
-          "/search": {
+          "/": {
             "get": {
-              "summary": "Search books",
-              "parameters": [
-                {
-                  "name": "query",
-                  "in": "query",
-                  "required": true,
-                  "schema": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "name": "category",
-                  "in": "query",
-                  "schema": {
-                    "type": "string"
-                  }
-                }
-              ],
+              "summary": "Get book catalog page",
               "responses": {
                 "200": {
-                  "description": "List of matching books"
+                  "description": "Book catalog page with search and filtering"
                 }
               }
             }
-          }
-        }
-      }
-    },
-    {
-      "name": "PDF Reader",
-      "description": "Read PDF books with zoom controls, page navigation, and two-page mode",
-      "files": [
-        "src/components/PDFReader.tsx"
-      ],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "PDF Reader API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/reader/{bookId}": {
+          },
+          "/book/{id}": {
             "get": {
-              "summary": "Open PDF reader for a book",
+              "summary": "Get book details",
               "parameters": [
                 {
-                  "name": "bookId",
+                  "name": "id",
                   "in": "path",
                   "required": true,
                   "schema": {
@@ -86,7 +53,53 @@
               ],
               "responses": {
                 "200": {
-                  "description": "PDF reader interface"
+                  "description": "Book detail page with PDF reader"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "AI Book Cover Generation",
+      "description": "Generate AI-inspired book covers with detailed scenes based on book titles and genres",
+      "files": [
+        "scripts/generateAICovers.js",
+        "public/book-covers/",
+        "src/components/BookCard.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "AI Book Cover Generation",
+          "version": "1.0.0",
+          "description": "Generate AI-inspired book covers with detailed scenes"
+        },
+        "paths": {
+          "/book-covers/{filename}": {
+            "get": {
+              "summary": "Get AI-generated book cover",
+              "parameters": [
+                {
+                  "name": "filename",
+                  "in": "path",
+                  "required": true,
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "SVG book cover image",
+                  "content": {
+                    "image/svg+xml": {
+                      "schema": {
+                        "type": "string"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -96,63 +109,26 @@
     },
     {
       "name": "User Authentication",
-      "description": "User login and registration with fallback local authentication",
+      "description": "User authentication system with Supabase integration for login, registration, and profile management",
       "files": [
-        "src/pages/Login.tsx",
-        "src/pages/Register.tsx"
+        "src/contexts/AuthContext.tsx",
+        "src/components/auth/AuthModal.tsx",
+        "src/pages/Profile.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
           "title": "Authentication API",
-          "version": "1.0.0"
+          "version": "1.0.0",
+          "description": "User authentication and profile management"
         },
         "paths": {
-          "/login": {
-            "post": {
-              "summary": "User login",
-              "requestBody": {
-                "required": true,
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "email": {"type": "string"},
-                        "password": {"type": "string"}
-                      }
-                    }
-                  }
-                }
-              },
+          "/profile": {
+            "get": {
+              "summary": "Get user profile",
               "responses": {
                 "200": {
-                  "description": "Login successful"
-                }
-              }
-            }
-          },
-          "/register": {
-            "post": {
-              "summary": "User registration",
-              "requestBody": {
-                "required": true,
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "email": {"type": "string"},
-                        "password": {"type": "string"},
-                        "name": {"type": "string"}
-                      }
-                    }
-                  }
-                }
-              },
-              "responses": {
-                "200": {
-                  "description": "Registration successful"
+                  "description": "User profile page"
                 }
               }
             }
@@ -161,69 +137,93 @@
       }
     },
     {
-      "name": "Book Management",
-      "description": "Manage books with CRUD operations and status tracking",
+      "name": "Bookmarks Management",
+      "description": "Save and manage book bookmarks with different statuses (plan, reading, on_hold, completed)",
       "files": [
-        "src/pages/BookDetail.tsx",
-        "src/components/BookCard.tsx"
+        "src/pages/Bookmarks.tsx",
+        "src/hooks/useBookmarks.ts",
+        "supabase/migrations/20251020070000_profiles_and_books.sql"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
-          "title": "Book Management API",
-          "version": "1.0.0"
+          "title": "Bookmarks API",
+          "version": "1.0.0",
+          "description": "Manage user bookmarks and reading status"
         },
         "paths": {
-          "/api/books": {
+          "/bookmarks": {
             "get": {
-              "summary": "Get all books",
+              "summary": "Get user bookmarks",
               "responses": {
                 "200": {
-                  "description": "List of books"
+                  "description": "User bookmarks page"
                 }
               }
             }
-          },
-          "/api/books/{id}": {
+          }
+        }
+      }
+    },
+    {
+      "name": "Reading History",
+      "description": "Track reading progress and history for users",
+      "files": [
+        "src/pages/ReadingHistory.tsx",
+        "src/hooks/useReadingHistory.ts"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "Reading History API",
+          "version": "1.0.0",
+          "description": "Track and manage reading history"
+        },
+        "paths": {
+          "/reading-history": {
             "get": {
-              "summary": "Get book by ID",
+              "summary": "Get reading history",
+              "responses": {
+                "200": {
+                  "description": "Reading history page"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "PDF Reader",
+      "description": "In-app PDF reader for viewing books with page navigation and progress tracking",
+      "files": [
+        "src/components/PDFReader.tsx",
+        "src/pages/BookDetail.tsx"
+      ],
+      "api_doc": {
+        "openapi": "3.0.0",
+        "info": {
+          "title": "PDF Reader API",
+          "version": "1.0.0",
+          "description": "PDF reading functionality"
+        },
+        "paths": {
+          "/book/{id}": {
+            "get": {
+              "summary": "Open PDF reader for book",
               "parameters": [
                 {
                   "name": "id",
                   "in": "path",
                   "required": true,
-                  "schema": {"type": "string"}
+                  "schema": {
+                    "type": "string"
+                  }
                 }
               ],
               "responses": {
                 "200": {
-                  "description": "Book details"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    {
-      "name": "Personal Library",
-      "description": "User's personal library with bookmarks and reading progress",
-      "files": [
-        "src/pages/Bookmarks.tsx"
-      ],
-      "api_doc": {
-        "openapi": "3.0.0",
-        "info": {
-          "title": "Personal Library API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/api/user-library": {
-            "get": {
-              "summary": "Get user's library",
-              "responses": {
-                "200": {
-                  "description": "User's library"
+                  "description": "PDF reader page"
                 }
               }
             }
@@ -233,57 +233,40 @@
     },
     {
       "name": "Theme Management",
-      "description": "Dark/light theme toggle with persistence",
+      "description": "Dark/light theme switching with system preference detection",
       "files": [
-        "src/contexts/ThemeContext.tsx"
+        "src/contexts/ThemeContext.tsx",
+        "src/components/Header.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
           "title": "Theme API",
-          "version": "1.0.0"
-        },
-        "paths": {
-          "/api/theme": {
-            "post": {
-              "summary": "Toggle theme",
-              "responses": {
-                "200": {
-                  "description": "Theme toggled successfully"
-                }
-              }
-            }
-          }
+          "version": "1.0.0",
+          "description": "Theme management and switching"
         }
       }
     },
     {
-      "name": "Music Player",
-      "description": "Background music player with multiple tracks",
+      "name": "Admin Panel",
+      "description": "Administrative interface for managing books and system settings",
       "files": [
-        "src/components/PDFReader.tsx"
+        "src/pages/Admin.tsx"
       ],
       "api_doc": {
         "openapi": "3.0.0",
         "info": {
-          "title": "Music Player API",
-          "version": "1.0.0"
+          "title": "Admin API",
+          "version": "1.0.0",
+          "description": "Administrative functions"
         },
         "paths": {
-          "/music/{track}": {
+          "/admin": {
             "get": {
-              "summary": "Get music track",
-              "parameters": [
-                {
-                  "name": "track",
-                  "in": "path",
-                  "required": true,
-                  "schema": {"type": "string"}
-                }
-              ],
+              "summary": "Get admin panel",
               "responses": {
                 "200": {
-                  "description": "Music track file"
+                  "description": "Admin panel page"
                 }
               }
             }

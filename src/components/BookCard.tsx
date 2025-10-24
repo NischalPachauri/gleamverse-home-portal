@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
 import { useState, useEffect } from "react";
-import { getBookCover } from "@/utils/bookCoverGenerator";
+// Removed old book cover generator import - using new SVG covers
 
 // Import Harry Potter covers
 import hp1 from "@/assets/covers/hp1.jpg";
@@ -26,13 +26,20 @@ const harryPotterCovers: Record<string, string> = {
 
 // Function to get cover image path
 const getCoverImage = (book: Book) => {
-  // For Harry Potter covers, use the imported images
+  // First check if we have a generated SVG cover
+  const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
+  if (bookFileName) {
+    // Use the generated SVG cover
+    return `/book-covers/${bookFileName}`;
+  }
+  
+  // Fallback to Harry Potter covers if available
   if (harryPotterCovers[book.coverImage]) {
     return harryPotterCovers[book.coverImage];
   }
   
-  // Generate beautiful covers for all other books
-  return getBookCover(book);
+  // Final fallback: Use a placeholder
+  return '/placeholder.svg';
 };
 
 const isPlaceholderCover = (book: Book) => {
@@ -160,8 +167,8 @@ export const BookCard = ({ book }: BookCardProps) => {
             alt={book.title}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             onError={(e) => {
-              // Fallback to generated cover if image fails to load
-              e.currentTarget.src = getBookCover(book);
+              // Fallback to placeholder if image fails to load
+              e.currentTarget.src = '/placeholder.svg';
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
