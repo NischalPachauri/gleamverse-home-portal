@@ -1,81 +1,55 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
-
-interface Bookmark {
-  id: string;
-  user_session_id: string;
-  book_id: string;
-  status?: string;
-  created_at: string;
-}
 
 export function useBookmarks() {
+  const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchBookmarks();
-    } else {
+  const loadBookmarks = useCallback(async () => {
+    if (!user) {
       setBookmarks([]);
+      setLoading(false);
+      return;
     }
-  }, [user]);
 
-  const fetchBookmarks = async () => {
-    if (!user) return;
-    
-    setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('bookmarks')
-        .select('*')
-        .eq('user_session_id', user.id)
-        .order('created_at', { ascending: false });
+        .from('user_library')
+        .select('book_id')
+        .eq('user_id', user.id);
 
       if (error) throw error;
-      setBookmarks(data || []);
-    } catch (error: any) {
-      console.error('Error fetching bookmarks:', error);
-      toast.error('Failed to load bookmarks');
+
+      setBookmarks(data?.map(item => item.book_id) || []);
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
+      setBookmarks([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const addBookmark = async (book: {
-    id: string;
-    title: string;
-    author: string;
-    coverImage?: string;
-  }) => {
-    if (!user) {
-      toast.error('Please sign in to bookmark books');
-      return false;
-    }
+  const addBookmark = async (bookId: string) => {
+    if (!user) return false;
 
     try {
       const { error } = await supabase
-        .from('bookmarks')
-        .insert([{
-          user_session_id: user.id,
-          book_id: book.id,
-          status: 'bookmarked',
-        }]);
+        .from('user_library')
+        .insert({
+          user_id: user.id,
+          book_id: bookId,
+          current_page: 0,
+          last_read_at: new Date().toISOString(),
+        });
 
       if (error) throw error;
-      
-      await fetchBookmarks();
-      toast.success(`Added "${book.title}" to bookmarks`);
+
+      setBookmarks(prev => [...prev, bookId]);
       return true;
-    } catch (error: any) {
-      if (error.code === '23505') {
-        toast.info('Book already in bookmarks');
-      } else {
-        toast.error('Failed to add bookmark');
-      }
+    } catch (error) {
+      console.error('Error adding bookmark:', error);
       return false;
     }
   };
@@ -85,32 +59,40 @@ export function useBookmarks() {
 
     try {
       const { error } = await supabase
-        .from('bookmarks')
+        .from('user_library')
         .delete()
-        .eq('user_session_id', user.id)
+        .eq('user_id', user.id)
         .eq('book_id', bookId);
 
       if (error) throw error;
-      
-      await fetchBookmarks();
-      toast.success('Removed from bookmarks');
+
+      setBookmarks(prev => prev.filter(id => id !== bookId));
       return true;
-    } catch (error: any) {
-      toast.error('Failed to remove bookmark');
+    } catch (error) {
+      console.error('Error removing bookmark:', error);
       return false;
     }
   };
 
-  const isBookmarked = (bookId: string) => {
-    return bookmarks.some(bookmark => bookmark.book_id === bookId);
+  const toggleBookmark = async (bookId: string) => {
+    if (bookmarks.includes(bookId)) {
+      return await removeBookmark(bookId);
+    } else {
+      return await addBookmark(bookId);
+    }
   };
+
+  useEffect(() => {
+    loadBookmarks();
+  }, [loadBookmarks]);
 
   return {
     bookmarks,
     loading,
     addBookmark,
     removeBookmark,
-    isBookmarked,
-    refresh: fetchBookmarks,
+    toggleBookmark,
+    refreshBookmarks: loadBookmarks,
   };
 }
+

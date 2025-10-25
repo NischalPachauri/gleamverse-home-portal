@@ -5,11 +5,9 @@ import { Document, Page, pdfjs } from "react-pdf";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Vite query suffix not typed
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Volume2, VolumeX, Music } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, Layout, Columns, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useParams } from "react-router-dom";
 
 // Configure PDF.js worker to use locally bundled worker for reliability
 try {
@@ -28,18 +26,13 @@ interface PDFReaderProps {
 
 export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   console.log('PDFReader initialized with:', { pdfPath, title });
-  const { id } = useParams();
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [nightMode, setNightMode] = useState<boolean>(false);
-  // TTS removed per requirements
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-  const [isInLibrary, setIsInLibrary] = useState<boolean>(false);
-  // Remove page turning state to avoid flicker
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  // Page turning animation removed
   
   // Music state management
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
@@ -72,75 +65,13 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     setLoading(false);
     toast.error("Failed to load PDF. Please try again.");
   }, [pdfPath]);
+
   const [twoPageMode, setTwoPageMode] = useState<boolean>(() => {
     const stored = localStorage.getItem("twoPageMode");
     return stored ? stored === "true" : true;
   });
-  // TTS removed per requirements
+
   const containerRef = useRef<HTMLDivElement>(null);
-  const [sessionId] = useState(() => {
-    let sid = localStorage.getItem("sessionId");
-    if (!sid) {
-      sid = Math.random().toString(36).substring(7);
-      localStorage.setItem("sessionId", sid);
-    }
-    return sid;
-  });
-
-  const checkIfInLibrary = useCallback(async () => {
-    if (!id) return;
-    const { data } = await supabase
-      .from("user_library")
-      .select("id")
-      .eq("book_id", id)
-      .eq("user_session_id", sessionId)
-      .single();
-    
-    setIsInLibrary(!!data);
-  }, [id, sessionId]);
-
-  const restoreLastPosition = useCallback(async () => {
-    if (!id) return;
-    const { data, error } = await supabase
-      .from("user_library")
-      .select("current_page")
-      .eq("book_id", id)
-      .eq("user_session_id", sessionId)
-      .maybeSingle();
-
-    if (!error && data?.current_page && data.current_page > 0) {
-      // Ensure left page is odd for two-page spread
-      const left = data.current_page % 2 === 0 ? data.current_page - 1 : data.current_page;
-      setPageNumber(left);
-    }
-  }, [id, sessionId]);
-
-  useEffect(() => {
-    checkIfInLibrary();
-    // Restore last read page for this book
-    restoreLastPosition();
-  }, [id, checkIfInLibrary, restoreLastPosition]);
-
-  const toggleLibrary = async () => {
-    if (!id) return;
-
-    if (isInLibrary) {
-      await supabase
-        .from("user_library")
-        .delete()
-        .eq("book_id", id)
-        .eq("user_session_id", sessionId);
-      toast.success("Removed from your library");
-      setIsInLibrary(false);
-    } else {
-      await supabase
-        .from("user_library")
-        .insert({ book_id: id, user_session_id: sessionId });
-      toast.success("Added to your library!");
-      setIsInLibrary(true);
-    }
-  };
-
 
   const goToPrevPage = () => {
     if (pageNumber <= 1) return;
@@ -448,33 +379,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     }
   };
 
-  // TTS removed per requirements
-
-  // TTS removed per requirements
-
-  // TTS removed per requirements
-
-  // TTS removed per requirements
-
-  // Persist reading position whenever page changes
-  useEffect(() => {
-    const persist = async () => {
-      if (!id) return;
-      const now = new Date().toISOString();
-      // Save the left page of the spread
-      await supabase
-        .from("user_library")
-        .upsert({
-          book_id: id,
-          user_session_id: sessionId,
-          current_page: pageNumber,
-          last_read_at: now,
-        }, { onConflict: "book_id,user_session_id" });
-    };
-    persist();
-    // We intentionally do not handle errors here; silent best-effort persistence
-  }, [pageNumber, id, sessionId]);
-
   // Show error state if PDF failed to load
   if (error) {
     return (
@@ -556,16 +460,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
 
         <div className="flex items-center gap-2">
           <Button 
-            onClick={toggleLibrary} 
-            size="sm" 
-            variant="outline"
-            className="gap-2"
-          >
-            {isInLibrary ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-            {isInLibrary ? "Saved" : "Save"}
-          </Button>
-
-          <Button 
             onClick={toggleNightMode} 
             size="sm" 
             variant="outline"
@@ -573,8 +467,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           >
             {nightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
-
-          {/* TTS control removed per requirements */}
 
           <Button 
             onClick={toggleFullscreen} 
@@ -608,7 +500,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
               ))}
             </select>
           </div>
-
 
           <Button onClick={handleDownload} size="sm" className="bg-primary hover:bg-primary/90 gap-2">
             <Download className="w-4 h-4" />

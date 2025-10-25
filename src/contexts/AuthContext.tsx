@@ -10,6 +10,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -49,19 +50,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (error) throw error;
 
       if (data.user) {
-        // Create user profile in database using existing profiles table
+        // Create user profile in database using user_profiles table
         const { error: profileError } = await supabase
-          .from('profiles')
+          .from('user_profiles')
           .insert([
             {
-              user_session_id: data.user.id,
-              display_name: fullName,
+              id: data.user.id,
+              email: data.user.email!,
+              full_name: fullName,
               created_at: new Date().toISOString(),
             },
           ]);
@@ -73,7 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.success('Account created successfully! Please check your email to verify your account.');
       }
     } catch (error: any) {
-      toast.error(error.message || 'Error creating account');
+      console.error('Sign up error:', error);
+      const errorMessage = error.message || 'Error creating account. Please try again.';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -93,7 +98,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       toast.success('Welcome back!');
     } catch (error: any) {
-      toast.error(error.message || 'Invalid email or password');
+      console.error('Sign in error:', error);
+      const errorMessage = error.message || 'Invalid email or password. Please try again.';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -108,7 +115,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       toast.success('Signed out successfully');
     } catch (error: any) {
+      console.error('Sign out error:', error);
       toast.error(error.message || 'Error signing out');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+      
+      toast.success('Password reset email sent! Check your inbox.');
+    } catch (error: any) {
+      console.error('Password reset error:', error);
+      const errorMessage = error.message || 'Error sending password reset email. Please try again.';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setLoading(false);
@@ -122,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signIn,
     signOut,
+    resetPassword,
     isAuthenticated: !!user,
   };
 
@@ -135,3 +165,4 @@ export function useAuth() {
   }
   return context;
 }
+

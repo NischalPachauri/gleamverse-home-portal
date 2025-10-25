@@ -2,7 +2,8 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { BookCard } from "@/components/BookCard";
 import { CategoryCard } from "@/components/CategoryCard";
 import { Footer } from "@/components/Footer";
-import { TopBooks } from "@/components/TopBooks";
+import { Header } from "@/components/Header";
+import { TrendingBooks } from "@/components/TrendingBooks";
 import { ReadingList } from "@/components/ReadingList";
 import { HeroSection } from "@/components/HeroSection";
 import { books } from "@/data/books";
@@ -18,17 +19,6 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { AuthModal } from "@/components/auth/AuthModal";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // Fallback component in case of errors
 const IndexFallback = () => (
@@ -49,43 +39,13 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(true);
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut, isAuthenticated } = useAuth();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
 
   const BOOKS_PER_PAGE = 16;
 
-  // Fade controls on scroll
+  // Keep controls always visible (removed fade on scroll)
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setControlsVisible(scrollPosition < 100);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    setControlsVisible(true);
   }, []);
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast.success('Signed out successfully');
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
-  };
-
-  const getUserInitials = () => {
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
-    }
-    return user?.email?.slice(0, 2).toUpperCase() || 'U';
-  };
 
   const categoryData = [
     { name: "All", icon: Home },
@@ -193,72 +153,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Theme Toggle, Sign In/Profile and Bookmarks - Visible on all devices with fade on scroll */}
-      <div className={`fixed top-4 right-4 z-50 flex gap-2 transition-opacity duration-500 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        {isAuthenticated ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-background/80 backdrop-blur-sm"
-              >
-                <Avatar className="h-5 w-5">
-                  <AvatarFallback className="text-xs">
-                    {getUserInitials()}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">
-                    {user?.user_metadata?.full_name || 'User'}
-                  </p>
-                  <p className="text-xs leading-none text-muted-foreground">
-                    {user?.email}
-                  </p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate('/bookmarks')}>
-                <BookMarked className="mr-2 h-4 w-4" />
-                My Bookmarks
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/reading-history')}>
-                <Book className="mr-2 h-4 w-4" />
-                Reading History
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogIn className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Button
-            onClick={() => {
-              setAuthModalMode('login');
-              setAuthModalOpen(true);
-            }}
-            variant="outline"
-            size="sm"
-            className="bg-background/80 backdrop-blur-sm"
-          >
-            <span className="hidden sm:inline">Sign In</span>
-            <LogIn className="w-4 h-4 sm:hidden" />
-          </Button>
-        )}
-        <Button
-          onClick={() => navigate('/bookmarks')}
-          size="sm"
-          className="bg-primary/80 backdrop-blur-sm"
-        >
-          <span className="hidden sm:inline">Bookmarks</span>
-          <BookMarked className="w-4 h-4 sm:hidden" />
-        </Button>
+      {/* Header */}
+      <Header />
+
+      {/* Theme Toggle - Visible on all devices */}
+      <div className={`fixed top-20 right-4 z-50 flex gap-2 transition-opacity duration-500 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <Button
           onClick={toggleTheme}
           size="sm"
@@ -268,13 +167,6 @@ const Index = () => {
         </Button>
       </div>
 
-      {/* Auth Modal */}
-      <AuthModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)}
-        initialMode={authModalMode}
-      />
-
       {/* New Hero Section with Gradient Background */}
       <HeroSection 
         searchQuery={searchQuery}
@@ -282,9 +174,9 @@ const Index = () => {
         onRandomBook={getRandomBook}
       />
 
-      {/* Top Books Carousel */}
-      <div id="top-books">
-        <TopBooks />
+      {/* Trending Books Section */}
+      <div id="trending-books">
+        <TrendingBooks />
       </div>
 
       {/* Books Grid - Browse Collection (moved above categories and library) */}
@@ -408,8 +300,6 @@ const Index = () => {
       <div id="library">
         <ReadingList />
       </div>
-
-      {/* Upload Section removed as per requirement */}
 
       <Footer />
     </div>

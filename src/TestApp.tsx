@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
-import { supabase } from "@/integrations/supabase/client";
 
 // Test individual components
 const TestApp = () => {
   const [tests, setTests] = useState({
     react: false,
     theme: false,
-    supabase: false,
     assets: false,
     router: false
   });
@@ -21,19 +19,7 @@ const TestApp = () => {
     // Test 2: Theme Context
     setTests(prev => ({ ...prev, theme: true }));
 
-    // Test 3: Supabase
-    const testSupabase = async () => {
-      try {
-        const { data, error } = await supabase.from("books").select("count").limit(1);
-        setTests(prev => ({ ...prev, supabase: !error }));
-      } catch (error) {
-        console.log("Supabase test failed (expected with placeholder credentials):", error);
-        setTests(prev => ({ ...prev, supabase: false }));
-      }
-    };
-    testSupabase();
-
-    // Test 4: Assets
+    // Test 3: Assets
     const testAssets = async () => {
       try {
         const response = await fetch('/src/assets/covers/hp1.jpg');
@@ -45,7 +31,7 @@ const TestApp = () => {
     };
     testAssets();
 
-    // Test 5: Router
+    // Test 4: Router
     setTests(prev => ({ ...prev, router: true }));
   }, []);
 
@@ -74,19 +60,14 @@ const TestApp = () => {
         </div>
 
         <div style={{ padding: '15px', border: '2px solid #ccc', borderRadius: '8px' }}>
-          <h2>Test 4: Supabase {tests.supabase ? '✅' : '⚠️'}</h2>
-          <p>Supabase connection: {tests.supabase ? 'Connected' : 'Using fallback (expected with placeholder credentials)'}</p>
-        </div>
-
-        <div style={{ padding: '15px', border: '2px solid #ccc', borderRadius: '8px' }}>
-          <h2>Test 5: Assets {tests.assets ? '✅' : '❌'}</h2>
+          <h2>Test 4: Assets {tests.assets ? '✅' : '❌'}</h2>
           <p>Asset loading: {tests.assets ? 'Working' : 'Failed'}</p>
         </div>
       </div>
 
       <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f0f0f0', borderRadius: '8px' }}>
         <h3>🎯 Next Steps</h3>
-        <p>If all tests pass, go to <a href="/main" style={{ color: 'blue' }}>/main</a> to see the full application.</p>
+        <p>If all tests pass, go to <a href="/" style={{ color: 'blue' }}>/</a> to see the full application.</p>
         <p>If tests fail, we'll fix them individually.</p>
       </div>
     </div>

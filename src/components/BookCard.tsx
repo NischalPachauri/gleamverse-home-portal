@@ -10,32 +10,16 @@ import { Book } from "@/data/books";
 import { useState, useEffect } from "react";
 // Removed old book cover generator import - using new SVG covers
 
-// Import Harry Potter covers
-import hp1 from "@/assets/covers/hp1.jpg";
-import hp2 from "@/assets/covers/hp2.jpg";
-import hp3 from "@/assets/covers/hp3.jpg";
-import hp4 from "@/assets/covers/hp4.jpg";
-import hp5 from "@/assets/covers/hp5.jpg";
-import hp6 from "@/assets/covers/hp6.jpg";
-import hp7 from "@/assets/covers/hp7.jpg";
-import hp8 from "@/assets/covers/hp8.jpg";
-
-const harryPotterCovers: Record<string, string> = {
-  hp1, hp2, hp3, hp4, hp5, hp6, hp7, hp8
-};
+// Import custom book cover mapper
+// Removed bookCoverMapper import - no longer needed
 
 // Function to get cover image path
 const getCoverImage = (book: Book) => {
-  // First check if we have a generated SVG cover
+  // Check if we have a generated SVG cover
   const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
   if (bookFileName) {
     // Use the generated SVG cover
     return `/book-covers/${bookFileName}`;
-  }
-  
-  // Fallback to Harry Potter covers if available
-  if (harryPotterCovers[book.coverImage]) {
-    return harryPotterCovers[book.coverImage];
   }
   
   // Final fallback: Use a placeholder
@@ -43,8 +27,8 @@ const getCoverImage = (book: Book) => {
 };
 
 const isPlaceholderCover = (book: Book) => {
-  // Only Harry Potter books have real covers
-  return !harryPotterCovers[book.coverImage];
+  // All books use placeholder covers for now
+  return true;
 };
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {

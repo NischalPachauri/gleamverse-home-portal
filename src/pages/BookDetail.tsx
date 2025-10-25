@@ -3,31 +3,12 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PDFReader } from "@/components/PDFReader";
 import { books } from "@/data/books";
-import { getBookCover } from "@/utils/bookCoverGenerator";
-
-// Import Harry Potter covers
-import hp1 from "@/assets/covers/hp1.jpg";
-import hp2 from "@/assets/covers/hp2.jpg";
-import hp3 from "@/assets/covers/hp3.jpg";
-import hp4 from "@/assets/covers/hp4.jpg";
-import hp5 from "@/assets/covers/hp5.jpg";
-import hp6 from "@/assets/covers/hp6.jpg";
-import hp7 from "@/assets/covers/hp7.jpg";
-import hp8 from "@/assets/covers/hp8.jpg";
-
-const harryPotterCovers: Record<string, string> = {
-  hp1, hp2, hp3, hp4, hp5, hp6, hp7, hp8
-};
+// Removed bookCoverGenerator import - no longer needed
 
 // Function to get cover image path
 const getCoverImage = (book: typeof books[0]) => {
-  // For Harry Potter covers, use the imported images
-  if (harryPotterCovers[book.coverImage]) {
-    return harryPotterCovers[book.coverImage];
-  }
-  
-  // For all other books, generate beautiful covers
-  return getBookCover(book);
+  // For all books, use a placeholder for now
+  return '/placeholder.svg';
 };
 
 const BookDetail = () => {

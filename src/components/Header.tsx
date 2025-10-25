@@ -11,9 +11,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
-  User, LogOut, BookMarked, Settings, Library, 
-  Moon, Sun, Menu, X, LogIn, UserPlus, History,
-  BookOpen
+  User, LogOut, BookMarked, Settings, 
+  Moon, Sun, Menu, X, LogIn, UserPlus
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -67,66 +66,43 @@ export function Header() {
 
   return (
     <>
-      <header className={`sticky top-0 z-40 w-full border-b transition-all duration-300 ${
-        scrolled ? 'bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60' : 'bg-background'
-      }`}>
+      <header className="sticky top-0 z-40 w-full bg-gradient-to-r from-blue-900 to-blue-700 text-white">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 font-bold text-xl">
-              <Library className="h-6 w-6 text-primary" />
-              <span className="hidden sm:inline">Gleam Verse</span>
+              <span>GleamVerse</span>
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
               <Link 
                 to="/" 
-                className="text-sm font-medium transition-colors hover:text-primary"
+                className="text-sm font-medium transition-colors hover:text-blue-200"
               >
                 Browse
               </Link>
               {isAuthenticated && (
-                <>
-                  <Link 
-                    to="/bookmarks" 
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    My Library
-                  </Link>
-                  <Link 
-                    to="/reading-history" 
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                  >
-                    Reading History
-                  </Link>
-                </>
+                <Link 
+                  to="/bookmarks" 
+                  className="text-sm font-medium transition-colors hover:text-blue-200"
+                >
+                  Bookmarks
+                </Link>
               )}
             </nav>
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-4">
-              {/* Theme Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="h-9 w-9"
-              >
-                {theme === "light" ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
-
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                      <Avatar className="h-9 w-9">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Button 
+                      variant="ghost" 
+                      className="relative h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 text-white"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-blue-600 text-white">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
@@ -159,10 +135,6 @@ export function Header() {
                       <History className="mr-2 h-4 w-4" />
                       Reading History
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/settings')}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
@@ -171,24 +143,43 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="flex gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => openAuthModal('login')}
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Sign in
-                  </Button>
-                  <Button 
-                    size="sm"
-                    onClick={() => openAuthModal('register')}
-                  >
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Sign up
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openAuthModal('login')}
+                  className="bg-transparent border-white text-white hover:bg-white/20"
+                >
+                  Sign In
+                </Button>
               )}
+              
+              {/* Bookmarks Button */}
+              {isAuthenticated && (
+                <Link to="/bookmarks">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-transparent border-white text-white hover:bg-white/20"
+                  >
+                    Bookmarks
+                  </Button>
+                </Link>
+              )}
+              
+              {/* Theme Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-9 w-9 text-white hover:bg-white/20"
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
+                <span className="sr-only">Toggle theme</span>
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}

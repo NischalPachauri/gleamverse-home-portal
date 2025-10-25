@@ -15,5 +15,10 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+  },
+  global: {
+    fetch: (...args) => fetch(...args),
+    headers: { 'X-Client-Info': 'gleamverse-home-portal' },
   }
 });
+

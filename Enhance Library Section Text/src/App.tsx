@@ -117,7 +117,7 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-6 py-14 relative z-10">
         {/* Trending Section */}
         <div className="mb-20">
-          <h2 className="text-4xl font-bold text-center mb-10 text-cyan-600 dark:text-cyan-400">
+          <h2 className="text-4xl font-bold text-center mb-16 text-cyan-600 dark:text-cyan-400">
             🔥 Hot Reads Right Now
           </h2>
           

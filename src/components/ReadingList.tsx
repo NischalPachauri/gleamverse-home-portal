@@ -2,76 +2,43 @@ import { useState, useEffect, useCallback } from "react";
 import { BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { books } from "@/data/books";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
-import { getBookCover } from "@/utils/bookCoverGenerator";
 
-// Import cover images
-import hp1 from "@/assets/covers/hp1.jpg";
-import hp2 from "@/assets/covers/hp2.jpg";
-import hp3 from "@/assets/covers/hp3.jpg";
-import hp4 from "@/assets/covers/hp4.jpg";
-import hp5 from "@/assets/covers/hp5.jpg";
-import hp6 from "@/assets/covers/hp6.jpg";
-import hp7 from "@/assets/covers/hp7.jpg";
-import hp8 from "@/assets/covers/hp8.jpg";
-
-const coverImages: Record<string, string> = {
-  hp1, hp2, hp3, hp4, hp5, hp6, hp7, hp8
+// Function to get cover image path
+const getCoverImage = (book: typeof books[0]) => {
+  // For all books, use a placeholder for now
+  return '/placeholder.svg';
 };
 
 export const ReadingList = () => {
   const [readingList, setReadingList] = useState<string[]>([]);
   const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.2 });
-  const [sessionId] = useState(() => {
-    let id = localStorage.getItem("sessionId");
-    if (!id) {
-      id = Math.random().toString(36).substring(7);
-      localStorage.setItem("sessionId", id);
-    }
-    return id;
-  });
 
   const loadReadingList = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("user_library")
-        .select("book_id")
-        .eq("user_session_id", sessionId);
-
-      if (error) {
-        console.error("Error loading reading list:", error);
-        setReadingList([]);
-        return;
-      }
-
-      setReadingList(data?.map((item) => item.book_id) || []);
+      const localList = localStorage.getItem("readingList");
+      setReadingList(localList ? JSON.parse(localList) : []);
     } catch (error) {
-      console.error("Error loading reading list:", error);
+      console.warn("Failed to load reading list:", error);
       setReadingList([]);
     }
-  }, [sessionId]);
+  }, []);
 
   useEffect(() => {
     loadReadingList();
   }, [loadReadingList]);
 
   const removeFromList = async (bookId: string) => {
-    const { error } = await supabase
-      .from("user_library")
-      .delete()
-      .eq("book_id", bookId)
-      .eq("user_session_id", sessionId);
-
-    if (error) {
+    try {
+      const updatedList = readingList.filter(id => id !== bookId);
+      setReadingList(updatedList);
+      localStorage.setItem("readingList", JSON.stringify(updatedList));
+      toast.success("Book removed from your library");
+    } catch (error) {
       toast.error("Failed to remove book");
-      return;
     }
-
-    toast.success("Book removed from your library");
-    loadReadingList();
   };
 
   const libraryBooks = books.filter((book) => readingList.includes(book.id));
@@ -114,10 +81,10 @@ export const ReadingList = () => {
             >
               <Link to={`/book/${book.id}`}>
                 <img
-                  src={coverImages[book.coverImage] || getBookCover(book)}
+                  src={getCoverImage(book)}
                   alt={book.title}
                   className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg transition-transform duration-300"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src=getBookCover(book); }}
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }}
                 />
               </Link>
               {statusMap[book.id] && (

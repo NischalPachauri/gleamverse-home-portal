@@ -8,10 +8,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
 import Bookmarks from "./pages/Bookmarks";
-import ReadingHistory from "./pages/ReadingHistory";
-import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
-import Admin from "./pages/Admin";
+import AuthCallback from "./pages/AuthCallback";
+import NotFound from "./pages/NotFound";
 import TestApp from "./TestApp";
 
 const queryClient = new QueryClient();
@@ -34,18 +33,19 @@ const App = () => {
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/test" element={<TestApp />} />
-                  <Route path="/book/:id" element={<BookDetail />} />
-                  <Route path="/bookmarks" element={<Bookmarks />} />
-                  <Route path="/reading-history" element={<ReadingHistory />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/component-test" element={<TestComponent />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
+                <div className="min-h-screen light:bg-[#f0f8ff]">
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/test" element={<TestApp />} />
+                    <Route path="/book/:id" element={<BookDetail />} />
+                    <Route path="/bookmarks" element={<Bookmarks />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/auth/callback" element={<AuthCallback />} />
+                    <Route path="/component-test" element={<TestComponent />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </div>
               </BrowserRouter>
             </TooltipProvider>
           </AuthProvider>
