@@ -1,11 +1,29 @@
 import { Button } from "./ui/button";
-import { Moon, Sun, Bookmark, Sparkles, X, Search } from "lucide-react";
+import { Moon, Sun, Bookmark, Sparkles, X, Search, User, Settings, LogOut, HelpCircle, CreditCard } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { toast } from 'sonner';
 import { books } from "@/data/books";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "./ui/dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Separator } from "./ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 export function EnhancedHeroSection({ 
   searchQuery, 
@@ -28,10 +46,23 @@ export function EnhancedHeroSection({
     };
   }, []);
   const { theme, toggleTheme } = useTheme();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, signOut } = useAuth();
   const navigate = useNavigate();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
+  
+  // Add comprehensive debugging logs for authentication state
+  useEffect(() => {
+    console.log('Authentication state changed:', { 
+      isAuthenticated, 
+      userId: user?.id,
+      email: user?.email,
+      metadata: user?.user_metadata,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Welcome toast notification removed as requested
+  }, [isAuthenticated, user]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchResults, setSearchResults] = useState<typeof books>([]);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -183,20 +214,116 @@ export function EnhancedHeroSection({
           
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className={`backdrop-blur-md ${theme === 'dark' ? 'text-cyan-100 hover:bg-white/20 bg-white/10 border border-cyan-400/30' : 'text-blue-900 hover:bg-white/60 bg-white/40 border border-blue-300/50'} transition-all`}
-                onClick={() => navigate('/profile')}
-              >
-                Profile
-              </Button>
+              <>
+                {/* Profile Modal */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className={`rounded-full overflow-hidden p-0 h-10 w-10 transition-all duration-300 ${theme === 'dark' ? 'hover:bg-white/20 bg-white/10 border-2 border-cyan-400/50' : 'hover:bg-white/60 bg-white/40 border-2 border-blue-300/70'} hover:scale-105 shadow-md`}
+                      aria-label="Open profile menu"
+                    >
+                      <Avatar className="h-full w-full">
+                        <AvatarImage 
+                          src={user?.user_metadata?.avatar_url || user?.photoURL || ""} 
+                          alt={user?.user_metadata?.full_name || user?.displayName || "User"} 
+                          onError={(e) => console.log("Avatar image failed to load:", e)}
+                        />
+                        <AvatarFallback className={`text-lg font-medium ${theme === 'dark' ? 'bg-cyan-700 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                          {user?.user_metadata?.full_name 
+                            ? user.user_metadata.full_name.charAt(0).toUpperCase() 
+                            : user?.email
+                              ? user.email.charAt(0).toUpperCase()
+                              : "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className={`w-56 ${theme === 'dark' ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'}`}>
+                    <div className={`p-2 ${theme === 'dark' ? 'bg-gradient-to-r from-cyan-900/50 to-blue-900/50' : 'bg-gradient-to-r from-cyan-100 to-blue-100'} rounded-t-md`}>
+                      <div className="flex items-center gap-2 p-2">
+                        <Avatar className="h-10 w-10 border border-white/50">
+                          <AvatarImage src={user?.user_metadata?.avatar_url || user?.photoURL || ""} alt={user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"} />
+                          <AvatarFallback className={`text-sm font-medium ${theme === 'dark' ? 'bg-cyan-700 text-white' : 'bg-blue-100 text-blue-800'}`}>
+                            {user?.user_metadata?.full_name 
+                              ? user.user_metadata.full_name.charAt(0).toUpperCase() 
+                              : user?.email ? user.email.charAt(0).toUpperCase() : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <DropdownMenuLabel className="p-0 text-base font-semibold">
+                            {user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"}
+                          </DropdownMenuLabel>
+                          <p className="text-xs opacity-70 truncate max-w-[180px]">
+                            {user?.email || ""}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem 
+                      onClick={() => {
+                        console.log('Navigating to profile page');
+                        navigate('/profile');
+                      }} 
+                      className="font-medium hover:bg-primary/10"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      <span>View Profile</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/subscription')}>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      <span>Subscription details</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/settings')}>
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Saved preferences</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/help')}>
+                      <HelpCircle className="mr-2 h-4 w-4" />
+                      <span>Help/Support</span>
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
+                    <div className="p-2 flex justify-between items-center">
+                      <Button 
+                        variant="destructive" 
+                        onClick={() => signOut()}
+                        className="flex items-center text-xs h-8"
+                        size="sm"
+                      >
+                        <LogOut className="mr-2 h-3 w-3" />
+                        <span>Sign out</span>
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        size="icon"
+                        onClick={toggleTheme}
+                        className="rounded-full h-8 w-8"
+                      >
+                        {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
+                      </Button>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <Button 
                 variant="ghost" 
                 size="sm"
                 className={`backdrop-blur-md ${theme === 'dark' ? 'text-cyan-100 hover:bg-white/20 bg-white/10 border border-cyan-400/30' : 'text-blue-900 hover:bg-white/60 bg-white/40 border border-blue-300/50'} transition-all`}
-                onClick={() => openAuthModal('login')}
+                onClick={() => {
+                  console.log('Opening auth modal for login');
+                  openAuthModal('login');
+                }}
               >
                 Sign In
               </Button>

@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Badge } from '@/components/ui/badge';
 import { SearchBar } from '@/components/SearchBar';
+import { TestProfileIcon } from '@/components/TestProfileIcon';
 
 export function Header() {
   const navigate = useNavigate();
@@ -37,6 +38,15 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  
+  // Add effect to log authentication state changes for debugging
+  useEffect(() => {
+    console.log("Header component - Authentication state:", { isAuthenticated, userId: user?.id });
+    // Force component re-render when authentication state changes
+    if (isAuthenticated && user?.id) {
+      console.log("User is authenticated, updating UI");
+    }
+  }, [isAuthenticated, user]);
 
   const openAuthModal = (mode: 'login' | 'register') => {
     setAuthModalMode(mode);
@@ -96,6 +106,9 @@ export function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-4">
+              {/* Test Profile Icon - appears adjacent to sign-in button */}
+              <TestProfileIcon />
+              
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -114,7 +127,7 @@ export function Header() {
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          {user?.user_metadata?.full_name || 'Reader'}
+                          {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
                         </p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user?.email}

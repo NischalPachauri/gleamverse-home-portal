@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import TestApp from "./TestApp";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -24,38 +25,51 @@ const TestComponent = () => (
 );
 
 const App = () => {
-  try {
-    return (
+  return (
+    <ErrorBoundary name="Root">
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <div className="min-h-screen dark:bg-background" style={{ backgroundColor: 'var(--background-color)', visibility: 'visible', opacity: 1 }}>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/test" element={<TestApp />} />
-                    <Route path="/book/:id" element={<BookDetail />} />
-                    <Route path="/bookmarks" element={<Bookmarks />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route path="/auth/callback" element={<AuthCallback />} />
-                    <Route path="/component-test" element={<TestComponent />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </div>
-              </BrowserRouter>
-            </TooltipProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <ErrorBoundary name="ThemeProvider">
+          <ThemeProvider>
+            <ErrorBoundary name="AuthProvider">
+              <AuthProvider>
+                <TooltipProvider>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <div className="min-h-screen dark:bg-background" style={{ backgroundColor: 'var(--background-color)', visibility: 'visible', opacity: 1 }}>
+                      <Routes>
+                        <Route path="/" element={
+                          <ErrorBoundary name="IndexPage">
+                            <Index />
+                          </ErrorBoundary>
+                        } />
+                        <Route path="/test" element={<TestApp />} />
+                        <Route path="/book/:id" element={<BookDetail />} />
+                        <Route path="/bookmarks" element={<Bookmarks />} />
+                        <Route path="/profile" element={
+                          <ErrorBoundary name="ProfilePage">
+                            <Profile />
+                          </ErrorBoundary>
+                        } />
+                        <Route path="/auth/callback" element={
+                          <ErrorBoundary name="AuthCallback">
+                            <AuthCallback />
+                          </ErrorBoundary>
+                        } />
+                        <Route path="/component-test" element={<TestComponent />} />
+                        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </div>
+                  </BrowserRouter>
+                </TooltipProvider>
+              </AuthProvider>
+            </ErrorBoundary>
+          </ThemeProvider>
+        </ErrorBoundary>
       </QueryClientProvider>
-    );
-  } catch (error) {
-    console.error('App error:', error);
-    return <TestComponent />;
-  }
+    </ErrorBoundary>
+  );
 };
 
 export default App;

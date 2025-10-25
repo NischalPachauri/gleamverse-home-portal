@@ -77,12 +77,34 @@ export function RegisterForm({ onToggleMode, onClose }: RegisterFormProps) {
 
     setIsLoading(true);
     try {
-      await signUp(email, password, fullName);
-      onClose();
+      // Log registration attempt for debugging
+      console.log('Attempting registration with form data:', { email, fullName });
+      
+      const user = await signUp(email, password, fullName);
+      
+      if (user) {
+        console.log('Registration successful, closing modal');
+        onClose();
+      } else {
+        // Handle case where signUp returns null but doesn't throw
+        console.warn('Registration returned null without throwing an error');
+        setErrors({
+          general: 'Registration could not be completed. Please try again later.'
+        });
+      }
     } catch (error: any) {
-      setErrors({
-        general: error.message || 'Failed to create account. Please try again.'
-      });
+      console.error('Registration form error:', error);
+      
+      // Handle API key errors specifically
+      if (error.message?.includes('API key') || error.message?.includes('Invalid API key')) {
+        setErrors({
+          general: 'Authentication service is temporarily unavailable. Please try again later.'
+        });
+      } else {
+        setErrors({
+          general: error.message || 'Failed to create account. Please try again.'
+        });
+      }
     } finally {
       setIsLoading(false);
     }

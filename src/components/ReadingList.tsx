@@ -85,7 +85,7 @@ export const ReadingList = () => {
 
   if (libraryBooks.length === 0) {
     return (
-      <section ref={sectionRef} className={`py-12 bg-muted/30 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <section ref={sectionRef} className={`py-12 bg-blue-50 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-3 mb-8">
             <BookOpen className="w-8 h-8 text-primary" />
@@ -100,14 +100,14 @@ export const ReadingList = () => {
   }
 
   return (
-    <section ref={sectionRef} className={`py-12 bg-muted/30 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+    <section ref={sectionRef} className={`py-12 bg-blue-50 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-center gap-3 mb-8">
+        <div className="flex items-center justify-center gap-3 mb-10">
           <BookOpen className="w-8 h-8 text-primary" />
           <h2 className="text-4xl font-bold text-foreground">Your Library</h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 px-2">
           {libraryBooks.map((book, index) => (
             <div
               key={book.id}
@@ -131,7 +131,7 @@ export const ReadingList = () => {
                   />
                 </div>
                 {/* Book title */}
-                <div className="mt-2 text-center text-sm font-medium text-foreground">
+                <div className="mt-3 text-center text-sm font-medium text-foreground">
                   {book.title}
                 </div>
               </Link>

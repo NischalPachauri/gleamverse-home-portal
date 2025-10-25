@@ -3,28 +3,71 @@ import { toast } from 'sonner';
 import { createClient } from '@supabase/supabase-js';
 import { User } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://your-supabase-instance.supabase.co';
-const supabaseKey = 'your-supabase-key';
-const supabaseSecret = 'your-supabase-secret';
+// Primary API configuration
+const primarySupabaseUrl = 'https://elddklyslvhrgmrasuay.supabase.co';
+const primarySupabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsZGRrbHlzbHZocmdtcmFzdWF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjQ1NzksImV4cCI6MjA3NjkwMDU3OX0.03Bn1B5U4k7EMvMU22wzanAZ4j3S3kW3Xn47vNIlM1Y';
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Fallback API configuration for key rotation scenarios
+const fallbackSupabaseKey = localStorage.getItem('supabase_fallback_key') || primarySupabaseKey;
+
+// Function to handle key rotation
+const rotateApiKey = (newKey: string) => {
+  try {
+    localStorage.setItem('supabase_fallback_key', newKey);
+    console.log('API key rotated successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to rotate API key:', error);
+    return false;
+  }
+};
+
+// Validate API key format before initialization
+if (!primarySupabaseKey || primarySupabaseKey.trim() === '') {
+  console.error('Supabase API key is missing or invalid');
+}
+
+// Create Supabase client with enhanced configuration
+const supabase = createClient(primarySupabaseUrl, primarySupabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: {
+      'x-client-info': 'gleamverse-home-portal'
+    }
+  }
+});
+
+// Export key rotation function for use in error recovery
+export const refreshApiKey = () => {
+  // In a real implementation, this would fetch a new key from a secure source
+  // For this demo, we'll just use the fallback key
+  return rotateApiKey(fallbackSupabaseKey);
+};
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<User | null>;
+  isAuthenticated: boolean;
+  signUp: (email: string, password: string, fullName: string) => Promise<User | null>;
   signIn: (email: string, password: string) => Promise<User | null>;
   verifyOtp: (email: string, token: string) => Promise<User | null>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  isAuthenticated: false,
   signUp: async () => null,
   signIn: async () => null,
   verifyOtp: async () => null,
   signOut: async () => {},
+  resetPassword: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -32,38 +75,80 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthContextType['user']>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Check active sessions and sets the user
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session);
       setUser(session?.user ?? null);
+      setIsAuthenticated(!!session?.user);
       setLoading(false);
     });
 
     // Listen for changes on auth state (sign in, sign out, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
       setUser(session?.user ?? null);
+      setIsAuthenticated(!!session?.user);
       setLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, []); // Empty dependency array ensures this effect runs only once
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     setLoading(true);
     try {
+      // Log authentication attempt for debugging
+      console.log(`Attempting sign up for email: ${email} with API key present: ${!!primarySupabaseKey}`);
+      
+      // Validate inputs before submission
+      if (!email || !password) {
+        throw new Error('Email and password are required');
+      }
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
       });
 
-      if (error) throw error;
-
+      if (error) {
+        // Detailed error logging
+        console.error('Sign up API error:', {
+          status: error.status,
+          name: error.name,
+          message: error.message,
+          details: error.details
+        });
+        throw error;
+      }
+      
+      // Log successful registration
+      console.log('Registration successful for:', email);
+      toast.success('Registration successful! Please check your email to verify your account.');
       return data.user;
     } catch (error: any) {
-      toast.error(error.error_description || error.message);
+      // Enhanced error logging with structured data
+      console.error('Sign up error:', {
+        message: error.message,
+        description: error.error_description,
+        status: error.status,
+        stack: error.stack
+      });
+      
+      // User-friendly error messages
+      if (error.message?.includes('API key')) {
+        toast.error('Authentication service unavailable. Please try again later.');
+      } else {
+        toast.error(error.error_description || error.message || 'Failed to create account');
+      }
       return null;
     } finally {
       setLoading(false);
@@ -106,12 +191,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Please verify your email before signing in');
+        } else {
+          throw error;
+        }
+        return null;
+      }
 
+      toast.success('Signed in successfully!');
       setUser(data.user);
       return data.user;
     } catch (error: any) {
-      toast.error(error.error_description || error.message);
+      console.error('Sign in error:', error);
+      toast.error(error.error_description || error.message || 'Invalid email or password');
       return null;
     } finally {
       setLoading(false);
@@ -155,6 +249,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     user,
     loading,
+    isAuthenticated,
     signUp,
     verifyOtp,
     signIn,

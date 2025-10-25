@@ -51,7 +51,7 @@ export function TrendingBooks() {
 
   return (
     <div className="w-full overflow-hidden mb-8 pt-6">
-      <h2 className="text-3xl font-bold text-center mb-10 dark:text-white text-black">
+      <h2 className="text-4xl md:text-5xl font-bold text-center mb-10 dark:text-white text-black">
         🔥 Hot Reads Right Now
       </h2>
       

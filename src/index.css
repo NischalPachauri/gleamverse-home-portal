@@ -143,53 +143,224 @@ All colors MUST be HSL.
   html:not(.dark) body, body:not(.dark) {
     background-color: #f0f8ff !important;
   }
+}
 
-  /* Light theme background with soft pastel gradient */
-  :root {
-    background: linear-gradient(135deg, 
-      hsl(208 100% 97%) 0%, 
-      hsl(208 100% 96%) 25%, 
-      hsl(208 100% 97%) 50%, 
-      hsl(208 100% 95%) 75%, 
-      hsl(208 100% 97%) 100%);
-    background-attachment: fixed;
-    background-size: 400% 400%;
-    animation: light-bg-drift 30s ease-in-out infinite;
+/* Section backgrounds for enhanced UI - More Visible Gradients */
+
+/* Light theme - Vibrant purple to blue gradients matching hero */
+#trending-books {
+  position: relative;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    hsl(262 83% 58% / 0.04) 5%,
+    hsl(252 70% 50% / 0.06) 20%,
+    hsl(240 60% 60% / 0.05) 50%,
+    hsl(220 70% 65% / 0.04) 80%,
+    hsl(200 80% 70% / 0.02) 95%,
+    transparent 100%);
+  padding: 2rem 0;
+}
+
+/* Dark theme - Deep purple to cyan gradients */
+.dark #trending-books {
+  background: linear-gradient(180deg,
+    transparent 0%,
+    hsl(260 85% 45% / 0.08) 5%,
+    hsl(250 80% 40% / 0.12) 20%,
+    hsl(220 75% 35% / 0.10) 50%,
+    hsl(200 90% 40% / 0.08) 80%,
+    hsl(180 85% 35% / 0.04) 95%,
+    transparent 100%);
+}
+
+/* Browse section with vibrant mesh gradient - Light */
+#browse {
+  position: relative;
+  background: 
+    linear-gradient(180deg,
+      transparent 0%,
+      hsl(208 100% 96% / 0.3) 5%,
+      hsl(210 100% 97% / 0.5) 15%,
+      hsl(210 100% 98% / 0.6) 50%,
+      hsl(210 100% 97% / 0.5) 85%,
+      hsl(208 100% 96% / 0.3) 95%,
+      transparent 100%),
+    radial-gradient(ellipse at 30% 20%, hsl(262 83% 58% / 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, hsl(200 80% 60% / 0.06) 0%, transparent 50%);
+}
+
+/* Browse section - Dark theme */
+.dark #browse {
+  background: 
+    linear-gradient(180deg,
+      transparent 0%,
+      hsl(220 30% 10% / 0.4) 5%,
+      hsl(220 28% 11% / 0.6) 15%,
+      hsl(220 28% 12% / 0.7) 50%,
+      hsl(220 28% 11% / 0.6) 85%,
+      hsl(220 30% 10% / 0.4) 95%,
+      transparent 100%),
+    radial-gradient(ellipse at 30% 20%, hsl(260 85% 65% / 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, hsl(200 90% 50% / 0.12) 0%, transparent 50%);
+}
+
+/* Categories section with flowing gradient - Light */
+#categories {
+  position: relative;
+  background: 
+    linear-gradient(180deg,
+      transparent 0%,
+      hsl(208 100% 95% / 0.3) 5%,
+      hsl(210 100% 96% / 0.5) 15%,
+      hsl(210 100% 97% / 0.6) 50%,
+      hsl(210 100% 96% / 0.5) 85%,
+      hsl(208 100% 95% / 0.3) 95%,
+      transparent 100%),
+    linear-gradient(90deg, 
+      transparent 0%,
+      hsl(262 83% 58% / 0.05) 20%,
+      hsl(240 60% 60% / 0.04) 50%,
+      hsl(200 80% 70% / 0.05) 80%,
+      transparent 100%);
+  overflow: hidden;
+}
+
+/* Categories section - Dark theme */
+.dark #categories {
+  background: 
+    linear-gradient(180deg,
+      transparent 0%,
+      hsl(220 30% 8% / 0.4) 5%,
+      hsl(220 28% 9% / 0.6) 15%,
+      hsl(220 28% 10% / 0.7) 50%,
+      hsl(220 28% 9% / 0.6) 85%,
+      hsl(220 30% 8% / 0.4) 95%,
+      transparent 100%),
+    linear-gradient(90deg, 
+      transparent 0%,
+      hsl(260 85% 65% / 0.10) 20%,
+      hsl(240 75% 50% / 0.08) 50%,
+      hsl(200 90% 50% / 0.10) 80%,
+      transparent 100%);
+}
+
+/* Library section with animated gradient waves - Light */
+#library {
+  position: relative;
+  background: 
+    linear-gradient(180deg,
+      transparent 0%,
+      hsl(208 100% 96% / 0.3) 5%,
+      hsl(210 100% 97% / 0.5) 15%,
+      hsl(210 100% 98% / 0.6) 50%,
+      hsl(210 100% 97% / 0.5) 85%,
+      hsl(208 100% 96% / 0.3) 95%,
+      transparent 100%),
+    linear-gradient(45deg, 
+      hsl(262 83% 58% / 0.04) 0%,
+      hsl(252 70% 50% / 0.03) 25%,
+      hsl(240 60% 60% / 0.02) 50%,
+      hsl(200 80% 70% / 0.03) 75%,
+      hsl(190 85% 75% / 0.04) 100%);
+  overflow: hidden;
+}
+
+#library::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    hsl(262 83% 58% / 0.05) 25%,
+    hsl(200 80% 60% / 0.05) 50%,
+    hsl(252 70% 50% / 0.05) 75%,
+    transparent 100%);
+  animation: wave-flow 20s linear infinite;
+}
+
+/* Library section - Dark theme */
+.dark #library {
+  background: 
+    linear-gradient(180deg,
+      transparent 0%,
+      hsl(220 30% 9% / 0.4) 5%,
+      hsl(220 28% 10% / 0.6) 15%,
+      hsl(220 28% 11% / 0.7) 50%,
+      hsl(220 28% 10% / 0.6) 85%,
+      hsl(220 30% 9% / 0.4) 95%,
+      transparent 100%),
+    linear-gradient(45deg, 
+      hsl(260 85% 65% / 0.08) 0%,
+      hsl(250 80% 55% / 0.06) 25%,
+      hsl(240 75% 50% / 0.05) 50%,
+      hsl(200 90% 50% / 0.06) 75%,
+      hsl(180 85% 45% / 0.08) 100%);
+}
+
+.dark #library::before {
+  background: linear-gradient(90deg,
+    transparent 0%,
+    hsl(260 85% 65% / 0.10) 25%,
+    hsl(200 90% 50% / 0.10) 50%,
+    hsl(280 85% 50% / 0.10) 75%,
+    transparent 100%);
+}
+
+@keyframes wave-flow {
+  from { transform: translateX(0); }
+  to { transform: translateX(50%); }
+}
+
+/* Remove harsh dividers - sections now fade smoothly */
+
+/* Light theme background with soft pastel gradient */
+:root {
+  background: linear-gradient(135deg, 
+    hsl(208 100% 97%) 0%, 
+    hsl(208 100% 96%) 25%, 
+    hsl(208 100% 97%) 50%, 
+    hsl(208 100% 95%) 75%, 
+    hsl(208 100% 97%) 100%);
+  background-attachment: fixed;
+  background-size: 400% 400%;
+  animation: light-bg-drift 30s ease-in-out infinite;
+}
+
+/* Dark theme background with deep teal particle effect */
+.dark {
+  background: 
+    radial-gradient(circle at 20% 20%, hsl(180 40% 15%) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, hsl(180 35% 12%) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, hsl(180 30% 8%) 0%, transparent 70%),
+    linear-gradient(135deg, 
+      hsl(180 25% 6%) 0%, 
+      hsl(180 30% 8%) 25%, 
+      hsl(180 25% 6%) 50%, 
+      hsl(180 20% 4%) 75%, 
+      hsl(180 25% 6%) 100%);
+  background-attachment: fixed;
+  background-size: 200% 200%, 200% 200%, 300% 300%, 400% 400%;
+  animation: dark-bg-drift 25s ease-in-out infinite;
+}
+
+@keyframes light-bg-drift {
+  0%, 100% {
+    background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%;
   }
-
-  /* Dark theme background with deep teal particle effect */
-  .dark {
-    background: 
-      radial-gradient(circle at 20% 20%, hsl(180 40% 15%) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, hsl(180 35% 12%) 0%, transparent 50%),
-      radial-gradient(circle at 50% 50%, hsl(180 30% 8%) 0%, transparent 70%),
-      linear-gradient(135deg, 
-        hsl(180 25% 6%) 0%, 
-        hsl(180 30% 8%) 25%, 
-        hsl(180 25% 6%) 50%, 
-        hsl(180 20% 4%) 75%, 
-        hsl(180 25% 6%) 100%);
-    background-attachment: fixed;
-    background-size: 200% 200%, 200% 200%, 300% 300%, 400% 400%;
-    animation: dark-bg-drift 25s ease-in-out infinite;
+  50% {
+    background-position: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
   }
+}
 
-  @keyframes light-bg-drift {
-    0%, 100% {
-      background-position: 0% 0%, 0% 0%, 0% 0%, 0% 0%;
-    }
-    50% {
-      background-position: 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-    }
+@keyframes dark-bg-drift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 100%, 0% 0%, 0% 0%;
   }
-
-  @keyframes dark-bg-drift {
-    0%, 100% {
-      background-position: 0% 0%, 100% 100%, 0% 0%, 0% 0%;
-    }
-    50% {
-      background-position: 100% 100%, 0% 0%, 50% 50%, 100% 100%;
-    }
+  50% {
+    background-position: 100% 100%, 0% 0%, 50% 50%, 100% 100%;
   }
 }
 
