@@ -18,6 +18,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Badge } from '@/components/ui/badge';
+import { SearchBar } from '@/components/SearchBar';
 
 export function Header() {
   const navigate = useNavigate();
@@ -90,6 +91,7 @@ export function Header() {
                   Bookmarks
                 </Link>
               )}
+              <SearchBar />
             </nav>
 
             {/* Desktop Actions */}

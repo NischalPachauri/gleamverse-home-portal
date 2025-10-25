@@ -2,15 +2,24 @@ import { Link } from "react-router-dom";
 import { 
   Download, BookOpen, MoreVertical, Check, Sparkles, Heart, BookMarked, Baby, 
   Landmark, FlaskConical, Globe, Scroll, Swords, Brain, Users, GraduationCap,
-  Castle, Fingerprint, Scale, Briefcase, Rocket, TreePine, Palette, Music
+  Castle, Fingerprint, Scale, Briefcase, Rocket, TreePine, Palette, Music,
+  Clock, CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getBookCover } from "@/utils/bookCoverMapping";
-import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
+import { useLocalBookmarks, statusOptions } from "@/hooks/useLocalBookmarks";
 import { toast } from "sonner";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { ReadingStatusBadge } from "@/components/ReadingStatusBadge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 // Function to get cover image path
 const getCoverImage = (book: Book) => {
@@ -77,30 +86,54 @@ interface BookCardProps {
 
 export function BookCard({ book }: { book: Book }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { bookmarkedBooks, addBookmark, removeBookmark } = useLocalBookmarks();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { bookmarkedBooks, addBookmark, removeBookmark, bookmarkStatuses, updateBookmarkStatus } = useLocalBookmarks();
   const isBookmarked = bookmarkedBooks.includes(book.id.toString());
-  const [status, setStatus] = useState<string>(() => {
-    try {
-      const raw = localStorage.getItem('bookStatus');
-      if (!raw) return '';
-      const map = JSON.parse(raw) as Record<string,string>;
-      return map[book.id] || '';
-    } catch { return ''; }
-  });
+  const bookStatus = bookmarkStatuses[book.id];
+  
+  // Handle clicks outside the menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  // Toggle bookmark status
+  const toggleBookmark = async () => {
+    if (isBookmarked) {
+      await removeBookmark(book.id);
+      toast.success(`Removed "${book.title}" from your bookmarks`);
+    } else {
+      await addBookmark(book.id);
+      toast.success(`Added "${book.title}" to your bookmarks`);
+    }
+  };
 
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(`[data-book-id="${book.id}"]`)) {
-        setMenuOpen(false);
+      if (menuOpen && event.target instanceof Element) {
+        const menuElement = document.getElementById(`book-menu-${book.id}`);
+        if (menuElement && !menuElement.contains(event.target)) {
+          setMenuOpen(false);
+        }
       }
     };
 
-    if (menuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [menuOpen, book.id]);
 
   // Close menu when another menu opens (global state)
@@ -135,7 +168,7 @@ export function BookCard({ book }: { book: Book }) {
         }
       }
       localStorage.setItem('bookStatus', JSON.stringify(map));
-      setStatus(newStatus);
+      updateBookmarkStatus(book.id, newStatus as any);
       setMenuOpen(false);
     } catch {}
   };
@@ -164,18 +197,34 @@ export function BookCard({ book }: { book: Book }) {
     <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
       <Link to={`/book/${book.id}`} className="block">
         <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
-          <img
+          <ImageWithFallback
             src={getCoverImage(book)}
             alt={book.title}
+            fallbackSrc="/placeholder.svg"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={(e) => {
-              // Fallback to placeholder if image fails to load
-              e.currentTarget.src = '/placeholder.svg';
-            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          {/* Section indicator icon - top left corner */}
+          {bookStatus && (
+            <div className="absolute top-2 left-2 z-10 p-1.5 rounded-full bg-background/80 backdrop-blur-sm shadow-md border border-primary/20">
+              {bookStatus === 'Planning to Read' && (
+                <BookOpen className="w-4 h-4 text-blue-500" />
+              )}
+              {bookStatus === 'Reading' && (
+                <BookMarked className="w-4 h-4 text-green-500" />
+              )}
+              {bookStatus === 'On Hold' && (
+                <Clock className="w-4 h-4 text-amber-500" />
+              )}
+              {bookStatus === 'Completed' && (
+                <CheckCircle2 className="w-4 h-4 text-purple-500" />
+              )}
+            </div>
+          )}
+          
           {/* Three-dot status menu */}
-          <div className="absolute top-2 right-2 z-30" data-book-id={book.id}>
+          <div className="absolute top-2 right-2 z-30 bookmark-dots" ref={menuRef} data-book-id={book.id}>
             <button
               className="h-8 w-8 rounded-full bg-background/70 hover:bg-background/90 border border-border shadow flex items-center justify-center"
               onClick={handleMenuToggle}
@@ -185,13 +234,13 @@ export function BookCard({ book }: { book: Book }) {
             </button>
             {menuOpen && (
               <div className="mt-2 right-0 absolute z-20 w-44 rounded-md border bg-card shadow-xl">
-                {['Planning to read','Reading','On hold','Completed'].map(opt => (
+                {['Planning to Read','Reading','On Hold','Completed'].map(opt => (
                   <button
                     key={opt}
                     onClick={async (e)=>{ e.preventDefault(); await setBookStatus(opt); }}
                     className="w-full text-left px-3 py-2 hover:bg-accent flex items-center gap-2"
                   >
-                    {status===opt && <Check className="w-4 h-4" />}<span>{opt}</span>
+                    {bookStatus===opt && <Check className="w-4 h-4" />}<span>{opt}</span>
                   </button>
                 ))}
                 <div className="h-px bg-border" />
@@ -238,9 +287,9 @@ export function BookCard({ book }: { book: Book }) {
             <span>•</span>
             <span>{book.genre}</span>
           </div>
-          {status && (
+          {bookStatus && (
             <div className="text-xs font-medium inline-flex items-center gap-2 rounded-full px-2 py-1 bg-primary/10 text-primary">
-              Status: {status}
+              Status: {bookStatus}
             </div>
           )}
         </div>

@@ -1,11 +1,45 @@
 import { useState, useEffect, useCallback } from 'react';
 import supabase from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+
+export interface BookmarkOperation {
+  status: 'idle' | 'loading' | 'success' | 'error';
+  error: string | null;
+}
 
 export function useBookmarks() {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [operationState, setOperationState] = useState<BookmarkOperation>({
+    status: 'idle',
+    error: null
+  });
   const { user } = useAuth();
+
+  // Set up real-time subscription for bookmark changes
+  useEffect(() => {
+    if (!user) return;
+    
+    // Subscribe to changes in the user_library table
+    const subscription = supabase
+      .channel('user_library_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'user_library',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        console.log('Real-time update received:', payload);
+        // Refresh bookmarks when changes occur
+        loadBookmarks();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user]);
 
   const loadBookmarks = useCallback(async () => {
     if (!user) {
@@ -14,6 +48,7 @@ export function useBookmarks() {
       return;
     }
 
+    setLoading(true);
     try {
       const { data, error } = await supabase
         .from('user_library')
@@ -26,6 +61,7 @@ export function useBookmarks() {
     } catch (error) {
       console.error('Error loading bookmarks:', error);
       setBookmarks([]);
+      toast.error('Failed to load your bookmarks. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -34,6 +70,11 @@ export function useBookmarks() {
   const addBookmark = async (bookId: string) => {
     if (!user) return false;
 
+    setOperationState({ status: 'loading', error: null });
+    
+    // Optimistically update UI
+    setBookmarks(prev => [...prev, bookId]);
+    
     try {
       const { error } = await supabase
         .from('user_library')
@@ -46,10 +87,18 @@ export function useBookmarks() {
 
       if (error) throw error;
 
-      setBookmarks(prev => [...prev, bookId]);
+      setOperationState({ status: 'success', error: null });
+      toast.success('Book added to your bookmarks');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding bookmark:', error);
+      // Revert optimistic update
+      setBookmarks(prev => prev.filter(id => id !== bookId));
+      setOperationState({ 
+        status: 'error', 
+        error: error.message || 'Failed to add bookmark' 
+      });
+      toast.error('Failed to add bookmark. Please try again.');
       return false;
     }
   };
@@ -57,6 +106,12 @@ export function useBookmarks() {
   const removeBookmark = async (bookId: string) => {
     if (!user) return false;
 
+    setOperationState({ status: 'loading', error: null });
+    
+    // Optimistically update UI
+    const previousBookmarks = [...bookmarks];
+    setBookmarks(prev => prev.filter(id => id !== bookId));
+    
     try {
       const { error } = await supabase
         .from('user_library')
@@ -66,10 +121,18 @@ export function useBookmarks() {
 
       if (error) throw error;
 
-      setBookmarks(prev => prev.filter(id => id !== bookId));
+      setOperationState({ status: 'success', error: null });
+      toast.success('Book removed from your bookmarks');
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing bookmark:', error);
+      // Revert optimistic update
+      setBookmarks(previousBookmarks);
+      setOperationState({ 
+        status: 'error', 
+        error: error.message || 'Failed to remove bookmark' 
+      });
+      toast.error('Failed to remove bookmark. Please try again.');
       return false;
     }
   };
@@ -89,6 +152,7 @@ export function useBookmarks() {
   return {
     bookmarks,
     loading,
+    operationState,
     addBookmark,
     removeBookmark,
     toggleBookmark,

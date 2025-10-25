@@ -127,6 +127,35 @@ const Index = () => {
       });
     }
   };
+  
+  // Handle direct page input
+  const [pageInputValue, setPageInputValue] = useState("1");
+  
+  // Update page input when page changes
+  useEffect(() => {
+    setPageInputValue((currentPage + 1).toString());
+  }, [currentPage]);
+  
+  // Handle page input change
+  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPageInputValue(e.target.value);
+  };
+  
+  // Handle page input submission
+  const handlePageInputSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const pageNumber = parseInt(pageInputValue, 10);
+      if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
+        setCurrentPage(pageNumber - 1);
+        // Scroll to top of browse section
+        requestAnimationFrame(() => {
+          document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      } else {
+        setPageInputValue((currentPage + 1).toString());
+      }
+    }
+  };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
@@ -161,7 +190,7 @@ const Index = () => {
         onRandomBook={getRandomBook}
       />
 
-      {/* Trending Books Section */}
+      {/* Trending Books Section - Always visible */}
       <div id="trending-books">
         <TrendingBooks />
       </div>
@@ -212,9 +241,16 @@ const Index = () => {
                 </Button>
                 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">
-                    Page {currentPage + 1} of {totalPages}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Page</span>
+                  <input
+                    type="text"
+                    value={pageInputValue}
+                    onChange={handlePageInputChange}
+                    onKeyDown={handlePageInputSubmit}
+                    className="w-12 h-8 text-center bg-background border border-input rounded-md text-sm"
+                    aria-label={`Page ${currentPage + 1} of ${totalPages}`}
+                  />
+                  <span className="text-sm text-muted-foreground">of {totalPages}</span>
                 </div>
                 
                 <Button

@@ -8,6 +8,8 @@ import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, Layout, Columns, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getBookCover } from "@/utils/bookCoverMapping";
+import { books } from "@/data/books";
 
 // Configure PDF.js worker to use locally bundled worker for reliability
 try {
@@ -25,6 +27,27 @@ interface PDFReaderProps {
   bookId: string;
 }
 
+// Function to get cover image path
+const getCoverImage = (title: string) => {
+  // First try to get the real book cover from BookCoversNew
+  const realCover = getBookCover(title);
+  if (realCover) {
+    return realCover;
+  }
+  
+  // Check if we have a generated SVG cover
+  const book = books.find(b => b.title === title);
+  if (book) {
+    const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
+    if (bookFileName) {
+      return `/book-covers/${bookFileName}`;
+    }
+  }
+  
+  // Final fallback: Use a placeholder
+  return '/placeholder.svg';
+};
+
 export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
   console.log('PDFReader initialized with:', { pdfPath, title, bookId });
   const [numPages, setNumPages] = useState<number>(0);
@@ -34,6 +57,12 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [coverImage, setCoverImage] = useState<string>('/placeholder.svg');
+  
+  // Load book cover on component mount
+  useEffect(() => {
+    setCoverImage(getCoverImage(title));
+  }, [title]);
   
   // Music state management
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
@@ -417,7 +446,19 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
     <div ref={containerRef} className={`flex flex-col bg-background ${isFullscreen ? 'h-screen' : 'h-full'}`}>
       {/* Controls */}
       <div className="pdf-controls sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center justify-between gap-4 flex-wrap shadow-lg">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          {/* Book cover display */}
+          <div className="hidden md:flex items-center gap-3">
+            <img 
+              src={coverImage} 
+              alt={title}
+              className="h-10 w-auto rounded shadow-sm object-cover"
+              onError={(e) => {
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+            />
+            <div className="text-sm font-medium truncate max-w-[150px]">{title}</div>
+          </div>
           <Button
             onClick={goToPrevPage}
             disabled={pageNumber <= 1}

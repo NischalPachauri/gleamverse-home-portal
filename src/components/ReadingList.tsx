@@ -1,4 +1,4 @@
-import { BookOpen, X } from "lucide-react";
+import { BookOpen, X, BookMarked, Clock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { books } from "@/data/books";
 import { toast } from "sonner";
@@ -6,6 +6,10 @@ import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
 import { getBookCover } from "@/utils/bookCoverMapping";
+import { useEffect } from "react";
+
+// Maximum number of books allowed in the library
+const MAX_LIBRARY_CAPACITY = 10;
 
 // Function to get cover image path
 const getCoverImage = (book: typeof books[0]) => {
@@ -32,23 +36,52 @@ export const ReadingList = () => {
   const removeFromList = async (bookId: string) => {
     try {
       await removeBookmark(bookId);
-      toast.success("Book removed from your library");
     } catch (error) {
-      toast.error("Failed to remove book");
+      // Silent error handling
     }
   };
 
-  // Get books with "Reading" status or all bookmarked books
-  const statusMap: Record<string,string> = (() => {
-    try { return JSON.parse(localStorage.getItem('bookStatus') || '{}'); } catch { return {}; }
-  })();
+  // Get books with their correct status
+  const { bookmarkStatuses } = useLocalBookmarks();
   
-  // Show books that are marked as "Reading" or all bookmarked books
+  // Show all bookmarked books in their correct status categories
   const libraryBooks = books.filter((book) => {
-    const isBookmarked = bookmarkedBooks.includes(book.id);
-    const isReading = statusMap[book.id] === 'Reading';
-    return isBookmarked || isReading;
+    return bookmarkedBooks.includes(book.id);
   });
+  
+  // Group books by their status
+  const booksByStatus = {
+    'Planning to Read': libraryBooks.filter(book => !bookmarkStatuses[book.id] || bookmarkStatuses[book.id] === 'Planning to Read'),
+    'Reading': libraryBooks.filter(book => bookmarkStatuses[book.id] === 'Reading'),
+    'On Hold': libraryBooks.filter(book => bookmarkStatuses[book.id] === 'On Hold'),
+    'Completed': libraryBooks.filter(book => bookmarkStatuses[book.id] === 'Completed')
+  };
+  
+  // Get status icon based on book status
+  const getStatusIcon = (bookId: string) => {
+    const status = bookmarkStatuses[bookId];
+    switch(status) {
+      case 'Reading':
+        return <BookMarked className="w-4 h-4 text-blue-500" />;
+      case 'On Hold':
+        return <Clock className="w-4 h-4 text-amber-500" />;
+      case 'Completed':
+        return <CheckCircle2 className="w-4 h-4 text-purple-500" />;
+      default:
+        return <BookOpen className="w-4 h-4 text-emerald-500" />;
+    }
+  };
+  
+  // Enforce FIFO capacity limit
+  useEffect(() => {
+    if (libraryBooks.length > MAX_LIBRARY_CAPACITY) {
+      // Find the oldest book (last one in the array) to remove
+      const oldestBook = libraryBooks[libraryBooks.length - 1];
+      
+      // Remove the oldest book silently without notification
+      removeBookmark(oldestBook.id);
+    }
+  }, [libraryBooks.length]);
 
   if (libraryBooks.length === 0) {
     return (
@@ -84,7 +117,12 @@ export const ReadingList = () => {
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <Link to={`/book/${book.id}`}>
-                <div className="aspect-[2/3] overflow-hidden rounded-lg shadow-lg">
+                <div className="aspect-[2/3] overflow-hidden rounded-lg shadow-lg relative">
+                  {/* Section indicator icon */}
+                  <div className="absolute top-2 left-2 z-10 p-1.5 rounded-full bg-slate-900/70 backdrop-blur-sm">
+                    {getStatusIcon(book.id)}
+                  </div>
+                  
                   <img
                     src={getCoverImage(book)}
                     alt={book.title}
@@ -97,9 +135,9 @@ export const ReadingList = () => {
                   {book.title}
                 </div>
               </Link>
-              {statusMap[book.id] && (
+              {bookmarkStatuses[book.id] && (
                 <div className="mt-2 text-xs font-medium text-center rounded-full px-2 py-1 bg-primary/10 text-primary">
-                  {statusMap[book.id]}
+                  {bookmarkStatuses[book.id]}
                 </div>
               )}
               <Button

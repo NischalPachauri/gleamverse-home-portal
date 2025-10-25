@@ -33,7 +33,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <BrowserRouter>
-                <div className="min-h-screen dark:bg-background" style={{ backgroundColor: 'var(--background-color)' }}>
+                <div className="min-h-screen dark:bg-background" style={{ backgroundColor: 'var(--background-color)', visibility: 'visible', opacity: 1 }}>
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/test" element={<TestApp />} />
