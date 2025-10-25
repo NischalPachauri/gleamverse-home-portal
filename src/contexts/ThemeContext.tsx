@@ -14,8 +14,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
+    const initialTheme = savedTheme || 'light';
+    setTheme(initialTheme);
+    
+    // Apply initial theme immediately
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.body.classList.add('dark');
+    } else {
+      document.documentElement.classList.add('light');
+      document.body.classList.add('light');
+      document.body.style.backgroundColor = '#f0f8ff';
     }
   }, []);
 
@@ -23,8 +32,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('theme', theme);
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
+      document.body.style.backgroundColor = '';
     } else {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+      document.body.classList.remove('dark');
+      document.body.classList.add('light');
+      // Set Alice Blue background for light theme
+      document.body.style.backgroundColor = '#f0f8ff';
     }
   }, [theme]);
 

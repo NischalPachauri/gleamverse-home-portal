@@ -8,13 +8,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
 import { useState, useEffect } from "react";
-// Removed old book cover generator import - using new SVG covers
-
-// Import custom book cover mapper
-// Removed bookCoverMapper import - no longer needed
+import { getBookCover } from "@/utils/bookCoverMapping";
+import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
+import { toast } from "sonner";
 
 // Function to get cover image path
 const getCoverImage = (book: Book) => {
+  // First try to get the real book cover from BookCoversNew
+  const realCover = getBookCover(book.title);
+  if (realCover) {
+    return realCover;
+  }
+  
   // Check if we have a generated SVG cover
   const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
   if (bookFileName) {
@@ -27,8 +32,9 @@ const getCoverImage = (book: Book) => {
 };
 
 const isPlaceholderCover = (book: Book) => {
-  // All books use placeholder covers for now
-  return true;
+  // Check if this book has a real cover
+  const realCover = getBookCover(book.title);
+  return !realCover;
 };
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
@@ -69,8 +75,10 @@ interface BookCardProps {
   book: Book;
 }
 
-export const BookCard = ({ book }: BookCardProps) => {
+export function BookCard({ book }: { book: Book }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { bookmarkedBooks, addBookmark, removeBookmark } = useLocalBookmarks();
+  const isBookmarked = bookmarkedBooks.includes(book.id.toString());
   const [status, setStatus] = useState<string>(() => {
     try {
       const raw = localStorage.getItem('bookStatus');
@@ -107,14 +115,24 @@ export const BookCard = ({ book }: BookCardProps) => {
     }
   }, [menuOpen]);
 
-  const setBookStatus = (newStatus: string) => {
+  const setBookStatus = async (newStatus: string) => {
     try {
       const raw = localStorage.getItem('bookStatus');
       const map: Record<string,string> = raw ? JSON.parse(raw) : {};
       if (newStatus) {
         map[book.id] = newStatus;
+        // Add to bookmarks when setting any status
+        if (!isBookmarked) {
+          await addBookmark(book.id);
+          toast.success(`Added to ${newStatus}`);
+        }
       } else {
         delete map[book.id];
+        // Remove from bookmarks when removing status
+        if (isBookmarked) {
+          await removeBookmark(book.id);
+          toast.success('Removed from bookmarks');
+        }
       }
       localStorage.setItem('bookStatus', JSON.stringify(map));
       setStatus(newStatus);
@@ -170,7 +188,7 @@ export const BookCard = ({ book }: BookCardProps) => {
                 {['Planning to read','Reading','On hold','Completed'].map(opt => (
                   <button
                     key={opt}
-                    onClick={(e)=>{ e.preventDefault(); setBookStatus(opt); }}
+                    onClick={async (e)=>{ e.preventDefault(); await setBookStatus(opt); }}
                     className="w-full text-left px-3 py-2 hover:bg-accent flex items-center gap-2"
                   >
                     {status===opt && <Check className="w-4 h-4" />}<span>{opt}</span>
@@ -209,7 +227,7 @@ export const BookCard = ({ book }: BookCardProps) => {
         </div>
         
         <div className="p-4 space-y-2">
-          <h3 className="font-semibold text-lg leading-tight line-clamp-2 text-foreground group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-lg leading-tight line-clamp-1 text-foreground group-hover:text-primary transition-colors whitespace-normal">
             {book.title}
           </h3>
           <p className="text-sm text-muted-foreground">{book.author}</p>

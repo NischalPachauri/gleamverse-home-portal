@@ -1,19 +1,21 @@
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { PDFReader } from "@/components/PDFReader";
-import { books } from "@/data/books";
-// Removed bookCoverGenerator import - no longer needed
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+// Fixed: Import books and alias it as bookList
+import { books as bookList } from '@/data/books';
+import { PDFReader } from '@/components/PDFReader';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import supabase from '@/integrations/supabase/client';
 
 // Function to get cover image path
-const getCoverImage = (book: typeof books[0]) => {
+const getCoverImage = (book: typeof bookList[0]) => {
   // For all books, use a placeholder for now
   return '/placeholder.svg';
 };
 
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const book = books.find((b) => b.id === id);
+  const book = bookList.find((b) => b.id === id);
 
   if (!book) {
     return (
@@ -55,7 +57,7 @@ const BookDetail = () => {
 
       {/* PDF Reader */}
       <main className="flex-1 overflow-hidden">
-        <PDFReader pdfPath={book.pdfPath} title={book.title} />
+        <PDFReader pdfPath={book.pdfPath} title={book.title} bookId={book.id} />
       </main>
     </div>
   );

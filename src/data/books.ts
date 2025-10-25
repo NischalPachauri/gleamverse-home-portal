@@ -221,21 +221,13 @@ const cleanTitle = (raw: string, pdfPath?: string) => {
 };
 
 // Generate unique IDs for duplicate entries
-let idCounter: Record<string, number> = {};
-
 export const books: Book[] = allBooks.map((b) => {
   const title = cleanTitle(b.title, b.pdfPath);
   const genre = determineGenre(title, b.author);
   const genres = determineMultipleGenres(title, b.author);
   
-  // Fix duplicate IDs by appending counter
-  let id = b.id;
-  if (idCounter[id]) {
-    id = `${b.id}-${idCounter[id]}`;
-    idCounter[b.id]++;
-  } else {
-    idCounter[b.id] = 1;
-  }
+  // Use the original ID without modification
+  const id = b.id;
   
   return { ...b, id, title, genre, genres };
 });

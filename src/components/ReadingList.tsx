@@ -1,50 +1,54 @@
-import { useState, useEffect, useCallback } from "react";
 import { BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { books } from "@/data/books";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
+import { getBookCover } from "@/utils/bookCoverMapping";
 
 // Function to get cover image path
 const getCoverImage = (book: typeof books[0]) => {
-  // For all books, use a placeholder for now
+  // First try to get the real book cover from BookCoversNew
+  const realCover = getBookCover(book.title);
+  if (realCover) {
+    return realCover;
+  }
+  
+  // Check if we have a generated SVG cover
+  const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
+  if (bookFileName) {
+    return `/book-covers/${bookFileName}`;
+  }
+  
+  // Final fallback: Use a placeholder
   return '/placeholder.svg';
 };
 
 export const ReadingList = () => {
-  const [readingList, setReadingList] = useState<string[]>([]);
+  const { bookmarkedBooks, removeBookmark } = useLocalBookmarks();
   const { ref: sectionRef, isVisible } = useScrollReveal({ threshold: 0.2 });
-
-  const loadReadingList = useCallback(async () => {
-    try {
-      const localList = localStorage.getItem("readingList");
-      setReadingList(localList ? JSON.parse(localList) : []);
-    } catch (error) {
-      console.warn("Failed to load reading list:", error);
-      setReadingList([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadReadingList();
-  }, [loadReadingList]);
 
   const removeFromList = async (bookId: string) => {
     try {
-      const updatedList = readingList.filter(id => id !== bookId);
-      setReadingList(updatedList);
-      localStorage.setItem("readingList", JSON.stringify(updatedList));
+      await removeBookmark(bookId);
       toast.success("Book removed from your library");
     } catch (error) {
       toast.error("Failed to remove book");
     }
   };
 
-  const libraryBooks = books.filter((book) => readingList.includes(book.id));
+  // Get books with "Reading" status or all bookmarked books
   const statusMap: Record<string,string> = (() => {
     try { return JSON.parse(localStorage.getItem('bookStatus') || '{}'); } catch { return {}; }
   })();
+  
+  // Show books that are marked as "Reading" or all bookmarked books
+  const libraryBooks = books.filter((book) => {
+    const isBookmarked = bookmarkedBooks.includes(book.id);
+    const isReading = statusMap[book.id] === 'Reading';
+    return isBookmarked || isReading;
+  });
 
   if (libraryBooks.length === 0) {
     return (
@@ -70,7 +74,7 @@ export const ReadingList = () => {
           <h2 className="text-4xl font-bold text-foreground">Your Library</h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {libraryBooks.map((book, index) => (
             <div
               key={book.id}
@@ -80,12 +84,18 @@ export const ReadingList = () => {
               style={{ transitionDelay: `${index * 100}ms` }}
             >
               <Link to={`/book/${book.id}`}>
-                <img
-                  src={getCoverImage(book)}
-                  alt={book.title}
-                  className="w-full aspect-[2/3] object-cover rounded-lg shadow-lg transition-transform duration-300"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }}
-                />
+                <div className="aspect-[2/3] overflow-hidden rounded-lg shadow-lg">
+                  <img
+                    src={getCoverImage(book)}
+                    alt={book.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }}
+                  />
+                </div>
+                {/* Book title */}
+                <div className="mt-2 text-center text-sm font-medium text-foreground">
+                  {book.title}
+                </div>
               </Link>
               {statusMap[book.id] && (
                 <div className="mt-2 text-xs font-medium text-center rounded-full px-2 py-1 bg-primary/10 text-primary">

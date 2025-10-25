@@ -4,14 +4,19 @@
 
 :root {
   --alice-blue: #f0f8ff;
+  --background-color: #f0f8ff;
+}
+
+.dark {
+  --background-color: hsl(180 25% 8%);
 }
 
 body {
   @apply transition-colors duration-300;
 }
 
-.light body {
-  background-color: var(--alice-blue);
+body.light, .light body {
+  background-color: #f0f8ff !important;
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
@@ -20,10 +25,10 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 200 100% 98%;
+    --background: 208 100% 97%; /* Alice Blue #f0f8ff */
     --foreground: 222 47% 11%;
 
-    --card: 0 0% 100%;
+    --card: 0 0% 100%; /* Keep cards white for contrast */
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
@@ -121,14 +126,23 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 
+  /* Ensure light theme uses Alice Blue background */
+  html.light, body.light, .light {
+    background-color: #f0f8ff !important;
+  }
+  
+  html:not(.dark) body, body:not(.dark) {
+    background-color: #f0f8ff !important;
+  }
+
   /* Light theme background with soft pastel gradient */
   :root {
     background: linear-gradient(135deg, 
-      hsl(200 100% 98%) 0%, 
-      hsl(200 100% 96%) 25%, 
-      hsl(200 100% 97%) 50%, 
-      hsl(200 100% 95%) 75%, 
-      hsl(200 100% 98%) 100%);
+      hsl(208 100% 97%) 0%, 
+      hsl(208 100% 96%) 25%, 
+      hsl(208 100% 97%) 50%, 
+      hsl(208 100% 95%) 75%, 
+      hsl(208 100% 97%) 100%);
     background-attachment: fixed;
     background-size: 400% 400%;
     animation: light-bg-drift 30s ease-in-out infinite;

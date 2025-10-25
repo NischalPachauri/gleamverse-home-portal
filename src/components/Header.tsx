@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   User, LogOut, BookMarked, Settings, 
-  Moon, Sun, Menu, X, LogIn, UserPlus
+  Moon, Sun, Menu, X, LogIn, UserPlus, History
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -121,8 +121,9 @@ export function Header() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
+                      <Button variant="ghost" size="sm">
+                        <User className="h-4 w-4" />
+                      </Button>
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/bookmarks')}>
                       <BookMarked className="mr-2 h-4 w-4" />
@@ -231,7 +232,9 @@ export function Header() {
                     className="block py-2 text-sm font-medium"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Profile
+                    <Button variant="ghost" size="sm">
+                      <User className="h-4 w-4" />
+                    </Button>
                   </Link>
                   <div className="pt-3 border-t">
                     <Button 

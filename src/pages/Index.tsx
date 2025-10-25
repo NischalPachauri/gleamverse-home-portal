@@ -6,6 +6,7 @@ import { Header } from "@/components/Header";
 import { TrendingBooks } from "@/components/TrendingBooks";
 import { ReadingList } from "@/components/ReadingList";
 import { HeroSection } from "@/components/HeroSection";
+import { EnhancedHeroSection } from "@/components/EnhancedHeroSection";
 import { books } from "@/data/books";
 import { 
   Search, Sparkles, Book, Globe, FlaskConical, Landmark, Laptop, 
@@ -153,22 +154,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <Header />
-
-      {/* Theme Toggle - Visible on all devices */}
-      <div className={`fixed top-20 right-4 z-50 flex gap-2 transition-opacity duration-500 ${controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <Button
-          onClick={toggleTheme}
-          size="sm"
-          className="rounded-full w-10 h-10 shadow-2xl bg-gradient-to-br from-primary to-secondary hover:scale-105 transition-all duration-300"
-        >
-          {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </Button>
-      </div>
-
-      {/* New Hero Section with Gradient Background */}
-      <HeroSection 
+      {/* Enhanced Hero Section with Gradient Background and integrated Header */}
+      <EnhancedHeroSection 
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onRandomBook={getRandomBook}

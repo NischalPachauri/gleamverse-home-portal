@@ -22,10 +22,11 @@ try {
 interface PDFReaderProps {
   pdfPath: string;
   title: string;
+  bookId: string;
 }
 
-export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
-  console.log('PDFReader initialized with:', { pdfPath, title });
+export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
+  console.log('PDFReader initialized with:', { pdfPath, title, bookId });
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
@@ -378,6 +379,24 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
       toast.success(`Selected: ${musicTracks[trackIndex].name}`);
     }
   };
+
+  // Add useEffect to set book status to 'Reading' and add to bookmarks
+  useEffect(() => {
+    if (bookId) {
+      // Update book status to 'Reading'
+      const rawStatus = localStorage.getItem('bookStatus');
+      const statusMap: Record<string, string> = rawStatus ? JSON.parse(rawStatus) : {};
+      statusMap[bookId] = 'Reading';
+      localStorage.setItem('bookStatus', JSON.stringify(statusMap));
+
+      // Also add to bookmarks if not already there
+      const bookmarks = JSON.parse(localStorage.getItem('gleamverse_bookmarks') || '[]');
+      if (!bookmarks.includes(bookId)) {
+        bookmarks.push(bookId);
+        localStorage.setItem('gleamverse_bookmarks', JSON.stringify(bookmarks));
+      }
+    }
+  }, [bookId]);
 
   // Show error state if PDF failed to load
   if (error) {
