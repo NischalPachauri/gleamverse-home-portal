@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
 import Bookmarks from "./pages/Bookmarks";
-import Profile from "./pages/Profile";
+import { ProfileWindow } from "@/components/ProfileWindow";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import TestApp from "./TestApp";
@@ -48,7 +48,7 @@ const App = () => {
                         <Route path="/bookmarks" element={<Bookmarks />} />
                         <Route path="/profile" element={
                           <ErrorBoundary name="ProfilePage">
-                            <Profile />
+                            <ProfileWindow />
                           </ErrorBoundary>
                         } />
                         <Route path="/auth/callback" element={

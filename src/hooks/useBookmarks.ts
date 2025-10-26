@@ -49,6 +49,8 @@ export function useBookmarks() {
     }
 
     setLoading(true);
+    setOperationState({ status: 'loading', error: null });
+    
     try {
       const { data, error } = await supabase
         .from('user_library')
@@ -58,10 +60,23 @@ export function useBookmarks() {
       if (error) throw error;
 
       setBookmarks(data?.map(item => item.book_id) || []);
-    } catch (error) {
+      setOperationState({ status: 'success', error: null });
+    } catch (error: any) {
       console.error('Error loading bookmarks:', error);
       setBookmarks([]);
-      toast.error('Failed to load your bookmarks. Please try again.');
+      setOperationState({ 
+        status: 'error', 
+        error: error.message || 'Failed to load your bookmarks' 
+      });
+      
+      // More user-friendly error message with retry option
+      toast.error('Failed to load your bookmarks', {
+        description: 'Please check your connection and try again',
+        action: {
+          label: 'Retry',
+          onClick: () => loadBookmarks()
+        }
+      });
     } finally {
       setLoading(false);
     }
