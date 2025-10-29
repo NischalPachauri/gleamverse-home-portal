@@ -1,17 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-// Fixed: Import books and alias it as bookList
+import { useParams, Link } from 'react-router-dom';
 import { books as bookList } from '@/data/books';
 import { PDFReader } from '@/components/PDFReader';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import supabase from '@/integrations/supabase/client';
-
-// Function to get cover image path
-const getCoverImage = (book: typeof bookList[0]) => {
-  // For all books, use a placeholder for now
-  return '/placeholder.svg';
-};
+import { getBookCover } from '@/utils/bookCoverMapping';
 
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -43,7 +35,7 @@ const BookDetail = () => {
           </Link>
           <div className="flex items-center gap-4 flex-1">
             <img
-              src={getCoverImage(book)}
+              src={getBookCover(book.title) || '/placeholder.svg'}
               alt={book.title}
               className="h-16 w-auto rounded shadow-md"
             />

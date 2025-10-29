@@ -129,6 +129,16 @@ export function PaymentModal({ isOpen, onClose, amount = 0, purpose }: PaymentMo
             console.log('Payment cancelled by user');
             toast.info("Payment cancelled");
             setIsProcessing(false);
+          },
+          escape: true,
+          backdropClose: true,
+          confirm: {
+            text: 'Cancel Payment',
+            callback: function() {
+              console.log('Payment cancelled via button');
+              toast.info("Payment cancelled");
+              setIsProcessing(false);
+            }
           }
         }
       };
@@ -205,19 +215,38 @@ export function PaymentModal({ isOpen, onClose, amount = 0, purpose }: PaymentMo
               Test Card: 4111 1111 1111 1111 | CVV: Any 3 digits | Expiry: Any future date
             </p>
           </div>
+          
+          {/* Cancellation Instructions */}
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-3 mt-2">
+            <p className="text-xs text-blue-800 font-medium">
+              Payment Cancellation Options:
+            </p>
+            <ul className="text-xs text-blue-700 mt-1 list-disc pl-4 space-y-1">
+              <li>Click the "Cancel Payment" button in the Razorpay window</li>
+              <li>Press ESC key to close the payment window</li>
+              <li>Click outside the payment window to cancel</li>
+              <li>Click the "Back to Donate Page" button to return</li>
+            </ul>
+          </div>
         </div>
         
-        <DialogFooter>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button 
             variant="outline" 
             onClick={onClose} 
             disabled={isProcessing}
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
-            Cancel
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-arrow-left">
+              <path d="m12 19-7-7 7-7"/>
+              <path d="M19 12H5"/>
+            </svg>
+            Back
           </Button>
           <Button 
             onClick={handlePayment} 
             disabled={isProcessing || paymentAmount < 1}
+            className="w-full sm:w-auto"
           >
             {isProcessing ? (
               <>

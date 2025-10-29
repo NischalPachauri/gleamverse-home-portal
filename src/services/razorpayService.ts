@@ -3,7 +3,7 @@ import Razorpay from 'razorpay';
 // Initialize Razorpay with your key_id and key_secret
 // In production, these should be environment variables
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_YOUR_KEY_ID', // Replace with your test key
+  key_id: 'rzp_test_RY3WvDTVIw8cad', // Updated with the correct test key
   key_secret: 'YOUR_KEY_SECRET', // Replace with your test secret
 });
 
@@ -61,7 +61,7 @@ export const createOrder = async (options: Omit<PaymentOptions, 'orderId'>) => {
 export const initializePayment = (options: PaymentOptions) => {
   return new Promise((resolve) => {
     const rzp = new (window as any).Razorpay({
-      key: 'rzp_test_YOUR_KEY_ID', // Replace with your test key
+      key: 'rzp_test_RY3WvDTVIw8cad', // Updated with the correct test key
       amount: options.amount,
       currency: options.currency || 'INR',
       name: options.name,

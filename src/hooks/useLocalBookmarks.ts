@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import supabase from '@/integrations/supabase/client';
+import { books } from '@/data/books';
 
 const BOOKMARKS_KEY = 'gleamverse_bookmarks';
 const BOOKMARK_STATUS_KEY = 'gleamverse_bookmark_status';
@@ -59,19 +60,41 @@ const useLocalBookmarks = () => {
     loadBookmarks();
   }, [loadBookmarks]);
 
+  // Maximum number of books allowed in the library
+  const MAX_LIBRARY_CAPACITY = 5;
+
   // Add bookmark with optimistic UI update and error handling
   const addBookmark = useCallback(async (bookId: string, status: 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed' = 'Planning to Read') => {
     setSyncing(true);
     setOperationState({ status: 'loading', error: null });
     
-    // Optimistically update UI
-    const updatedBookmarks = [...bookmarkedBooks, bookId];
+    // Check for duplicates - prevent adding the same book twice
+    if (bookmarkedBooks.includes(bookId)) {
+      setSyncing(false);
+      toast.info('This book is already in your library');
+      return false;
+    }
+    
+    // Implement FIFO queue system - if we're at capacity, remove the oldest book
+    let updatedBookmarks: string[];
+    if (bookmarkedBooks.length >= MAX_LIBRARY_CAPACITY) {
+      // Remove the oldest book (first one in the array)
+      const oldestBookId = bookmarkedBooks[0];
+      // Get the book title from the books data for better user feedback
+      const oldestBook = books.find(book => book.id === oldestBookId);
+      const oldestBookTitle = oldestBook ? oldestBook.title : oldestBookId;
+      
+      // Remove oldest and add new one
+      updatedBookmarks = [...bookmarkedBooks.slice(1), bookId];
+      toast.info(`"${oldestBookTitle}" was removed from your library as you've reached the 5-book limit.`);
+    } else {
+      // Just add the new book
+      updatedBookmarks = [...bookmarkedBooks, bookId];
+    }
+    
     const updatedStatuses = { ...bookmarkStatuses, [bookId]: status };
     
     try {
-      // Simulate network delay for testing (remove in production)
-      // await new Promise(resolve => setTimeout(resolve, 500));
-      
       // Update localStorage
       localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(updatedBookmarks));
       localStorage.setItem(BOOKMARK_STATUS_KEY, JSON.stringify(updatedStatuses));
@@ -81,7 +104,7 @@ const useLocalBookmarks = () => {
       setBookmarkStatuses(updatedStatuses);
       
       setOperationState({ status: 'success', error: null });
-      toast.success('Book added to your bookmarks');
+      toast.success('Book added to your library');
       return true;
     } catch (error: any) {
       console.error('Error adding bookmark:', error);

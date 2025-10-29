@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getBookCover } from "@/utils/bookCoverMapping";
 import { books } from "@/data/books";
+// Import required CSS for annotations - using import statements that work with Vite
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 // Configure PDF.js worker to use locally bundled worker for reliability
 try {
@@ -27,26 +30,7 @@ interface PDFReaderProps {
   bookId: string;
 }
 
-// Function to get cover image path
-const getCoverImage = (title: string) => {
-  // First try to get the real book cover from BookCoversNew
-  const realCover = getBookCover(title);
-  if (realCover) {
-    return realCover;
-  }
-  
-  // Check if we have a generated SVG cover
-  const book = books.find(b => b.title === title);
-  if (book) {
-    const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
-    if (bookFileName) {
-      return `/book-covers/${bookFileName}`;
-    }
-  }
-  
-  // Final fallback: Use a placeholder
-  return '/placeholder.svg';
-};
+// Use the imported getBookCover function directly
 
 export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
   console.log('PDFReader initialized with:', { pdfPath, title, bookId });
@@ -57,11 +41,11 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [coverImage, setCoverImage] = useState<string>('/placeholder.svg');
+  const [coverImage, setCoverImage] = useState<string>(`/placeholder.svg?title=${encodeURIComponent(title)}`);
   
   // Load book cover on component mount
   useEffect(() => {
-    setCoverImage(getCoverImage(title));
+    setCoverImage(getBookCover(title));
   }, [title]);
   
   // Music state management
@@ -70,7 +54,7 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [audioContextInitialized, setAudioContextInitialized] = useState<boolean>(false);
   
-  // Available instrumental tracks - Your music files
+  // Available instrumental tracks - Using local music files
   const musicTracks = [
     { name: "Track 1", url: "/music/track1.mp3" },
     { name: "Track 2", url: "/music/track2.mp3" },
@@ -204,13 +188,14 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
     }
   };
 
-  // Test all audio files on component mount
+  // Test all audio files on component mount - disabled to prevent console errors
   useEffect(() => {
-    musicTracks.forEach((track, index) => {
-      testAudioFile(track.url).then(isAccessible => {
-        console.log(`Track ${index + 1} (${track.name}): ${isAccessible ? 'Accessible' : 'Not accessible'}`);
-      });
-    });
+    // Disable audio file testing to prevent console errors
+    // musicTracks.forEach((track, index) => {
+    //   testAudioFile(track.url).then(isAccessible => {
+    //     console.log(`Track ${index + 1} (${track.name}): ${isAccessible ? 'Accessible' : 'Not accessible'}`);
+    //   });
+    // });
   }, []);
 
   // Initialize audio context on user interaction
@@ -451,10 +436,10 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
           <div className="hidden md:flex items-center gap-3">
             <img 
               src={coverImage} 
-              alt={title}
-              className="h-10 w-auto rounded shadow-sm object-cover"
+              alt={`${title} cover`}
+              className="h-10 w-8 rounded shadow-sm object-cover"
               onError={(e) => {
-                e.currentTarget.src = '/placeholder.svg';
+                e.currentTarget.src = `/placeholder.svg?title=${encodeURIComponent(title)}`;
               }}
             />
             <div className="text-sm font-medium truncate max-w-[150px]">{title}</div>
@@ -584,7 +569,6 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
         }}
       >
         <div className={`flex flex-col items-center ${isFullscreen ? 'gap-0 fullscreen-pdf' : 'gap-1'}`}>
-          {!isFullscreen && <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>}
           <div className={isFullscreen ? 'fullscreen-pdf' : ''}>
             <Document
               file={pdfPath}

@@ -8,11 +8,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
 import Bookmarks from "./pages/Bookmarks";
+import Favorites from "./pages/Favorites";
 import { ProfileWindow } from "@/components/ProfileWindow";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import TestApp from "./TestApp";
 import ErrorBoundary from "./components/ErrorBoundary";
+import DonatePage from "./pages/Donate";
+import HelpPage from "./pages/Help";
 
 const queryClient = new QueryClient();
 
@@ -46,9 +49,24 @@ const App = () => {
                         <Route path="/test" element={<TestApp />} />
                         <Route path="/book/:id" element={<BookDetail />} />
                         <Route path="/bookmarks" element={<Bookmarks />} />
+                        <Route path="/favorites" element={
+                          <ErrorBoundary name="FavoritesPage">
+                            <Favorites />
+                          </ErrorBoundary>
+                        } />
                         <Route path="/profile" element={
                           <ErrorBoundary name="ProfilePage">
                             <ProfileWindow />
+                          </ErrorBoundary>
+                        } />
+                        <Route path="/donate" element={
+                          <ErrorBoundary name="DonatePage">
+                            <DonatePage />
+                          </ErrorBoundary>
+                        } />
+                        <Route path="/help" element={
+                          <ErrorBoundary name="HelpPage">
+                            <HelpPage />
                           </ErrorBoundary>
                         } />
                         <Route path="/auth/callback" element={

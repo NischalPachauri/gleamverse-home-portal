@@ -1,5 +1,5 @@
 import { Button } from "./ui/button";
-import { Moon, Sun, Bookmark, Sparkles, X, Search, User, Settings, LogOut, HelpCircle, CreditCard } from "lucide-react";
+import { Moon, Sun, Bookmark, Sparkles, X, Search, User, Settings, LogOut, HelpCircle, CreditCard, Heart } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -275,15 +275,10 @@ export function EnhancedHeroSection({
                       <span>View Profile</span>
                     </DropdownMenuItem>
                     
-                    <DropdownMenuItem onClick={() => navigate('/subscription')}>
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      <span>Subscription details</span>
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem onClick={() => navigate('/settings')}>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Saved preferences</span>
-                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/donate')}>
+                <Heart className="mr-2 h-4 w-4" />
+                <span>Donate</span>
+              </DropdownMenuItem>
                     
                     <DropdownMenuItem onClick={() => navigate('/help')}>
                       <HelpCircle className="mr-2 h-4 w-4" />

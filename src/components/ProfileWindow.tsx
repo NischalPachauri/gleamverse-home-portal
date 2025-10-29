@@ -10,7 +10,7 @@ import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { BookOpen, Heart, Settings, Award, Target, Calendar, MapPin, Mail, Phone, DollarSign, User, Moon, Sun, LogOut, Plus, Clock, CheckCircle2, BookPlus, Trash, MoreHorizontal, Flame } from "lucide-react";
+import { BookOpen, Heart, Settings, Award, Target, Calendar, MapPin, Mail, Phone, DollarSign, User, Moon, Sun, LogOut, Plus, Clock, CheckCircle2, BookPlus, Trash, MoreHorizontal, Flame, ChevronLeft, HelpCircle, FileText } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useReadingHistory } from "../hooks/useReadingHistory";
 import { useBookmarks } from "../hooks/useBookmarks";
@@ -18,11 +18,14 @@ import { useReadingStreak } from "../hooks/useReadingStreak";
 import { useReadingGoals } from "../hooks/useReadingGoals";
 import { useTheme } from "../contexts/ThemeContext";
 import { books, Book } from "../data/books";
+import { ImageWithFallback } from "./ImageWithFallback";
+import { getBookCover } from "../utils/bookCoverMapping";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { useFavorites } from "../hooks/useFavorites";
 import { PaymentModal } from "./PaymentModal";
 import { cn } from "../lib/utils";
+import supabase from "../integrations/supabase/client";
 
 interface UserData {
   name: string;
@@ -70,6 +73,7 @@ export function ProfileWindow() {
   const goals = (goalsData?.goals || []) as ReadingGoal[];
   const createGoal = goalsData?.createGoal || ((goal: any) => {});
   const deleteGoal = goalsData?.deleteGoal || ((id: string) => {});
+  const fetchGoals = goalsData?.refreshGoals || (() => {});
   const favoriteBookIds = favoritesData?.favoriteBooks || [];
   const toggleFavorite = favoritesData?.toggleFavorite || ((id: string) => {});
   
@@ -112,7 +116,7 @@ export function ProfileWindow() {
     setFavoriteBooks(favBooks);
   }, [favoriteBookIds]);
   
-  const handleSaveField = (field: string): void => {
+  const handleSaveField = async (field: string): Promise<void> => {
     setIsSavingField(true);
     
     // Validate fields
@@ -134,9 +138,30 @@ export function ProfileWindow() {
       }
     }
     
-    // Simulate API call
-    setTimeout(() => {
-      // Update the user data state with the new value
+    try {
+      // Update user metadata in Supabase
+      const updates = {};
+      
+      if (field === 'email') {
+        // Email requires special handling through auth.updateUser
+        const { error } = await supabase.auth.updateUser({ email: editValue });
+        if (error) throw error;
+      } else {
+        // For other fields, update user_metadata
+        const metadata = user?.user_metadata ? { ...user.user_metadata } : {};
+        
+        // Map field names to metadata keys
+        const metadataKey = field === 'name' ? 'full_name' : field;
+        metadata[metadataKey] = editValue;
+        
+        const { error } = await supabase.auth.updateUser({
+          data: metadata
+        });
+        
+        if (error) throw error;
+      }
+      
+      // Update the local state
       setUserData(prev => ({
         ...prev,
         [field]: editValue
@@ -148,10 +173,14 @@ export function ProfileWindow() {
       setEmailError('');
       setPhoneError('');
       setAddressError('');
-    }, 1000);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error(`Failed to update ${field}. Please try again.`);
+      setIsSavingField(false);
+    }
   };
   
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
     
@@ -169,26 +198,85 @@ export function ProfileWindow() {
     
     setIsUploadingPhoto(true);
     
-    // Convert to base64 for preview (in a real app, you'd upload to a server)
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setTimeout(() => {
-        setUserData(prev => ({
-          ...prev,
-          avatar: reader.result as string
-        }));
-        setIsUploadingPhoto(false);
-        toast.success('Profile photo updated successfully');
-      }, 1000);
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Convert to base64 for preview and storage
+      const reader = new FileReader();
+      
+      // Create a promise to handle the FileReader
+      const readFileAsDataURL = new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      
+      // Get the base64 data
+      const base64Image = await readFileAsDataURL;
+      
+      // Update user metadata with the new avatar
+      const metadata = user?.user_metadata ? { ...user.user_metadata } : {};
+      metadata.avatar_url = base64Image;
+      
+      const { error } = await supabase.auth.updateUser({
+        data: metadata
+      });
+      
+      if (error) throw error;
+      
+      // Update local state
+      setUserData(prev => ({
+        ...prev,
+        avatar: base64Image
+      }));
+      
+      toast.success('Profile photo updated successfully');
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      toast.error('Failed to update profile photo. Please try again.');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
   
-  const handleCreateGoal = () => {
+  const [isCreatingGoal, setIsCreatingGoal] = useState(false);
+  
+  const [goalTitleError, setGoalTitleError] = useState("");
+  const [goalTargetError, setGoalTargetError] = useState("");
+  
+  const validateGoalForm = () => {
+    let isValid = true;
+    
+    // Reset errors
+    setGoalTitleError("");
+    setGoalTargetError("");
+    
+    // Validate title
     if (!newGoalTitle.trim()) {
-      toast.error("Please enter a goal title");
+      setGoalTitleError("Goal title is required");
+      isValid = false;
+    } else if (newGoalTitle.length > 50) {
+      setGoalTitleError("Goal title must be less than 50 characters");
+      isValid = false;
+    }
+    
+    // Validate target
+    if (newGoalTarget <= 0) {
+      setGoalTargetError("Target must be greater than 0");
+      isValid = false;
+    } else if (newGoalTarget > 1000) {
+      setGoalTargetError("Target must be less than 1000");
+      isValid = false;
+    }
+    
+    return isValid;
+  };
+  
+  const handleCreateGoal = async () => {
+    // Validate form
+    if (!validateGoalForm()) {
       return;
     }
+    
+    setIsCreatingGoal(true);
     
     const newGoal: ReadingGoal = {
       id: Date.now().toString(),
@@ -201,15 +289,35 @@ export function ProfileWindow() {
       created_at: new Date().toISOString(),
     };
     
-    createGoal(newGoal);
-    toast.success("Reading goal created successfully!");
-    setShowGoalModal(false);
-    
-    // Reset form
-    setNewGoalTitle("");
-    setNewGoalTarget(5);
-    setNewGoalDeadline("");
-    setNewGoalDescription("");
+    try {
+      const success = await createGoal(newGoal);
+      
+      if (success) {
+        // Force refresh the goals list immediately and after a delay to ensure UI updates
+        fetchGoals();
+        
+        // Schedule another refresh to ensure database sync completes
+        setTimeout(() => {
+          fetchGoals();
+        }, 1000);
+        
+        toast.success("Reading goal created successfully!");
+        setShowGoalModal(false);
+        
+        // Reset form
+        setNewGoalTitle("");
+        setNewGoalTarget(5);
+        setNewGoalDeadline("");
+        setNewGoalDescription("");
+      } else {
+        throw new Error("Failed to create goal");
+      }
+    } catch (error) {
+      console.error("Error creating goal:", error);
+      toast.error("Failed to create reading goal");
+    } finally {
+      setIsCreatingGoal(false);
+    }
   };
   
   const handleAddBooksToGoal = (goal: ReadingGoal): void => {
@@ -228,6 +336,16 @@ export function ProfileWindow() {
   
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-end mb-4">
+        <Button 
+          variant="outline" 
+          className={`${theme === 'dark' ? 'text-white hover:bg-slate-800' : 'text-slate-800 hover:bg-slate-100'}`}
+          onClick={() => window.location.href = '/'}
+        >
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          Back to Library
+        </Button>
+      </div>
       <div className="flex flex-col gap-8">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Profile Sidebar */}
@@ -525,7 +643,7 @@ export function ProfileWindow() {
                           >
                             <div className="w-12 h-16 rounded overflow-hidden flex-shrink-0">
                               <img
-                                src={book.coverImage}
+                                src={getBookCover(book.title) || book.coverImage || '/placeholder.svg'}
                                 alt={book.title}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -588,7 +706,17 @@ export function ProfileWindow() {
                 </div>
                 
                 <div className="space-y-4">
-                  {goals.length > 0 ? (
+                  {goalsData?.loading ? (
+                    <div className={`p-8 text-center rounded-lg border ${theme === 'dark' 
+                      ? 'border-slate-800 bg-slate-800/20' 
+                      : 'border-slate-200 bg-slate-100/20'}`}>
+                      <div className="animate-pulse flex flex-col items-center">
+                        <div className={`h-10 w-10 rounded-full mb-4 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-300'}`}></div>
+                        <div className={`h-4 w-48 rounded mb-3 ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-300'}`}></div>
+                        <div className={`h-3 w-32 rounded ${theme === 'dark' ? 'bg-slate-700' : 'bg-slate-300'}`}></div>
+                      </div>
+                    </div>
+                  ) : goals.length > 0 ? (
                     goals.map((goal) => (
                       <Card 
                         key={goal.id} 
@@ -923,50 +1051,54 @@ export function ProfileWindow() {
                       </div>
                     </div>
 
-                    {/* Theme Toggle Section */}
+                    {/* Help/Support Section */}
                     <Separator className={theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'} />
                     
                     <div>
-                      <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Preferences</h3>
+                      <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Help & Support</h3>
                       <div className={`p-4 rounded-lg border ${theme === 'dark' 
                         ? 'border-slate-800 bg-slate-800/30' 
                         : 'border-slate-200 bg-slate-100/30'}`}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {theme === 'dark' ? (
-                              <Moon className="h-5 w-5 text-blue-400" />
-                            ) : (
-                              <Sun className="h-5 w-5 text-yellow-600" />
-                            )}
+                        <div className="space-y-4">
+                          <div className="flex items-start gap-3">
+                            <HelpCircle className={`h-5 w-5 mt-0.5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
                             <div>
                               <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-                                Theme
+                                Need Help?
                               </p>
                               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Currently using {theme === 'dark' ? 'dark' : 'light'} mode
+                                Our support team is available 24/7 to assist you with any questions or issues.
                               </p>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className={`px-0 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}
+                                onClick={() => window.location.href = '/help#contact'}
+                              >
+                                Contact Support
+                              </Button>
                             </div>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={toggleTheme}
-                            className={theme === 'dark' 
-                              ? 'border-slate-700 hover:bg-slate-800' 
-                              : 'border-slate-300 hover:bg-slate-100'}
-                          >
-                            {theme === 'dark' ? (
-                              <>
-                                <Sun className="h-4 w-4 mr-2" />
-                                Light Mode
-                              </>
-                            ) : (
-                              <>
-                                <Moon className="h-4 w-4 mr-2" />
-                                Dark Mode
-                              </>
-                            )}
-                          </Button>
+                          
+                          <div className="flex items-start gap-3">
+                            <FileText className={`h-5 w-5 mt-0.5 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                            <div>
+                              <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                                Documentation
+                              </p>
+                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                Browse our comprehensive guides and tutorials to get the most out of GleamVerse.
+                              </p>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                className={`px-0 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}
+                                onClick={() => window.location.href = '/help#documentation'}
+                              >
+                                View Documentation
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -998,9 +1130,17 @@ export function ProfileWindow() {
                 id="goal-title" 
                 placeholder="E.g., Summer Reading Challenge" 
                 value={newGoalTitle}
-                onChange={(e) => setNewGoalTitle(e.target.value)}
-                className={theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300'}
+                onChange={(e) => {
+                  setNewGoalTitle(e.target.value);
+                  if (goalTitleError) setGoalTitleError("");
+                }}
+                className={`${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300'} ${
+                  goalTitleError ? 'border-red-500 focus:ring-red-500' : ''
+                }`}
               />
+              {goalTitleError && (
+                <p className="text-red-500 text-sm mt-1">{goalTitleError}</p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -1011,11 +1151,19 @@ export function ProfileWindow() {
                   type="number" 
                   min="1"
                   value={newGoalTarget}
-                  onChange={(e) => setNewGoalTarget(parseInt(e.target.value) || 1)}
-                  className={theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300'}
+                  onChange={(e) => {
+                    setNewGoalTarget(parseInt(e.target.value) || 1);
+                    if (goalTargetError) setGoalTargetError("");
+                  }}
+                  className={`${theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300'} ${
+                    goalTargetError ? 'border-red-500 focus:ring-red-500' : ''
+                  }`}
                 />
                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>books</span>
               </div>
+              {goalTargetError && (
+                <p className="text-red-500 text-sm mt-1">{goalTargetError}</p>
+              )}
             </div>
             
             <div className="space-y-2">
@@ -1055,11 +1203,20 @@ export function ProfileWindow() {
             </Button>
             <Button 
               onClick={handleCreateGoal}
+              disabled={isCreatingGoal}
               className={`${theme === 'dark' 
                 ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
                 : 'bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600'} text-white`}
             >
-              Create Goal
+              {isCreatingGoal ? (
+                <span className="flex items-center">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating...
+                </span>
+              ) : 'Create Goal'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1140,12 +1297,12 @@ export function ProfileWindow() {
         </DialogContent>
       </Dialog>
       
-      {/* Payment Modal */}
+      {/* Donation Modal */}
       <PaymentModal 
         isOpen={showPaymentModal} 
         onClose={() => setShowPaymentModal(false)} 
-        amount={999} 
-        purpose="Premium Subscription"
+        amount={500} 
+        purpose="Donation to GleamVerse"
       />
     </div>
   );

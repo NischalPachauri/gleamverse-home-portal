@@ -17,6 +17,7 @@ export interface ReadingGoal {
 export function useReadingGoals() {
   const [goals, setGoals] = useState<ReadingGoal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const { bookmarkStatuses } = useLocalBookmarks();
 
@@ -29,59 +30,80 @@ export function useReadingGoals() {
     }
 
     setLoading(true);
-    try {
-      // Try to load from local storage first for quick access
-      const localGoals = localStorage.getItem(`reading_goals_${user.id}`);
-      if (localGoals) {
-        setGoals(JSON.parse(localGoals));
-      }
+    setError(null);
 
-      // Then fetch from database for most up-to-date data
+    try {
+      // First try to load from Supabase
       const { data, error } = await supabase
         .from('reading_goals')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        setGoals(data);
+      if (error) {
+        console.error('Error loading reading goals:', error);
+        setError('Failed to load reading goals');
+        
+        // Fallback to local storage
+        const localGoals = localStorage.getItem(`reading_goals_${user.id}`);
+        if (localGoals) {
+          setGoals(JSON.parse(localGoals));
+        }
+      } else {
+        setGoals(data || []);
         // Update local storage
         localStorage.setItem(`reading_goals_${user.id}`, JSON.stringify(data));
       }
-    } catch (error) {
-      console.error('Error loading reading goals:', error);
+    } catch (err) {
+      console.error('Error in loadGoals:', err);
+      setError('An unexpected error occurred');
+      
+      // Fallback to local storage
+      const localGoals = localStorage.getItem(`reading_goals_${user.id}`);
+      if (localGoals) {
+        setGoals(JSON.parse(localGoals));
+      }
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   // Create a new reading goal
-  const createGoal = async (goal: Omit<ReadingGoal, 'id' | 'created_at' | 'completed_books'>): Promise<boolean> => {
+  const createGoal = async (goal: Omit<ReadingGoal, 'id' | 'created_at' | 'completed_books'> | ReadingGoal): Promise<boolean> => {
     if (!user) return false;
 
     try {
+      // Generate a UUID-like string for the ID if not provided
+      const newId = goal.id || (crypto.randomUUID ? crypto.randomUUID() : `goal-${Date.now()}`);
+      
       const newGoal = {
         ...goal,
-        id: `goal-${Date.now()}`,
+        id: newId,
         user_id: user.id,
-        completed_books: 0,
-        created_at: new Date().toISOString(),
+        completed_books: goal.completed_books || 0,
+        book_ids: goal.book_ids || [], // Ensure book_ids is defined
+        created_at: goal.created_at || new Date().toISOString(),
       };
 
       // Save to database
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('reading_goals')
-        .insert([newGoal]);
+        .insert([newGoal])
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error creating goal:', error);
+        throw error;
+      }
 
+      // Use the returned data from Supabase if available
+      const savedGoal = data && data.length > 0 ? data[0] : newGoal;
+      
       // Update local state
-      setGoals(prev => [newGoal, ...prev]);
+      setGoals(prev => [savedGoal, ...prev]);
       
       // Update local storage with the updated goals array
-      const updatedGoals = [newGoal, ...goals];
+      const updatedGoals = [savedGoal, ...goals];
       localStorage.setItem(
         `reading_goals_${user.id}`, 
         JSON.stringify(updatedGoals)

@@ -25,10 +25,10 @@ export const Footer = () => {
               <a href="#" className="p-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110">
                 <Twitter className="w-5 h-5" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110">
+              <a href="https://www.instagram.com/nischalpachauri/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="p-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110">
+              <a href="https://www.linkedin.com/in/nischal-pachauri-881851326/" target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-primary/10 hover:bg-primary hover:text-white transition-all duration-300 hover:scale-110">
                 <Linkedin className="w-5 h-5" />
               </a>
             </div>
@@ -57,13 +57,20 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#top-books" onClick={(e) => { e.preventDefault(); document.getElementById('top-books')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                <a href="#trending-books" onClick={(e) => { e.preventDefault(); document.getElementById('trending-books')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
                   <Star className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Top Books
                 </a>
               </li>
               <li>
-                <a href="#search" onClick={(e) => { e.preventDefault(); document.getElementById('search')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
+                <a href="#" onClick={(e) => { 
+                  e.preventDefault(); 
+                  const searchInput = document.querySelector('input[placeholder*="Search"]');
+                  if (searchInput) {
+                    searchInput.scrollIntoView({ behavior: 'smooth' });
+                    searchInput.focus();
+                  }
+                }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
                   <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
                   Search Bar
                 </a>

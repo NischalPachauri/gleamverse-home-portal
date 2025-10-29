@@ -9,25 +9,9 @@ import { getBookCover } from "@/utils/bookCoverMapping";
 import { useEffect } from "react";
 
 // Maximum number of books allowed in the library
-const MAX_LIBRARY_CAPACITY = 10;
+const MAX_LIBRARY_CAPACITY = 5;
 
-// Function to get cover image path
-const getCoverImage = (book: typeof books[0]) => {
-  // First try to get the real book cover from BookCoversNew
-  const realCover = getBookCover(book.title);
-  if (realCover) {
-    return realCover;
-  }
-  
-  // Check if we have a generated SVG cover
-  const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
-  if (bookFileName) {
-    return `/book-covers/${bookFileName}`;
-  }
-  
-  // Final fallback: Use a placeholder
-  return '/placeholder.svg';
-};
+// Use getBookCover directly from import
 
 export const ReadingList = () => {
   const { bookmarkedBooks, removeBookmark } = useLocalBookmarks();
@@ -72,26 +56,27 @@ export const ReadingList = () => {
     }
   };
   
-  // Enforce FIFO capacity limit
+  // Enforce queue capacity limit (last in, first out)
   useEffect(() => {
     if (libraryBooks.length > MAX_LIBRARY_CAPACITY) {
-      // Find the oldest book (last one in the array) to remove
-      const oldestBook = libraryBooks[libraryBooks.length - 1];
+      // Find the oldest book to remove (first one in the array)
+      const oldestBook = libraryBooks[0];
       
-      // Remove the oldest book silently without notification
+      // Remove the oldest book
       removeBookmark(oldestBook.id);
+      toast.info(`"${oldestBook.title}" was removed from your library as you've reached the 5-book limit.`);
     }
   }, [libraryBooks.length]);
 
   if (libraryBooks.length === 0) {
     return (
-      <section ref={sectionRef} className={`py-12 bg-blue-50 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+      <section ref={sectionRef} className={`py-12 bg-blue-50 dark:bg-slate-900 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-center gap-3 mb-8">
-            <BookOpen className="w-8 h-8 text-primary" />
-            <h2 className="text-4xl font-bold text-foreground">Your Library</h2>
+            <BookOpen className="w-8 h-8 text-primary dark:text-cyan-400" />
+            <h2 className="text-4xl font-bold text-foreground dark:text-white">Your Library</h2>
           </div>
-          <p className="text-center text-muted-foreground">
+          <p className="text-center text-muted-foreground dark:text-slate-300">
             Your library is empty. Start adding books to read later!
           </p>
         </div>
@@ -100,11 +85,11 @@ export const ReadingList = () => {
   }
 
   return (
-    <section ref={sectionRef} className={`py-12 bg-blue-50 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+    <section ref={sectionRef} className={`py-12 bg-blue-50 dark:bg-slate-900 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-center gap-3 mb-10">
-          <BookOpen className="w-8 h-8 text-primary" />
-          <h2 className="text-4xl font-bold text-foreground">Your Library</h2>
+          <BookOpen className="w-8 h-8 text-primary dark:text-cyan-400" />
+          <h2 className="text-4xl font-bold text-foreground dark:text-white">Your Library</h2>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 px-2">
@@ -124,19 +109,19 @@ export const ReadingList = () => {
                   </div>
                   
                   <img
-                    src={getCoverImage(book)}
+                    src={getBookCover(book.title) || '/placeholder.svg'}
                     alt={book.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }}
                   />
                 </div>
                 {/* Book title */}
-                <div className="mt-3 text-center text-sm font-medium text-foreground">
+                <div className="mt-3 text-center text-sm font-medium text-foreground dark:text-white">
                   {book.title}
                 </div>
               </Link>
               {bookmarkStatuses[book.id] && (
-                <div className="mt-2 text-xs font-medium text-center rounded-full px-2 py-1 bg-primary/10 text-primary">
+                <div className="mt-2 text-xs font-medium text-center rounded-full px-2 py-1 bg-primary/10 dark:bg-cyan-500/20 text-primary dark:text-cyan-300">
                   {bookmarkStatuses[book.id]}
                 </div>
               )}

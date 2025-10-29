@@ -186,6 +186,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
+      // Validate inputs
+      if (!email || !password) {
+        toast.error('Email and password are required');
+        return null;
+      }
+
+      // Attempt to sign in
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -194,10 +201,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         if (error.message.includes('Email not confirmed')) {
           toast.error('Please verify your email before signing in');
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password');
         } else {
           throw error;
         }
         return null;
+      }
+
+      // Store authentication in localStorage as fallback
+      try {
+        localStorage.setItem('auth_fallback_user', JSON.stringify(data.user));
+      } catch (storageError) {
+        console.warn('Failed to store auth data in localStorage:', storageError);
       }
 
       toast.success('Signed in successfully!');
@@ -205,7 +221,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return data.user;
     } catch (error: any) {
       console.error('Sign in error:', error);
-      toast.error(error.error_description || error.message || 'Invalid email or password');
+      
+      // Detailed error handling with specific user messages
+      if (error.status === 429) {
+        toast.error('Too many sign-in attempts. Please try again later.');
+      } else if (error.status >= 500) {
+        toast.error('Authentication service is currently unavailable. Please try again later.');
+      } else {
+        toast.error(error.error_description || error.message || 'Invalid email or password');
+      }
       return null;
     } finally {
       setLoading(false);
@@ -217,9 +241,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Clear any local auth data
+      try {
+        localStorage.removeItem('auth_fallback_user');
+      } catch (storageError) {
+        console.warn('Failed to clear local auth data:', storageError);
+      }
+      
       setUser(null);
+      toast.success('Signed out successfully');
     } catch (error: any) {
-      toast.error(error.error_description || error.message);
+      console.error('Sign out error:', error);
+      toast.error(error.error_description || error.message || 'Failed to sign out');
+      
+      // Force sign out on client side even if API call fails
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -228,6 +265,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const resetPassword = async (email: string) => {
     try {
       setLoading(true);
+      
+      // Validate email
+      if (!email || !email.includes('@')) {
+        toast.error('Please enter a valid email address');
+        return;
+      }
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
@@ -238,9 +281,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast.success('Password reset email sent! Check your inbox.');
     } catch (error: any) {
       console.error('Password reset error:', error);
-      const errorMessage = error.message || 'Error sending password reset email. Please try again.';
-      toast.error(errorMessage);
-      throw error;
+      
+      // Specific error messages based on error type
+      if (error.status === 429) {
+        toast.error('Too many password reset attempts. Please try again later.');
+      } else if (error.status >= 500) {
+        toast.error('Service temporarily unavailable. Please try again later.');
+      } else if (error.message?.includes('User not found')) {
+        // Don't reveal if email exists for security reasons
+        toast.success('If your email exists in our system, you will receive reset instructions.');
+      } else {
+        const errorMessage = error.message || 'Error sending password reset email. Please try again.';
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }

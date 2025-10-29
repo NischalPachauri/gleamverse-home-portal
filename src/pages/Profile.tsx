@@ -8,12 +8,7 @@ import { books } from '@/data/books';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReadingHistory } from '@/hooks/useReadingHistory';
 import { formatDistanceToNow } from 'date-fns';
-
-// Function to get cover image path
-const getCoverImage = (book: typeof books[0]) => {
-  // For all books, use a placeholder for now
-  return '/placeholder.svg';
-};
+import { getBookCover } from '@/utils/bookCoverMapping';
 
 export default function Profile() {
   const { user, isAuthenticated, signOut } = useAuth();
@@ -184,7 +179,7 @@ export default function Profile() {
                 
                 <div className="flex gap-4">
                   <img
-                    src={getCoverImage(lastReadBook)}
+                    src={getBookCover(lastReadBook.title) || '/placeholder.svg'}
                     alt={lastReadBook.title}
                     className="w-20 h-30 object-cover rounded shadow-sm"
                     onError={(e) => {
@@ -238,7 +233,7 @@ export default function Profile() {
                     return (
                       <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                         <img
-                          src={getCoverImage(book)}
+                          src={getBookCover(book.title) || '/placeholder.svg'}
                           alt={book.title}
                           className="w-12 h-16 object-cover rounded shadow-sm"
                           onError={(e) => {

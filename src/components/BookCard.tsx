@@ -10,41 +10,9 @@ import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
 import { useState, useEffect, useRef } from "react";
 import { getBookCover } from "@/utils/bookCoverMapping";
-import { useLocalBookmarks, statusOptions } from "@/hooks/useLocalBookmarks";
+import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
 import { toast } from "sonner";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
-import { ReadingStatusBadge } from "@/components/ReadingStatusBadge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-// Function to get cover image path
-const getCoverImage = (book: Book) => {
-  // First try to get the real book cover from BookCoversNew
-  const realCover = getBookCover(book.title);
-  if (realCover) {
-    return realCover;
-  }
-  
-  // Check if we have a generated SVG cover
-  const bookFileName = book.pdfPath.split('/').pop()?.replace('.pdf', '.svg');
-  if (bookFileName) {
-    // Use the generated SVG cover
-    return `/book-covers/${bookFileName}`;
-  }
-  
-  // Final fallback: Use a placeholder
-  return '/placeholder.svg';
-};
-
-const isPlaceholderCover = (book: Book) => {
-  // Check if this book has a real cover
-  const realCover = getBookCover(book.title);
-  return !realCover;
-};
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   const g = genre.toLowerCase();
@@ -80,16 +48,19 @@ const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   return <BookOpen className={cls} />;
 };
 
-interface BookCardProps {
-  book: Book;
-}
-
 export function BookCard({ book }: { book: Book }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { bookmarkedBooks, addBookmark, removeBookmark, bookmarkStatuses, updateBookmarkStatus } = useLocalBookmarks();
   const isBookmarked = bookmarkedBooks.includes(book.id.toString());
   const bookStatus = bookmarkStatuses[book.id];
+  const [favorites, setFavorites] = useState<string[]>([]);
+  
+  // Load favorites from localStorage
+  useEffect(() => {
+    const storedFavorites = JSON.parse(localStorage.getItem('gleamverse_favorites') || '[]');
+    setFavorites(storedFavorites);
+  }, []);
   
   // Handle clicks outside the menu to close it
   useEffect(() => {
@@ -107,34 +78,6 @@ export function BookCard({ book }: { book: Book }) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [menuOpen]);
-
-  // Toggle bookmark status
-  const toggleBookmark = async () => {
-    if (isBookmarked) {
-      await removeBookmark(book.id);
-      toast.success(`Removed "${book.title}" from your bookmarks`);
-    } else {
-      await addBookmark(book.id);
-      toast.success(`Added "${book.title}" to your bookmarks`);
-    }
-  };
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuOpen && event.target instanceof Element) {
-        const menuElement = document.getElementById(`book-menu-${book.id}`);
-        if (menuElement && !menuElement.contains(event.target)) {
-          setMenuOpen(false);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [menuOpen, book.id]);
 
   // Close menu when another menu opens (global state)
   useEffect(() => {
@@ -154,14 +97,12 @@ export function BookCard({ book }: { book: Book }) {
       const map: Record<string,string> = raw ? JSON.parse(raw) : {};
       if (newStatus) {
         map[book.id] = newStatus;
-        // Add to bookmarks when setting any status
         if (!isBookmarked) {
           await addBookmark(book.id);
           toast.success(`Added to ${newStatus}`);
         }
       } else {
         delete map[book.id];
-        // Remove from bookmarks when removing status
         if (isBookmarked) {
           await removeBookmark(book.id);
           toast.success('Removed from bookmarks');
@@ -172,14 +113,11 @@ export function BookCard({ book }: { book: Book }) {
       setMenuOpen(false);
     } catch {}
   };
+
   const handleMenuToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    // Close all other menus first
     window.dispatchEvent(new CustomEvent('bookMenuOpen'));
-    
-    // Then open this one
     setMenuOpen((v) => !v);
   };
 
@@ -193,15 +131,34 @@ export function BookCard({ book }: { book: Book }) {
     document.body.removeChild(link);
   };
 
+  // CRITICAL: Get book cover with BOTH title and pdfPath for better matching
+  const bookCover = getBookCover(book.title, book.pdfPath);
+  
+  // Enhanced debug logging for cover resolution
+  useEffect(() => {
+    if (!bookCover) {
+      console.warn(`Missing cover for book: "${book.title}" with path: ${book.pdfPath}`);
+    }
+  }, [book.title, book.pdfPath, bookCover]);
+
   return (
     <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
       <Link to={`/book/${book.id}`} className="block">
         <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
           <ImageWithFallback
-            src={getCoverImage(book)}
-            alt={book.title}
+            src={bookCover || '/placeholder.svg'}
+            alt={`Cover of ${book.title} by ${book.author}`}
             fallbackSrc="/placeholder.svg"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            style={{ objectFit: 'cover' }}
+            onLoad={() => {
+              if (bookCover) {
+                console.log(`✅ Image loaded successfully: ${book.title}`);
+              }
+            }}
+            onError={() => {
+              console.error(`❌ Image failed to load: ${book.title}`, bookCover);
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
@@ -255,22 +212,57 @@ export function BookCard({ book }: { book: Book }) {
           </div>
           
           {/* Hover overlay with actions */}
-          <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-            <Button 
-              size="sm" 
-              className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm"
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+            <div className="flex items-center justify-center gap-3">
+              <Button 
+                size="sm" 
+                className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Read
+              </Button>
+              <Button 
+                size="sm" 
+                variant="secondary"
+                onClick={handleDownload}
+                className="backdrop-blur-sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download
+              </Button>
+            </div>
+            
+            {/* Favorite button */}
+            <Button
+              size="sm"
+              variant="ghost"
+              className="mt-2 bg-background/80 hover:bg-background/90 backdrop-blur-sm transition-all duration-300"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const bookId = book.id.toString();
+                
+                if (favorites.includes(bookId)) {
+                  const updatedFavorites = favorites.filter(id => id !== bookId);
+                  localStorage.setItem('gleamverse_favorites', JSON.stringify(updatedFavorites));
+                  setFavorites(updatedFavorites);
+                  toast.success('Removed from favorites');
+                } else {
+                  const updatedFavorites = [...favorites, bookId];
+                  localStorage.setItem('gleamverse_favorites', JSON.stringify(updatedFavorites));
+                  setFavorites(updatedFavorites);
+                  toast.success('Added to favorites');
+                }
+              }}
+              aria-label={favorites.includes(book.id.toString()) ? "Remove from favorites" : "Add to favorites"}
             >
-              <BookOpen className="w-4 h-4 mr-2" />
-              Read
-            </Button>
-            <Button 
-              size="sm" 
-              variant="secondary"
-              onClick={handleDownload}
-              className="backdrop-blur-sm"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download
+              <Heart 
+                className={`w-5 h-5 ${
+                  favorites.includes(book.id.toString()) 
+                    ? "fill-red-500 text-red-500" 
+                    : "text-gray-600 hover:text-red-500 hover:fill-red-500/50"
+                } transition-all duration-300 transform hover:scale-110`} 
+              />
             </Button>
           </div>
         </div>
@@ -296,4 +288,4 @@ export function BookCard({ book }: { book: Book }) {
       </Link>
     </Card>
   );
-};
+}

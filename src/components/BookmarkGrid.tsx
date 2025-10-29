@@ -3,6 +3,9 @@ import { BookCard } from "@/components/BookCard";
 import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ImageWithFallback } from "./ImageWithFallback";
+import { getBookCover } from "@/utils/bookCoverMapping";
 
 interface BookmarkGridProps {
   books: Book[];
@@ -15,6 +18,8 @@ interface BookmarkGridProps {
 
 // Constants for pagination
 const BOOKS_PER_PAGE = 8;
+
+// Using getBookCover from import
 
 export const BookmarkGrid = ({ 
   books, 
@@ -106,7 +111,22 @@ export const BookmarkGrid = ({
         ) : currentBooks.length > 0 ? (
           // Book cards
           currentBooks.map(book => (
-            <BookCard key={book.id} book={book} />
+            <div key={book.id} className="relative group">
+              <div className="aspect-[2/3] overflow-hidden rounded-lg shadow-lg transition-all duration-300 group-hover:shadow-xl">
+                <ImageWithFallback
+                  src={getBookCover(book.title) || `/book-covers/${book.pdfPath.split('/').pop()?.replace('.pdf', '.svg')}` || '/placeholder.svg'}
+                  alt={`Cover of ${book.title}`}
+                  width={200}
+                  height={300}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  fallbackSrc="/placeholder.svg"
+                  priority={false}
+                  sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+                />
+              </div>
+              <div className="mt-2 text-sm font-medium truncate">{book.title}</div>
+              <div className="text-xs text-slate-400 truncate">{book.author}</div>
+            </div>
           ))
         ) : (
           // Empty state

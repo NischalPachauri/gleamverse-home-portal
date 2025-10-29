@@ -52,6 +52,7 @@ export function useBookmarks() {
     setOperationState({ status: 'loading', error: null });
     
     try {
+      // First try to load from Supabase
       const { data, error } = await supabase
         .from('user_library')
         .select('book_id')
@@ -62,21 +63,48 @@ export function useBookmarks() {
       setBookmarks(data?.map(item => item.book_id) || []);
       setOperationState({ status: 'success', error: null });
     } catch (error: any) {
-      console.error('Error loading bookmarks:', error);
-      setBookmarks([]);
-      setOperationState({ 
-        status: 'error', 
-        error: error.message || 'Failed to load your bookmarks' 
-      });
+      console.error('Error loading bookmarks from Supabase:', error);
       
-      // More user-friendly error message with retry option
-      toast.error('Failed to load your bookmarks', {
-        description: 'Please check your connection and try again',
-        action: {
-          label: 'Retry',
-          onClick: () => loadBookmarks()
+      // Fallback to local storage if Supabase fails
+      try {
+        const localBookmarks = JSON.parse(localStorage.getItem('gleamverse_bookmarks') || '[]');
+        setBookmarks(localBookmarks);
+        setOperationState({ status: 'success', error: null });
+        
+        // Silently sync local bookmarks to Supabase in background
+        if (user && localBookmarks.length > 0) {
+          localBookmarks.forEach(async (bookId: string) => {
+            try {
+              await supabase
+                .from('user_library')
+                .upsert({
+                  user_id: user.id,
+                  book_id: bookId,
+                  current_page: 0,
+                  last_read_at: new Date().toISOString(),
+                });
+            } catch (syncError) {
+              console.error('Error syncing bookmark to Supabase:', syncError);
+            }
+          });
         }
-      });
+      } catch (localError) {
+        console.error('Error loading bookmarks from localStorage:', localError);
+        setBookmarks([]);
+        setOperationState({ 
+          status: 'error', 
+          error: error.message || 'Failed to load your bookmarks' 
+        });
+        
+        // More user-friendly error message with retry option
+        toast.error('Failed to load your bookmarks', {
+          description: 'Please check your connection and try again',
+          action: {
+            label: 'Retry',
+            onClick: () => loadBookmarks()
+          }
+        });
+      }
     } finally {
       setLoading(false);
     }

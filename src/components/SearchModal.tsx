@@ -24,15 +24,30 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     const query = e.target.value;
     setSearchQuery(query);
     
-    if (query.trim().length > 0) {
-      const filteredResults = books.filter(book => 
-        book.title.toLowerCase().includes(query.toLowerCase()) || 
-        book.author.toLowerCase().includes(query.toLowerCase()) ||
-        book.genre.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 10); // Limit to 10 results for better performance
-      setSearchResults(filteredResults);
-    } else {
-      setSearchResults([]);
+    try {
+      if (query.trim().length > 0) {
+        const filteredResults = books.filter(book => 
+          book.title.toLowerCase().includes(query.toLowerCase()) || 
+          book.author.toLowerCase().includes(query.toLowerCase()) ||
+          book.genre.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 10); // Limit to 10 results for better performance
+        setSearchResults(filteredResults);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error during search filtering:', error);
+      // Provide a fallback search method if the main one fails
+      try {
+        // Simple fallback that only searches by title
+        const basicResults = books
+          .filter(book => book.title.toLowerCase().includes(query.toLowerCase()))
+          .slice(0, 5);
+        setSearchResults(basicResults);
+      } catch (fallbackError) {
+        console.error('Fallback search also failed:', fallbackError);
+        setSearchResults([]);
+      }
     }
   };
 

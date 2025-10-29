@@ -283,7 +283,22 @@ const Index = () => {
       </main>
 
       {/* Browse Categories Section */}
-      <section ref={categoriesRef} id="categories" className="container mx-auto px-4 py-16">
+      <section ref={categoriesRef} id="categories" className="container mx-auto px-4 py-16 relative">
+        {/* Scroll Up Button */}
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className={`absolute right-8 -top-6 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10 ${
+            theme === 'dark' 
+              ? 'bg-slate-800 text-cyan-400 hover:bg-slate-700 border border-cyan-500/30' 
+              : 'bg-white text-blue-600 hover:bg-blue-50 border border-blue-200'
+          }`}
+          aria-label="Scroll to top"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+        
         <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <h2 className="text-5xl font-bold text-center mb-4 text-primary">
             Browse Categories

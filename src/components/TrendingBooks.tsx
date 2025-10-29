@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import { books } from "@/data/books";
+import { ImageWithFallback } from "./ImageWithFallback";
+import { getBookCover } from "@/utils/bookCoverMapping";
 
 export function TrendingBooks() {
   const navigate = useNavigate();
@@ -65,8 +67,19 @@ export function TrendingBooks() {
               className="flex-shrink-0 w-[140px] md:w-[150px] group cursor-pointer"
               onClick={() => handleBookClick(book.id)}
             >
-              <div className={`${book.bgColor} rounded-lg p-4 md:p-5 h-[200px] md:h-[204px] flex flex-col justify-between shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-102`}>
-                <div className="flex flex-col gap-2">
+              <div className={`${book.bgColor} rounded-lg p-4 md:p-5 h-[200px] md:h-[204px] flex flex-col justify-between shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-102 relative overflow-hidden`}>
+                {/* Book Cover Image */}
+                <div className="absolute inset-0 opacity-20 z-0">
+                  <ImageWithFallback
+                    src={getBookCover(book.title) || '/placeholder.svg'}
+                    alt={`Cover of ${book.title}`}
+                    fallbackSrc="/placeholder.svg"
+                    className="w-full h-full object-cover"
+                    style={{ objectFit: 'cover' }}
+                  />
+                </div>
+                
+                <div className="flex flex-col gap-2 relative z-10">
                   <div className="text-white text-xs uppercase tracking-wider font-medium leading-tight">
                     Now Reading
                   </div>
@@ -76,7 +89,7 @@ export function TrendingBooks() {
                     </h3>
                   </div>
                 </div>
-                <div className="text-white text-sm font-medium">
+                <div className="text-white text-sm font-medium relative z-10">
                   by {book.author}
                 </div>
               </div>
