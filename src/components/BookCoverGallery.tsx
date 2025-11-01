@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { bookCoverMap, handleImageError } from '../utils/bookCoverMapping';
+import { handleImageError } from '../utils/bookCoverMapping';
+import { bookCoverMap } from '../utils/generatedBookCoverMap';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface BookCoverGalleryProps {
@@ -48,6 +49,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
                 className="w-full h-full object-cover transition-all hover:scale-105"
                 onError={(e) => handleImageError(e)}
                 loading="lazy"
+                data-title={title}
               />
             </div>
             <p className="mt-2 text-sm text-center font-medium line-clamp-2">{title}</p>
@@ -85,3 +87,4 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
 };
 
 export default BookCoverGallery;
+

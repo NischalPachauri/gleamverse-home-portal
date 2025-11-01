@@ -28,3 +28,4 @@ console.log('Supabase client initialized with URL:', supabaseUrl);
 console.log('Supabase Anon Key:', supabaseAnonKey ? '***' + supabaseAnonKey.slice(-4) : 'not set');
 
 export default supabase;
+export { supabase };

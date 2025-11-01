@@ -12,7 +12,7 @@ import { useState, useEffect, useRef } from "react";
 import { getBookCover } from "@/utils/bookCoverMapping";
 import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
 import { toast } from "sonner";
-import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "./ImageWithFallback";
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   const g = genre.toLowerCase();
@@ -131,13 +131,13 @@ export function BookCard({ book }: { book: Book }) {
     document.body.removeChild(link);
   };
 
-  // CRITICAL: Get book cover with BOTH title and pdfPath for better matching
-  const bookCover = getBookCover(book.title, book.pdfPath);
+  // Get book cover using the updated getBookCover function
+  const bookCover = getBookCover(book.title);
   
   // Enhanced debug logging for cover resolution
   useEffect(() => {
-    if (!bookCover) {
-      console.warn(`Missing cover for book: "${book.title}" with path: ${book.pdfPath}`);
+    if (bookCover === '/placeholder.svg') {
+      console.warn(`Using placeholder for book: "${book.title}" with path: ${book.pdfPath}`);
     }
   }, [book.title, book.pdfPath, bookCover]);
 

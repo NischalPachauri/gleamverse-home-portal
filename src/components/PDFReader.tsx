@@ -5,14 +5,11 @@ import { Document, Page, pdfjs } from "react-pdf";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - Vite query suffix not typed
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, Layout, Columns, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Volume2, VolumeX, Music, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { getBookCover } from "@/utils/bookCoverMapping";
-import { books } from "@/data/books";
-// Import required CSS for annotations - using import statements that work with Vite
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
+import { supabase } from "@/integrations/supabase/client";
+import { useParams } from "react-router-dom";
 
 // Configure PDF.js worker to use locally bundled worker for reliability
 try {
@@ -27,26 +24,46 @@ try {
 interface PDFReaderProps {
   pdfPath: string;
   title: string;
-  bookId: string;
 }
 
-// Use the imported getBookCover function directly
-
-export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
-  console.log('PDFReader initialized with:', { pdfPath, title, bookId });
+export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
+  console.log('PDFReader initialized with:', { pdfPath, title });
+  const { id } = useParams();
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
   const [nightMode, setNightMode] = useState<boolean>(false);
+  // TTS removed per requirements
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [isInLibrary, setIsInLibrary] = useState<boolean>(false);
+  // Remove page turning state to avoid flicker
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [coverImage, setCoverImage] = useState<string>(`/placeholder.svg?title=${encodeURIComponent(title)}`);
+  // Page transition states
+  const [pageTransitioning, setPageTransitioning] = useState<boolean>(false);
+  // Magnifier functionality
+  const [magnifierActive, setMagnifierActive] = useState<boolean>(false);
+  const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
+  const [magnifierZoom, setMagnifierZoom] = useState<number>(2);
   
-  // Load book cover on component mount
-  useEffect(() => {
-    setCoverImage(getBookCover(title));
-  }, [title]);
+  // Handle magnifier activation
+  const toggleMagnifier = () => {
+    setMagnifierActive(!magnifierActive);
+    toast.success(magnifierActive ? "Magnifier disabled" : "Magnifier enabled");
+  };
+
+  // Handle mouse movement for magnifier
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!magnifierActive) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMagnifierPosition({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+  // Preloaded pages for smoother transitions
+  const [cachedPages, setCachedPages] = useState<Record<number, boolean>>({});
   
   // Music state management
   const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
@@ -54,7 +71,7 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
   const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
   const [audioContextInitialized, setAudioContextInitialized] = useState<boolean>(false);
   
-  // Available instrumental tracks - Using local music files
+  // Available instrumental tracks - Your music files
   const musicTracks = [
     { name: "Track 1", url: "/music/track1.mp3" },
     { name: "Track 2", url: "/music/track2.mp3" },
@@ -79,34 +96,146 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
     setLoading(false);
     toast.error("Failed to load PDF. Please try again.");
   }, [pdfPath]);
-
   const [twoPageMode, setTwoPageMode] = useState<boolean>(() => {
     const stored = localStorage.getItem("twoPageMode");
     return stored ? stored === "true" : true;
   });
-
+  // TTS removed per requirements
   const containerRef = useRef<HTMLDivElement>(null);
+  const [sessionId] = useState(() => {
+    let sid = localStorage.getItem("sessionId");
+    if (!sid) {
+      sid = Math.random().toString(36).substring(7);
+      localStorage.setItem("sessionId", sid);
+    }
+    return sid;
+  });
+
+  const checkIfInLibrary = useCallback(async () => {
+    if (!id) return;
+    const { data } = await supabase
+      .from("user_library")
+      .select("id")
+      .eq("book_id", id)
+      .eq("user_session_id", sessionId)
+      .single();
+    
+    setIsInLibrary(!!data);
+  }, [id, sessionId]);
+
+  const restoreLastPosition = useCallback(async () => {
+    if (!id) return;
+    const { data, error } = await supabase
+      .from("user_library")
+      .select("current_page")
+      .eq("book_id", id)
+      .eq("user_session_id", sessionId)
+      .maybeSingle();
+
+    if (!error && data?.current_page && data.current_page > 0) {
+      // Ensure left page is odd for two-page spread
+      const left = data.current_page % 2 === 0 ? data.current_page - 1 : data.current_page;
+      setPageNumber(left);
+    }
+  }, [id, sessionId]);
+
+  useEffect(() => {
+    checkIfInLibrary();
+    // Restore last read page for this book
+    restoreLastPosition();
+  }, [id, checkIfInLibrary, restoreLastPosition]);
+
+  const toggleLibrary = async () => {
+    if (!id) return;
+
+    if (isInLibrary) {
+      await supabase
+        .from("user_library")
+        .delete()
+        .eq("book_id", id)
+        .eq("user_session_id", sessionId);
+      toast.success("Removed from your library");
+      setIsInLibrary(false);
+    } else {
+      await supabase
+        .from("user_library")
+        .insert({ book_id: id, user_session_id: sessionId });
+      toast.success("Added to your library!");
+      setIsInLibrary(true);
+    }
+  };
+
+
+  // Preload adjacent pages for smoother transitions
+  const preloadAdjacentPages = useCallback((currentPage: number) => {
+    // Preload next and previous pages
+    const pagesToPreload = [];
+    if (currentPage > 1) pagesToPreload.push(currentPage - 1);
+    if (currentPage < numPages) pagesToPreload.push(currentPage + 1);
+    
+    // For two-page mode, also preload the paired pages
+    if (twoPageMode) {
+      if (currentPage + 1 <= numPages) pagesToPreload.push(currentPage + 1);
+      if (currentPage + 2 <= numPages) pagesToPreload.push(currentPage + 2);
+      if (currentPage - 2 > 0) pagesToPreload.push(currentPage - 2);
+    }
+    
+    // Mark these pages as cached
+    pagesToPreload.forEach(page => {
+      setCachedPages(prev => ({...prev, [page]: true}));
+    });
+  }, [numPages, twoPageMode]);
 
   const goToPrevPage = () => {
     if (pageNumber <= 1) return;
-    setPageNumber((prev) => {
-      if (twoPageMode) {
-        const nextPage = Math.max(prev - 2, 1);
-        return nextPage % 2 === 0 ? nextPage - 1 : nextPage;
-      }
-      return Math.max(prev - 1, 1);
-    });
+    
+    // Set transitioning state
+    setPageTransitioning(true);
+    
+    // Calculate the new page number
+    const newPageNumber = twoPageMode 
+      ? Math.max(pageNumber - 2, 1) 
+      : Math.max(pageNumber - 1, 1);
+    
+    // Normalize for two-page mode
+    const normalizedPage = twoPageMode && newPageNumber % 2 === 0 
+      ? newPageNumber - 1 
+      : newPageNumber;
+    
+    // Apply the page change with a slight delay for transition effect
+    setTimeout(() => {
+      setPageNumber(normalizedPage);
+      // Preload adjacent pages for smoother future transitions
+      preloadAdjacentPages(normalizedPage);
+      // End transition effect
+      setTimeout(() => setPageTransitioning(false), 150);
+    }, 100);
   };
 
   const goToNextPage = () => {
     if (pageNumber >= numPages) return;
-    setPageNumber((prev) => {
-      if (twoPageMode) {
-        const nextLeft = Math.min(prev + 2, numPages);
-        return nextLeft % 2 === 0 ? nextLeft - 1 : nextLeft;
-      }
-      return Math.min(prev + 1, numPages);
-    });
+    
+    // Set transitioning state
+    setPageTransitioning(true);
+    
+    // Calculate the new page number
+    const newPageNumber = twoPageMode 
+      ? Math.min(pageNumber + 2, numPages) 
+      : Math.min(pageNumber + 1, numPages);
+    
+    // Normalize for two-page mode
+    const normalizedPage = twoPageMode && newPageNumber % 2 === 0 
+      ? newPageNumber - 1 
+      : newPageNumber;
+    
+    // Apply the page change with a slight delay for transition effect
+    setTimeout(() => {
+      setPageNumber(normalizedPage);
+      // Preload adjacent pages for smoother future transitions
+      preloadAdjacentPages(normalizedPage);
+      // End transition effect
+      setTimeout(() => setPageTransitioning(false), 150);
+    }, 100);
   };
 
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.0));
@@ -188,14 +317,13 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
     }
   };
 
-  // Test all audio files on component mount - disabled to prevent console errors
+  // Test all audio files on component mount
   useEffect(() => {
-    // Disable audio file testing to prevent console errors
-    // musicTracks.forEach((track, index) => {
-    //   testAudioFile(track.url).then(isAccessible => {
-    //     console.log(`Track ${index + 1} (${track.name}): ${isAccessible ? 'Accessible' : 'Not accessible'}`);
-    //   });
-    // });
+    musicTracks.forEach((track, index) => {
+      testAudioFile(track.url).then(isAccessible => {
+        console.log(`Track ${index + 1} (${track.name}): ${isAccessible ? 'Accessible' : 'Not accessible'}`);
+      });
+    });
   }, []);
 
   // Initialize audio context on user interaction
@@ -394,23 +522,32 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
     }
   };
 
-  // Add useEffect to set book status to 'Reading' and add to bookmarks
-  useEffect(() => {
-    if (bookId) {
-      // Update book status to 'Reading'
-      const rawStatus = localStorage.getItem('bookStatus');
-      const statusMap: Record<string, string> = rawStatus ? JSON.parse(rawStatus) : {};
-      statusMap[bookId] = 'Reading';
-      localStorage.setItem('bookStatus', JSON.stringify(statusMap));
+  // TTS removed per requirements
 
-      // Also add to bookmarks if not already there
-      const bookmarks = JSON.parse(localStorage.getItem('gleamverse_bookmarks') || '[]');
-      if (!bookmarks.includes(bookId)) {
-        bookmarks.push(bookId);
-        localStorage.setItem('gleamverse_bookmarks', JSON.stringify(bookmarks));
-      }
-    }
-  }, [bookId]);
+  // TTS removed per requirements
+
+  // TTS removed per requirements
+
+  // TTS removed per requirements
+
+  // Persist reading position whenever page changes
+  useEffect(() => {
+    const persist = async () => {
+      if (!id) return;
+      const now = new Date().toISOString();
+      // Save the left page of the spread
+      await supabase
+        .from("user_library")
+        .upsert({
+          book_id: id,
+          user_session_id: sessionId,
+          current_page: pageNumber,
+          last_read_at: now,
+        }, { onConflict: "book_id,user_session_id" });
+    };
+    persist();
+    // We intentionally do not handle errors here; silent best-effort persistence
+  }, [pageNumber, id, sessionId]);
 
   // Show error state if PDF failed to load
   if (error) {
@@ -431,19 +568,7 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
     <div ref={containerRef} className={`flex flex-col bg-background ${isFullscreen ? 'h-screen' : 'h-full'}`}>
       {/* Controls */}
       <div className="pdf-controls sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center justify-between gap-4 flex-wrap shadow-lg">
-        <div className="flex items-center gap-4">
-          {/* Book cover display */}
-          <div className="hidden md:flex items-center gap-3">
-            <img 
-              src={coverImage} 
-              alt={`${title} cover`}
-              className="h-10 w-8 rounded shadow-sm object-cover"
-              onError={(e) => {
-                e.currentTarget.src = `/placeholder.svg?title=${encodeURIComponent(title)}`;
-              }}
-            />
-            <div className="text-sm font-medium truncate max-w-[150px]">{title}</div>
-          </div>
+        <div className="flex items-center gap-2">
           <Button
             onClick={goToPrevPage}
             disabled={pageNumber <= 1}
@@ -505,6 +630,16 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
 
         <div className="flex items-center gap-2">
           <Button 
+            onClick={toggleLibrary} 
+            size="sm" 
+            variant="outline"
+            className="gap-2"
+          >
+            {isInLibrary ? <BookmarkCheck className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
+            {isInLibrary ? "Saved" : "Save"}
+          </Button>
+
+          <Button 
             onClick={toggleNightMode} 
             size="sm" 
             variant="outline"
@@ -512,6 +647,8 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
           >
             {nightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
+
+          {/* TTS control removed per requirements */}
 
           <Button 
             onClick={toggleFullscreen} 
@@ -546,6 +683,7 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
             </select>
           </div>
 
+
           <Button onClick={handleDownload} size="sm" className="bg-primary hover:bg-primary/90 gap-2">
             <Download className="w-4 h-4" />
             Download
@@ -569,6 +707,7 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
         }}
       >
         <div className={`flex flex-col items-center ${isFullscreen ? 'gap-0 fullscreen-pdf' : 'gap-1'}`}>
+          {!isFullscreen && <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>}
           <div className={isFullscreen ? 'fullscreen-pdf' : ''}>
             <Document
               file={pdfPath}
@@ -582,14 +721,45 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
               }
             >
               {twoPageMode ? (
-                <div className="two-page-spread">
+                <div className="two-page-spread" onMouseMove={handleMouseMove}>
+                  {magnifierActive && (
+                    <div 
+                      className="magnifier" 
+                      style={{
+                        left: `${magnifierPosition.x}px`,
+                        top: `${magnifierPosition.y}px`,
+                        transform: `translate(-50%, -50%) scale(${magnifierZoom})`,
+                        pointerEvents: 'none',
+                        position: 'absolute',
+                        width: '150px',
+                        height: '150px',
+                        borderRadius: '50%',
+                        border: '2px solid #333',
+                        overflow: 'hidden',
+                        zIndex: 100,
+                        boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                        background: 'white'
+                      }}
+                    >
+                      <div 
+                        style={{
+                          transform: `translate(${-magnifierPosition.x * magnifierZoom + 75}px, ${-magnifierPosition.y * magnifierZoom + 75}px) scale(${magnifierZoom})`,
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        {/* This is a visual representation only - actual magnification happens via CSS */}
+                      </div>
+                    </div>
+                  )}
                   <div className="pdf-page">
                     <Page
                       pageNumber={pageNumber}
                       scale={scale}
                       renderTextLayer={false}
                       renderAnnotationLayer={true}
-                      className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                      className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''}`}
+                      onRenderSuccess={() => setCachedPages(prev => ({...prev, [pageNumber]: true}))}
                     />
                   </div>
                   {pageNumber + 1 <= numPages && (
@@ -599,7 +769,8 @@ export const PDFReader = ({ pdfPath, title, bookId }: PDFReaderProps) => {
                         scale={scale}
                         renderTextLayer={false}
                         renderAnnotationLayer={true}
-                        className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                        className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''}`}
+                        onRenderSuccess={() => setCachedPages(prev => ({...prev, [pageNumber + 1]: true}))}
                       />
                     </div>
                   )}

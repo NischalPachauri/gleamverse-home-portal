@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 
 const ERROR_IMG_SRC =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg==';
@@ -8,8 +7,8 @@ interface ImageWithFallbackProps {
   src: string;
   alt: string;
   fallbackSrc?: string;
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
   className?: string;
   style?: React.CSSProperties;
   onLoad?: () => void;
@@ -18,7 +17,7 @@ interface ImageWithFallbackProps {
   priority?: boolean;
 }
 
-const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
+export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   src,
   alt,
   fallbackSrc = ERROR_IMG_SRC,
@@ -28,8 +27,6 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   style,
   onLoad,
   onError,
-  sizes,
-  priority = false,
   ...rest
 }) => {
   const [imgSrc, setImgSrc] = useState<string>(src);
@@ -44,10 +41,14 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
   const handleError = () => {
     if (imgSrc !== fallbackSrc) {
-      console.warn(`Image failed to load: ${imgSrc}`);
+      console.warn(`Image failed to load: ${imgSrc}. Using fallback image.`);
       setImgSrc(fallbackSrc);
       setHasError(true);
       if (onError) onError();
+    } else {
+      // If even the fallback fails, use inline SVG as final fallback
+      console.error(`Critical: Both image and fallback failed to load: ${src}`);
+      setIsLoading(false);
     }
     setIsLoading(false);
   };
@@ -64,23 +65,21 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
           <div className="w-8 h-8 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin"></div>
         </div>
       )}
-      <Image
+      <img
         src={imgSrc}
         alt={alt}
         width={width}
         height={height}
         className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-        style={style}
+        style={{...style, objectFit: 'cover'}}
         onError={handleError}
         onLoad={handleLoad}
-        priority={priority}
-        sizes={sizes}
         data-original-url={hasError ? src : undefined}
-        unoptimized={true}
+        loading="lazy"
         {...rest}
       />
     </div>
   );
-};
+}
 
 export default ImageWithFallback;
