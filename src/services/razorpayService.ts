@@ -48,11 +48,11 @@ export const createOrder = async (options: Omit<PaymentOptions, 'orderId'>) => {
       success: true,
       order: simulatedOrder,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating Razorpay order:', error);
     return {
       success: false,
-      error: error.message || 'Failed to create order',
+      error: (error as Error).message || 'Failed to create order',
     };
   }
 };
@@ -60,14 +60,18 @@ export const createOrder = async (options: Omit<PaymentOptions, 'orderId'>) => {
 // Initialize payment
 export const initializePayment = (options: PaymentOptions) => {
   return new Promise((resolve) => {
-    const rzp = new (window as any).Razorpay({
+    const rzp = new window.Razorpay({
       key: 'rzp_test_RY3WvDTVIw8cad', // Updated with the correct test key
       amount: options.amount,
       currency: options.currency || 'INR',
       name: options.name,
       description: options.description,
       order_id: options.orderId,
-      handler: function (response: any) {
+      handler: function (response: {
+        razorpay_payment_id: string;
+        razorpay_order_id: string;
+        razorpay_signature: string;
+      }) {
         // This handler is called when payment is successful
         resolve({
           success: true,
@@ -88,7 +92,15 @@ export const initializePayment = (options: PaymentOptions) => {
     
     rzp.open();
     
-    rzp.on('payment.failed', function (response: any) {
+    rzp.on('payment.failed', function (response: {
+      error: {
+        code: string;
+        description: string;
+        source: string;
+        step: string;
+        reason: string;
+      };
+    }) {
       resolve({
         success: false,
         error: response.error.description,

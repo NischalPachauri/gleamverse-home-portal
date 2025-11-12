@@ -92,17 +92,17 @@ export function RegisterForm({ onToggleMode, onClose }: RegisterFormProps) {
           general: 'Registration could not be completed. Please try again later.'
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Registration form error:', error);
       
       // Handle API key errors specifically
-      if (error.message?.includes('API key') || error.message?.includes('Invalid API key')) {
+      if ((error as Error).message?.includes('API key') || (error as Error).message?.includes('Invalid API key')) {
         setErrors({
           general: 'Authentication service is temporarily unavailable. Please try again later.'
         });
       } else {
         setErrors({
-          general: error.message || 'Failed to create account. Please try again.'
+          general: (error as Error).message || 'Failed to create account. Please try again.'
         });
       }
     } finally {

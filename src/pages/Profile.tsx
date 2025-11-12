@@ -1,38 +1,66 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, BookOpen, Clock, ArrowLeft, Mail, Calendar, BookMarked, Heart, Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { books } from '@/data/books';
 import { useAuth } from '@/contexts/AuthContext';
 import { useReadingHistory } from '@/hooks/useReadingHistory';
+import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { EnhancedImage } from '@/components/EnhancedImage';
+import { books } from '@/data/books';
+import { User, BookOpen, Clock, Mail, Calendar, LogOut, Settings } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { getBookCover } from '@/utils/bookCoverMapping';
+import { toast } from 'sonner';
 
 export default function Profile() {
   const { user, isAuthenticated, signOut } = useAuth();
   const { history, loading } = useReadingHistory();
+  const { metrics, logPerformance, isSlow } = usePerformanceMonitor('Profile');
   const [lastReadBook, setLastReadBook] = useState<typeof books[0] | null>(null);
+  const [userDataError, setUserDataError] = useState<string | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  // Log performance metrics when component updates
+  useEffect(() => {
+    logPerformance();
+  }, [history, lastReadBook, userDataError]);
+
+  // Show performance warning if component is slow
+  useEffect(() => {
+    if (isSlow) {
+      console.warn('Profile component performance is slow:', metrics);
+    }
+  }, [isSlow, metrics]);
 
   useEffect(() => {
-    if (history.length > 0) {
-      const mostRecent = history[0];
-      const book = books.find(b => b.id === mostRecent.book_id);
-      setLastReadBook(book || null);
+    try {
+      if (history.length > 0) {
+        const mostRecent = history[0];
+        const book = books.find(b => b.id === mostRecent.book_id);
+        setLastReadBook(book || null);
+      }
+    } catch (error) {
+      console.error('Error loading last read book:', error);
+      setHistoryError('Failed to load reading history');
     }
   }, [history]);
 
   const getUserInitials = () => {
-    if (user?.user_metadata?.full_name) {
-      return user.user_metadata.full_name
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+    try {
+      if (user?.user_metadata?.full_name) {
+        return user.user_metadata.full_name
+          .split(' ')
+          .map((n: string) => n[0])
+          .join('')
+          .toUpperCase()
+          .slice(0, 2);
+      }
+      return user?.email?.slice(0, 2).toUpperCase() || 'U';
+    } catch (error) {
+      console.error('Error generating user initials:', error);
+      return 'U';
     }
-    return user?.email?.slice(0, 2).toUpperCase() || 'U';
   };
 
   const handleSignOut = async () => {
@@ -40,6 +68,7 @@ export default function Profile() {
       await signOut();
     } catch (error) {
       console.error('Sign out error:', error);
+      toast.error('Failed to sign out. Please try again.');
     }
   };
 
@@ -53,6 +82,19 @@ export default function Profile() {
           <Link to="/">
             <Button>Go Home</Button>
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (userDataError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <User className="w-16 h-16 text-muted-foreground mx-auto" />
+          <h1 className="text-2xl font-bold text-foreground">Profile Error</h1>
+          <p className="text-muted-foreground">{userDataError}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     );
@@ -178,13 +220,10 @@ export default function Profile() {
                 </div>
                 
                 <div className="flex gap-4">
-                  <img
-                    src={getBookCover(lastReadBook.title) || '/placeholder.svg'}
+                  <EnhancedImage
+                    bookTitle={lastReadBook.title}
                     alt={lastReadBook.title}
                     className="w-20 h-30 object-cover rounded shadow-sm"
-                    onError={(e) => {
-                      e.currentTarget.src = '/placeholder.svg';
-                    }}
                   />
                   <div className="flex-1">
                     <h4 className="font-semibold text-foreground">{lastReadBook.title}</h4>
@@ -213,7 +252,15 @@ export default function Profile() {
                 <h3 className="text-lg font-semibold text-foreground">Reading History</h3>
               </div>
 
-              {loading ? (
+              {historyError ? (
+                <div className="text-center py-8">
+                  <BookOpen className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">Error loading reading history</p>
+                  <Button size="sm" variant="outline" onClick={() => window.location.reload()} className="mt-2">
+                    Retry
+                  </Button>
+                </div>
+              ) : loading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                   <p className="text-muted-foreground mt-2">Loading reading history...</p>
@@ -232,13 +279,10 @@ export default function Profile() {
 
                     return (
                       <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                        <img
-                          src={getBookCover(book.title) || '/placeholder.svg'}
+                        <EnhancedImage
+                          bookTitle={book.title}
                           alt={book.title}
                           className="w-12 h-16 object-cover rounded shadow-sm"
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder.svg';
-                          }}
                         />
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-foreground truncate">{book.title}</h4>

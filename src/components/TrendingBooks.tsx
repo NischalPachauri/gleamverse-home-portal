@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import { books } from "@/data/books";
-import { ImageWithFallback } from "./ImageWithFallback";
-import { getBookCover } from "@/utils/bookCoverMapping";
+import EnhancedImage from "./EnhancedImage";
 
 export function TrendingBooks() {
   const navigate = useNavigate();
@@ -70,10 +69,9 @@ export function TrendingBooks() {
               <div className={`${book.bgColor} rounded-lg p-4 md:p-5 h-[200px] md:h-[204px] flex flex-col justify-between shadow-md hover:shadow-lg transition-all duration-300 group-hover:scale-102 relative overflow-hidden`}>
                 {/* Book Cover Image */}
                 <div className="absolute inset-0 opacity-20 z-0">
-                  <ImageWithFallback
-                    src={getBookCover(book.title) || '/placeholder.svg'}
+                  <EnhancedImage
+                    bookTitle={book.title}
                     alt={`Cover of ${book.title}`}
-                    fallbackSrc="/placeholder.svg"
                     className="w-full h-full object-cover"
                     style={{ objectFit: 'cover' }}
                   />

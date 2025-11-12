@@ -1,34 +1,115 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-// Use a same-origin worker URL to avoid cross-origin/module worker issues
-// Vite will bundle this and return a URL string
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - Vite query suffix not typed
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Volume2, VolumeX, Music, Search } from "lucide-react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Document, Page, pdfjs } from 'react-pdf';
+import { useReadingProgress } from '@/hooks/useReadingProgress';
+const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
+import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
 
 // Configure PDF.js worker to use locally bundled worker for reliability
 try {
-  pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl as unknown as string;
-  console.log('PDF.js worker configured:', pdfWorkerUrl);
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl as unknown as string;
+  console.log('PDF.js worker configured:', workerUrl);
 } catch (error) {
   console.error('Failed to configure PDF.js worker:', error);
-  // Fallback to CDN
-  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 }
+
+try {
+  const worker = new Worker(new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url), { type: 'module' });
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  pdfjs.GlobalWorkerOptions.workerPort = worker;
+} catch {}
 
 interface PDFReaderProps {
   pdfPath: string;
   title: string;
 }
 
+const extractFilename = (path: string) => {
+  const last = path.split('/').pop() || path;
+  return decodeURIComponent(last);
+};
+
+const validatePdfFilename = (filename: string) => {
+  const hasPdfExt = /\.pdf$/i.test(filename);
+  if (!hasPdfExt) return { ok: false, message: 'Filename must end with .pdf' };
+  const validChars = /^[A-Za-z0-9 _().,-]+\.pdf$/;
+  if (!validChars.test(filename)) return { ok: false, message: 'Unsupported characters in filename' };
+  if (filename.length > 200) return { ok: false, message: 'Filename is too long' };
+  return { ok: true };
+};
+
+const sanitizeDownloadTitle = (title: string) => {
+  const base = title.replace(/[^A-Za-z0-9 _().,-]/g, ' ').replace(/\s+/g, ' ').trim();
+  return `${base}.pdf`;
+};
+
+function isDomException(error: unknown): error is DOMException {
+  return error instanceof DOMException;
+}
+
 export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
-  console.log('PDFReader initialized with:', { pdfPath, title });
+  // Normalize PDF path to handle renamed files
+  const normalizedPdfPath = pdfPath.replace(/\s+/g, ' ').trim();
+  console.log('PDFReader initialized with:', { pdfPath: normalizedPdfPath, title });
+  
+  // Debug PDF.js worker status
+  console.log('PDF.js version:', pdfjs.version);
+  console.log('PDF.js worker source:', pdfjs.GlobalWorkerOptions.workerSrc);
+  
+  // Test if PDF path is accessible
+  const filename = extractFilename(normalizedPdfPath);
+  const filenameCheck = validatePdfFilename(filename);
+  const [preflightChecked, setPreflightChecked] = useState(false);
+  useEffect(() => {
+    setPreflightChecked(false);
+    const check = async () => {
+      if (!filenameCheck.ok) {
+        const msg = `Filename doesn't match requirements: ${filenameCheck.message}`;
+        setError(msg);
+        setLoading(false);
+        toast.error(msg);
+        setPreflightChecked(true);
+        return;
+      }
+      try {
+        const res = await fetch(normalizedPdfPath, { method: 'HEAD' });
+        const ct = res.headers.get('content-type') || '';
+        const cl = res.headers.get('content-length');
+        const size = cl ? parseInt(cl, 10) : NaN;
+        if (!res.ok) {
+          const msg = 'File not accessible. Please try again later.';
+          setError(msg);
+          setLoading(false);
+          toast.error(msg);
+        } else if (ct && !/pdf/i.test(ct)) {
+          const msg = 'File is not a PDF based on server headers.';
+          setError(msg);
+          setLoading(false);
+          toast.error(msg);
+        } else if (!isNaN(size) && size <= 0) {
+          const msg = 'File size is 0 bytes.';
+          setError(msg);
+          setLoading(false);
+          toast.error(msg);
+        }
+      } catch (err) {
+        
+      } finally {
+        setPreflightChecked(true);
+      }
+    };
+    check();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedPdfPath]);
   const { id } = useParams();
+  const { updateProgress, getProgress } = useReadingProgress();
+  const { updateBookmarkStatus, addBookmark, bookmarkedBooks, bookmarkStatuses } = useLocalBookmarks();
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState<number>(1.0);
@@ -45,6 +126,17 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   const [magnifierActive, setMagnifierActive] = useState<boolean>(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [magnifierZoom, setMagnifierZoom] = useState<number>(2);
+  const optionsMemo = useMemo(() => ({
+    cMapUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+    standardFontDataUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+    disableAutoFetch: true,
+    disableStream: false,
+    disableRange: false,
+    rangeChunkSize: 65536,
+    useSystemFonts: false,
+    useWorkerFetch: true,
+  }), []);
   
   // Handle magnifier activation
   const toggleMagnifier = () => {
@@ -65,37 +157,65 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   // Preloaded pages for smoother transitions
   const [cachedPages, setCachedPages] = useState<Record<number, boolean>>({});
   
-  // Music state management
-  const [isMusicPlaying, setIsMusicPlaying] = useState<boolean>(false);
-  const [currentTrack, setCurrentTrack] = useState<number>(0);
-  const [audioRef, setAudioRef] = useState<HTMLAudioElement | null>(null);
-  const [audioContextInitialized, setAudioContextInitialized] = useState<boolean>(false);
+  // Enhanced transition management
+  const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
+  const [isRendering, setIsRendering] = useState<boolean>(false);
   
-  // Available instrumental tracks - Your music files
-  const musicTracks = [
-    { name: "Track 1", url: "/music/track1.mp3" },
-    { name: "Track 2", url: "/music/track2.mp3" },
-    { name: "Track 3", url: "/music/track3.mp3" },
-    { name: "Track 4", url: "/music/track4.mp3" },
-    { name: "Track 5", url: "/music/track5.mp3" },
-    { name: "Track 6", url: "/music/track6.mp3" }
-  ];
+  // Music controls moved to global persistent player
 
-  // Add error boundary for PDF loading
+  // Enhanced error boundary with performance optimization
   const onDocumentLoadSuccess = useCallback(({ numPages }: { numPages: number }) => {
     console.log('PDF loaded successfully:', { numPages, pdfPath });
     setNumPages(numPages);
     setLoading(false);
     setError(null);
     toast.success(`Document loaded! ${numPages} pages available.`);
-  }, [pdfPath]);
+
+    if (id) {
+      const savedProgress = getProgress(id);
+      if (savedProgress && savedProgress.currentPage > 1) {
+        const left = savedProgress.currentPage % 2 === 0 ? savedProgress.currentPage - 1 : savedProgress.currentPage;
+        setPageNumber(left);
+      }
+      updateProgress(id, savedProgress?.currentPage || 1, numPages);
+    }
+    
+    // Preload first few pages for better initial performance
+    requestAnimationFrame(() => {
+      const pagesToPreload = Math.min(3, numPages);
+      for (let i = 1; i <= pagesToPreload; i++) {
+        setCachedPages(prev => ({...prev, [i]: true}));
+      }
+    });
+  }, [pdfPath, id, getProgress, updateProgress]);
 
   const onDocumentLoadError = useCallback((error: Error) => {
-    console.error('PDF load error:', error, 'PDF path:', pdfPath);
-    setError('Failed to load PDF. Please try again.');
+    console.error('PDF load error:', error, 'PDF path:', normalizedPdfPath);
+    let errorMessage = 'Failed to load PDF. Please try again.';
+    
+    // Provide more specific error messages based on error type
+    if (error.message) {
+      if (error.message.includes('Missing PDF')) {
+        errorMessage = 'PDF file not found. The file may have been moved or deleted.';
+      } else if (error.message.includes('Invalid PDF')) {
+        errorMessage = 'Invalid PDF file. The file may be corrupted or not a valid PDF.';
+      } else if (error.message.includes('Unexpected server response')) {
+        errorMessage = 'Server error while loading PDF. Please try again later.';
+      } else if (error.message.includes('CORS')) {
+        errorMessage = 'Cross-origin error. The PDF cannot be loaded due to security restrictions.';
+      } else if (error.message.includes('NetworkError')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (error.message.includes('worker')) {
+        errorMessage = 'PDF worker error. There may be an issue with the PDF rendering engine.';
+      } else {
+        errorMessage = `PDF loading error: ${error.message}`;
+      }
+    }
+    
+    setError(errorMessage);
     setLoading(false);
-    toast.error("Failed to load PDF. Please try again.");
-  }, [pdfPath]);
+    toast.error(errorMessage);
+  }, [normalizedPdfPath]);
   const [twoPageMode, setTwoPageMode] = useState<boolean>(() => {
     const stored = localStorage.getItem("twoPageMode");
     return stored ? stored === "true" : true;
@@ -123,27 +243,9 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     setIsInLibrary(!!data);
   }, [id, sessionId]);
 
-  const restoreLastPosition = useCallback(async () => {
-    if (!id) return;
-    const { data, error } = await supabase
-      .from("user_library")
-      .select("current_page")
-      .eq("book_id", id)
-      .eq("user_session_id", sessionId)
-      .maybeSingle();
-
-    if (!error && data?.current_page && data.current_page > 0) {
-      // Ensure left page is odd for two-page spread
-      const left = data.current_page % 2 === 0 ? data.current_page - 1 : data.current_page;
-      setPageNumber(left);
-    }
-  }, [id, sessionId]);
-
   useEffect(() => {
     checkIfInLibrary();
-    // Restore last read page for this book
-    restoreLastPosition();
-  }, [id, checkIfInLibrary, restoreLastPosition]);
+  }, [id, checkIfInLibrary]);
 
   const toggleLibrary = async () => {
     if (!id) return;
@@ -166,31 +268,36 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   };
 
 
-  // Preload adjacent pages for smoother transitions
+  // Enhanced preloading with frame rate optimization
   const preloadAdjacentPages = useCallback((currentPage: number) => {
-    // Preload next and previous pages
-    const pagesToPreload = [];
-    if (currentPage > 1) pagesToPreload.push(currentPage - 1);
-    if (currentPage < numPages) pagesToPreload.push(currentPage + 1);
-    
-    // For two-page mode, also preload the paired pages
-    if (twoPageMode) {
-      if (currentPage + 1 <= numPages) pagesToPreload.push(currentPage + 1);
-      if (currentPage + 2 <= numPages) pagesToPreload.push(currentPage + 2);
-      if (currentPage - 2 > 0) pagesToPreload.push(currentPage - 2);
-    }
-    
-    // Mark these pages as cached
-    pagesToPreload.forEach(page => {
-      setCachedPages(prev => ({...prev, [page]: true}));
+    // Use requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+      // Preload next and previous pages
+      const pagesToPreload = [];
+      if (currentPage > 1) pagesToPreload.push(currentPage - 1);
+      if (currentPage < numPages) pagesToPreload.push(currentPage + 1);
+      
+      // For two-page mode, also preload the paired pages
+      if (twoPageMode) {
+        if (currentPage + 1 <= numPages) pagesToPreload.push(currentPage + 1);
+        if (currentPage + 2 <= numPages) pagesToPreload.push(currentPage + 2);
+        if (currentPage - 2 > 0) pagesToPreload.push(currentPage - 2);
+      }
+      
+      // Mark these pages as cached
+      pagesToPreload.forEach(page => {
+        setCachedPages(prev => ({...prev, [page]: true}));
+      });
     });
   }, [numPages, twoPageMode]);
 
   const goToPrevPage = () => {
-    if (pageNumber <= 1) return;
+    if (pageNumber <= 1 || isRendering) return;
     
     // Set transitioning state
     setPageTransitioning(true);
+    setTransitionDirection('left');
+    setIsRendering(true);
     
     // Calculate the new page number
     const newPageNumber = twoPageMode 
@@ -202,21 +309,36 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
       ? newPageNumber - 1 
       : newPageNumber;
     
-    // Apply the page change with a slight delay for transition effect
+    // Apply the page change with optimized timing
     setTimeout(() => {
       setPageNumber(normalizedPage);
+      if (id) {
+        updateProgress(id, normalizedPage, numPages);
+        if (!bookmarkedBooks.includes(id)) addBookmark(id);
+        if (normalizedPage >= numPages) {
+          if (bookmarkStatuses[id] !== 'Completed') updateBookmarkStatus(id, 'Completed');
+        } else if (normalizedPage > 1) {
+          if (bookmarkStatuses[id] !== 'Reading') updateBookmarkStatus(id, 'Reading');
+        }
+      }
       // Preload adjacent pages for smoother future transitions
       preloadAdjacentPages(normalizedPage);
-      // End transition effect
-      setTimeout(() => setPageTransitioning(false), 150);
-    }, 100);
+      // End transition effect after rendering completes
+      setTimeout(() => {
+        setPageTransitioning(false);
+        setTransitionDirection(null);
+        setIsRendering(false);
+      }, 200);
+    }, 50);
   };
 
   const goToNextPage = () => {
-    if (pageNumber >= numPages) return;
+    if (pageNumber >= numPages || isRendering) return;
     
     // Set transitioning state
     setPageTransitioning(true);
+    setTransitionDirection('right');
+    setIsRendering(true);
     
     // Calculate the new page number
     const newPageNumber = twoPageMode 
@@ -228,14 +350,27 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
       ? newPageNumber - 1 
       : newPageNumber;
     
-    // Apply the page change with a slight delay for transition effect
+    // Apply the page change with optimized timing
     setTimeout(() => {
       setPageNumber(normalizedPage);
+      if (id) {
+        updateProgress(id, normalizedPage, numPages);
+        if (!bookmarkedBooks.includes(id)) addBookmark(id);
+        if (normalizedPage >= numPages) {
+          if (bookmarkStatuses[id] !== 'Completed') updateBookmarkStatus(id, 'Completed');
+        } else if (normalizedPage > 1) {
+          if (bookmarkStatuses[id] !== 'Reading') updateBookmarkStatus(id, 'Reading');
+        }
+      }
       // Preload adjacent pages for smoother future transitions
       preloadAdjacentPages(normalizedPage);
-      // End transition effect
-      setTimeout(() => setPageTransitioning(false), 150);
-    }, 100);
+      // End transition effect after rendering completes
+      setTimeout(() => {
+        setPageTransitioning(false);
+        setTransitionDirection(null);
+        setIsRendering(false);
+      }, 200);
+    }, 50);
   };
 
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.0));
@@ -244,7 +379,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = pdfPath;
-    link.download = `${title}.pdf`;
+    link.download = sanitizeDownloadTitle(title);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -268,12 +403,6 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     const handleFullscreenChange = () => {
       const isFullscreenNow = !!document.fullscreenElement;
       setIsFullscreen(isFullscreenNow);
-      
-      // Show/hide controls based on fullscreen state
-      const controls = document.querySelector('.pdf-controls');
-      if (controls) {
-        (controls as HTMLElement).style.display = isFullscreenNow ? 'none' : 'flex';
-      }
     };
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
@@ -288,66 +417,88 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
       } else if (event.key === 'ArrowRight') {
         event.preventDefault();
         goToNextPage();
+      } else if (event.key === 'Escape' && isFullscreen) {
+        event.preventDefault();
+        document.exitFullscreen();
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [pageNumber, numPages, twoPageMode]);
+  }, [goToNextPage, goToPrevPage, isFullscreen]);
 
-  // Cleanup audio when component unmounts
+  // Touch gesture navigation for mobile
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+
+  // Auto-hide controls in fullscreen mode
+  const [showControls, setShowControls] = useState(true);
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showControlsTemporarily = () => {
+    setShowControls(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      if (isFullscreen) {
+        setShowControls(false);
+      }
+    }, 3000);
+  };
+
   useEffect(() => {
+    if (isFullscreen) {
+      showControlsTemporarily();
+    } else {
+      setShowControls(true);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    }
     return () => {
-      if (audioRef) {
-        audioRef.pause();
-        audioRef.currentTime = 0;
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
       }
     };
-  }, [audioRef]);
+  }, [isFullscreen]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchEnd({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const deltaX = touchEnd.x - touchStart.x;
+    const deltaY = touchEnd.y - touchStart.y;
+    const minSwipeDistance = 50;
+
+    // Check if horizontal swipe is longer than vertical swipe
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > minSwipeDistance) {
+      if (deltaX > 0) {
+        goToPrevPage();
+      } else {
+        goToNextPage();
+      }
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  // No local audio cleanup needed
 
   // Test audio file accessibility
-  const testAudioFile = async (url: string) => {
-    try {
-      const response = await fetch(url, { method: 'HEAD' });
-      console.log(`Audio file ${url} status:`, response.status);
-      return response.ok;
-    } catch (error) {
-      console.error(`Error testing audio file ${url}:`, error);
-      return false;
-    }
-  };
+  // Local audio testing removed
 
-  // Test all audio files on component mount
-  useEffect(() => {
-    musicTracks.forEach((track, index) => {
-      testAudioFile(track.url).then(isAccessible => {
-        console.log(`Track ${index + 1} (${track.name}): ${isAccessible ? 'Accessible' : 'Not accessible'}`);
-      });
-    });
-  }, []);
-
-  // Initialize audio context on user interaction
-  const initializeAudioContext = async () => {
-    if (audioContextInitialized) return true;
-    
-    try {
-      // Create a silent audio to initialize the audio context
-      const silentAudio = new Audio();
-      silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-      silentAudio.volume = 0;
-      
-      await silentAudio.play();
-      silentAudio.pause();
-      silentAudio.remove();
-      
-      setAudioContextInitialized(true);
-      console.log('Audio context initialized');
-      return true;
-    } catch (error) {
-      console.error('Failed to initialize audio context:', error);
-      return false;
-    }
-  };
+  // Local audio context removed
 
   const toggleMode = () => {
     const next = !twoPageMode;
@@ -359,168 +510,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     }
   };
 
-  // Music control functions
-  const toggleMusic = async () => {
-    if (isMusicPlaying) {
-      if (audioRef) {
-        audioRef.pause();
-        audioRef.currentTime = 0;
-      }
-      setIsMusicPlaying(false);
-      toast.success("Background music stopped");
-    } else {
-      // Initialize audio context first
-      const contextInitialized = await initializeAudioContext();
-      if (!contextInitialized) {
-        toast.error("Failed to initialize audio. Please try again.");
-        return;
-      }
-
-      const audio = new Audio();
-      audio.loop = true;
-      audio.volume = 0.6; // Set volume to 60% for background music
-      audio.preload = 'auto';
-      audio.crossOrigin = 'anonymous';
-      
-      // Add event listeners before setting source
-      audio.addEventListener('loadstart', () => {
-        console.log('Audio loading started');
-      });
-      
-      audio.addEventListener('canplaythrough', () => {
-        console.log('Audio can play through');
-      });
-      
-      audio.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        const error = audio.error;
-        let errorMessage = `Music file not found: ${musicTracks[currentTrack].name}`;
-        
-        if (error) {
-          switch (error.code) {
-            case error.MEDIA_ERR_ABORTED:
-              errorMessage = "Audio playback was aborted";
-              break;
-            case error.MEDIA_ERR_NETWORK:
-              errorMessage = "Network error while loading audio";
-              break;
-            case error.MEDIA_ERR_DECODE:
-              errorMessage = "Audio file format not supported";
-              break;
-            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-              errorMessage = "Audio file not found or format not supported";
-              break;
-          }
-        }
-        
-        toast.error(errorMessage);
-        setIsMusicPlaying(false);
-      });
-      
-      // Set the source and try to play
-      audio.src = musicTracks[currentTrack].url;
-      
-      try {
-        await audio.play();
-        setAudioRef(audio);
-        setIsMusicPlaying(true);
-        toast.success(`Playing: ${musicTracks[currentTrack].name}`);
-        console.log('Audio started playing successfully');
-      } catch (error: any) {
-        console.error('Error playing music:', error);
-        if (error.name === 'NotAllowedError') {
-          toast.error("Autoplay blocked. Please click the play button to start music.");
-        } else if (error.name === 'NotSupportedError') {
-          toast.error("Audio format not supported by your browser.");
-        } else {
-          toast.error(`Failed to play: ${musicTracks[currentTrack].name}. Please check if the music file exists and is in a supported format.`);
-        }
-      }
-    }
-  };
-
-  const changeTrack = async (trackIndex: number) => {
-    const wasPlaying = isMusicPlaying;
-    
-    if (isMusicPlaying && audioRef) {
-      audioRef.pause();
-      audioRef.currentTime = 0;
-    }
-    
-    setCurrentTrack(trackIndex);
-    
-    if (wasPlaying) {
-      // Initialize audio context first
-      const contextInitialized = await initializeAudioContext();
-      if (!contextInitialized) {
-        toast.error("Failed to initialize audio. Please try again.");
-        return;
-      }
-
-      const audio = new Audio();
-      audio.loop = true;
-      audio.volume = 0.6;
-      audio.preload = 'auto';
-      audio.crossOrigin = 'anonymous';
-      
-      // Add event listeners before setting source
-      audio.addEventListener('loadstart', () => {
-        console.log('Audio loading started for track:', trackIndex);
-      });
-      
-      audio.addEventListener('canplaythrough', () => {
-        console.log('Audio can play through for track:', trackIndex);
-      });
-      
-      audio.addEventListener('error', (e) => {
-        console.error('Audio error for track:', trackIndex, e);
-        const error = audio.error;
-        let errorMessage = `Music file not found: ${musicTracks[trackIndex].name}`;
-        
-        if (error) {
-          switch (error.code) {
-            case error.MEDIA_ERR_ABORTED:
-              errorMessage = "Audio playback was aborted";
-              break;
-            case error.MEDIA_ERR_NETWORK:
-              errorMessage = "Network error while loading audio";
-              break;
-            case error.MEDIA_ERR_DECODE:
-              errorMessage = "Audio file format not supported";
-              break;
-            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
-              errorMessage = "Audio file not found or format not supported";
-              break;
-          }
-        }
-        
-        toast.error(errorMessage);
-        setIsMusicPlaying(false);
-      });
-      
-      // Set the source and try to play
-      audio.src = musicTracks[trackIndex].url;
-      
-      try {
-        await audio.play();
-        setAudioRef(audio);
-        toast.success(`Now playing: ${musicTracks[trackIndex].name}`);
-        console.log('Audio track changed successfully');
-      } catch (error: any) {
-        console.error('Error playing music:', error);
-        if (error.name === 'NotAllowedError') {
-          toast.error("Autoplay blocked. Please click the play button to start music.");
-        } else if (error.name === 'NotSupportedError') {
-          toast.error("Audio format not supported by your browser.");
-        } else {
-          toast.error(`Failed to play: ${musicTracks[trackIndex].name}. Please check if the music file exists and is in a supported format.`);
-        }
-        setIsMusicPlaying(false);
-      }
-    } else {
-      toast.success(`Selected: ${musicTracks[trackIndex].name}`);
-    }
-  };
+  // Music control functions removed; use global music player
 
   // TTS removed per requirements
 
@@ -532,22 +522,10 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
 
   // Persist reading position whenever page changes
   useEffect(() => {
-    const persist = async () => {
-      if (!id) return;
-      const now = new Date().toISOString();
-      // Save the left page of the spread
-      await supabase
-        .from("user_library")
-        .upsert({
-          book_id: id,
-          user_session_id: sessionId,
-          current_page: pageNumber,
-          last_read_at: now,
-        }, { onConflict: "book_id,user_session_id" });
-    };
-    persist();
-    // We intentionally do not handle errors here; silent best-effort persistence
-  }, [pageNumber, id, sessionId]);
+    if (id && numPages > 0) {
+      updateProgress(id, pageNumber, numPages);
+    }
+  }, [pageNumber, id, numPages, updateProgress]);
 
   // Show error state if PDF failed to load
   if (error) {
@@ -565,19 +543,28 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   }
 
   return (
-    <div ref={containerRef} className={`flex flex-col bg-background ${isFullscreen ? 'h-screen' : 'h-full'}`}>
+    <div ref={containerRef} className={`flex flex-col bg-background h-full ${isFullscreen ? 'fullscreen-active' : ''}`}>
       {/* Controls */}
-      <div className="pdf-controls sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center justify-between gap-4 flex-wrap shadow-lg">
+      <div 
+        className={`pdf-controls sticky top-0 z-10 bg-card border-b border-border p-4 flex items-center justify-between gap-4 flex-wrap shadow-lg transition-all duration-300 ${
+          isFullscreen ? 'fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm' : ''
+        } ${
+          isFullscreen && !showControls ? 'transform -translate-y-full opacity-0' : 'transform translate-y-0 opacity-100'
+        }`}
+        onMouseEnter={() => isFullscreen && showControlsTemporarily()}
+        onMouseMove={() => isFullscreen && showControlsTemporarily()}
+      >
         <div className="flex items-center gap-2">
           <Button
             onClick={goToPrevPage}
             disabled={pageNumber <= 1}
             size="sm"
             variant="outline"
+            className={isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}
           >
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <span className="text-sm font-medium px-3">
+          <span className={`text-sm font-medium px-3 ${isFullscreen ? 'text-white' : ''}`}>
             Pages {pageNumber}{pageNumber + 1 <= numPages ? `–${pageNumber + 1}` : ""} of {numPages || "..."}
           </span>
           <Button
@@ -585,6 +572,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             disabled={pageNumber >= numPages}
             size="sm"
             variant="outline"
+            className={isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}
           >
             <ChevronRight className="w-4 h-4" />
           </Button>
@@ -619,11 +607,13 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         </div>
 
         <div className="flex items-center gap-2 justify-center flex-1">
-          <Button onClick={zoomOut} size="sm" variant="outline">
+          <Button onClick={zoomOut} size="sm" variant="outline" disabled={scale <= 0.5} className={isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}>
             <ZoomOut className="w-4 h-4" />
           </Button>
-          <span className="text-sm font-medium px-2">{Math.round(scale * 100)}%</span>
-          <Button onClick={zoomIn} size="sm" variant="outline">
+          <span className={`text-sm min-w-[60px] text-center ${isFullscreen ? 'text-white' : 'text-muted-foreground'}`}>
+            {Math.round(scale * 100)}%
+          </span>
+          <Button onClick={zoomIn} size="sm" variant="outline" disabled={scale >= 3} className={isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}>
             <ZoomIn className="w-4 h-4" />
           </Button>
         </div>
@@ -643,7 +633,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             onClick={toggleNightMode} 
             size="sm" 
             variant="outline"
-            className="gap-2"
+            className={`gap-2 ${isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}`}
           >
             {nightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </Button>
@@ -654,44 +644,22 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
             onClick={toggleFullscreen} 
             size="sm" 
             variant="outline"
-            className="gap-2"
+            className={`gap-2 ${isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}`}
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </Button>
 
-          <Button 
-            onClick={toggleMusic} 
-            size="sm" 
-            variant="outline"
-            className="gap-2"
-          >
-            {isMusicPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            {isMusicPlaying ? `Stop ${musicTracks[currentTrack].name}` : "Play Music"}
-          </Button>
-
-          <div className="relative">
-            <select
-              value={currentTrack}
-              onChange={(e) => changeTrack(parseInt(e.target.value))}
-              className="text-sm border border-border rounded px-2 py-1 bg-background text-foreground"
-            >
-              {musicTracks.map((track, index) => (
-                <option key={index} value={index}>
-                  {track.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Music controls removed; use global music bar */}
 
 
-          <Button onClick={handleDownload} size="sm" className="bg-primary hover:bg-primary/90 gap-2">
+          <Button onClick={handleDownload} size="sm" className={`bg-primary hover:bg-primary/90 gap-2 ${isFullscreen ? 'bg-white/20 hover:bg-white/30 text-white border-white/20' : ''}`}>
             <Download className="w-4 h-4" />
             Download
           </Button>
 
-          <Button onClick={toggleMode} size="sm" variant="outline" className="gap-2">
+          <Button onClick={toggleMode} size="sm" variant="outline" className={`gap-2 ${isFullscreen ? 'text-white border-white/20 hover:bg-white/10' : ''}`}>
             {twoPageMode ? <Layout className="w-4 h-4" /> : <Columns className="w-4 h-4" />}
-            {twoPageMode ? "Two-page" : "Single-page"}
+            {twoPageMode ? "Two" : "Single"}
           </Button>
         </div>
       </div>
@@ -705,20 +673,25 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           maxHeight: isFullscreen ? '100vh' : 'calc(100vh - 200px)',
           height: isFullscreen ? '100vh' : 'auto'
         }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <div className={`flex flex-col items-center ${isFullscreen ? 'gap-0 fullscreen-pdf' : 'gap-1'}`}>
           {!isFullscreen && <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>}
           <div className={isFullscreen ? 'fullscreen-pdf' : ''}>
             <Document
-              file={pdfPath}
+              file={normalizedPdfPath}
               onLoadSuccess={onDocumentLoadSuccess}
               onLoadError={onDocumentLoadError}
               loading={
                 <div className="flex flex-col items-center justify-center p-12 gap-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                  <p className="text-muted-foreground">Where Learning Never Stops</p>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary animate-pulse"></div>
+                  <p className="text-muted-foreground animate-pulse">Loading your book...</p>
+                  <div className="text-xs text-muted-foreground opacity-70">Optimizing for smooth reading</div>
                 </div>
               }
+              options={optionsMemo}
             >
               {twoPageMode ? (
                 <div className="two-page-spread" onMouseMove={handleMouseMove}>
@@ -758,19 +731,37 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
                       scale={scale}
                       renderTextLayer={false}
                       renderAnnotationLayer={true}
-                      className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''}`}
-                      onRenderSuccess={() => setCachedPages(prev => ({...prev, [pageNumber]: true}))}
+                      className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''} ${transitionDirection === 'left' ? 'slide-from-left' : transitionDirection === 'right' ? 'slide-from-right' : ''}`}
+                      onRenderSuccess={() => {
+                        setCachedPages(prev => ({...prev, [pageNumber]: true}));
+                        setIsRendering(false);
+                      }}
+                      onRenderError={(error) => {
+                        console.error('Page render error:', error);
+                        setIsRendering(false);
+                      }}
+                      loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
+                      error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
                     />
                   </div>
                   {pageNumber + 1 <= numPages && (
                     <div className="pdf-page">
                       <Page
-                        pageNumber={pageNumber + 1}
+                        pageNumber={pageNumber}
                         scale={scale}
                         renderTextLayer={false}
                         renderAnnotationLayer={true}
-                        className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''}`}
-                        onRenderSuccess={() => setCachedPages(prev => ({...prev, [pageNumber + 1]: true}))}
+                        className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''} ${transitionDirection === 'left' ? 'slide-from-left' : transitionDirection === 'right' ? 'slide-from-right' : ''}`}
+                        onRenderSuccess={() => {
+                          setCachedPages(prev => ({...prev, [pageNumber]: true}));
+                          setIsRendering(false);
+                        }}
+                        onRenderError={(error) => {
+                          console.error('Page render error:', error);
+                          setIsRendering(false);
+                        }}
+                        loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
+                        error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
                       />
                     </div>
                   )}
@@ -783,14 +774,40 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
                       scale={scale}
                       renderTextLayer={false}
                       renderAnnotationLayer={true}
-                      className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                      className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''} ${transitionDirection === 'left' ? 'slide-from-left' : transitionDirection === 'right' ? 'slide-from-right' : ''}`}
+                      onRenderSuccess={() => setIsRendering(false)}
+                      onRenderError={(error) => {
+                        console.error('Page render error:', error);
+                        setIsRendering(false);
+                      }}
+                      loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
+                      error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
                     />
                   </div>
                 </div>
               )}
             </Document>
           </div>
-          
+
+          <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', top: 0, width: 0, height: 0, overflow: 'hidden' }}>
+            <Document file={normalizedPdfPath} options={optionsMemo}>
+              {Object.keys(cachedPages)
+                .map((p) => parseInt(p, 10))
+                .filter((p) => p !== pageNumber && p !== pageNumber + 1)
+                .slice(0, 4)
+                .map((p) => (
+                  <Page
+                    key={`preload-${p}`}
+                    pageNumber={p}
+                    scale={scale}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    className="preload-page"
+                  />
+                ))}
+            </Document>
+          </div>
+
           {error && (
             <div className="flex flex-col items-center justify-center p-12 gap-4 bg-red-50 border border-red-200 rounded-lg m-4">
               <div className="text-red-600 text-lg font-semibold">⚠️ PDF Loading Error</div>
@@ -822,6 +839,10 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           max-height: 80vh;
           overflow: hidden;
           position: relative;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          contain: paint;
+          transform: translateZ(0);
         }
         
         .pdf-page canvas {
@@ -829,6 +850,9 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           margin: 0 auto;
           max-height: 80vh;
           object-fit: contain;
+          will-change: transform, opacity;
+          backface-visibility: hidden;
+          transform: translateZ(0);
         }
         .react-pdf__Page {
           max-height: 80vh !important;
@@ -837,27 +861,207 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           max-height: 80vh !important;
           height: auto !important;
         }
-        /* Fullscreen styles */
+        /* Fullscreen styles with responsive design fixes */
+        .fullscreen-active {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          z-index: 9999;
+          background: #000;
+          overflow: hidden;
+        }
+        .fullscreen-pdf {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
         .fullscreen-pdf .pdf-page {
-          max-height: 100vh !important;
-          height: 100vh !important;
+          max-height: calc(100vh - 120px);
+          height: calc(100vh - 120px);
+          width: auto;
+          max-width: 100%;
+          overflow: hidden;
         }
         .fullscreen-pdf .pdf-page canvas {
-          max-height: 100vh !important;
-          height: 100vh !important;
+          max-height: calc(100vh - 120px);
+          height: calc(100vh - 120px) !important;
+          width: auto !important;
+          max-width: 100%;
           object-fit: contain;
+          margin: 0 auto;
+          display: block;
         }
         .fullscreen-pdf .react-pdf__Page {
-          max-height: 100vh !important;
-          height: 100vh !important;
+          max-height: calc(100vh - 120px);
+          height: calc(100vh - 120px);
+          width: auto;
+          max-width: 100%;
         }
         .fullscreen-pdf .react-pdf__Page__canvas {
-          max-height: 100vh !important;
-          height: 100vh !important;
+          max-height: calc(100vh - 120px);
+          height: calc(100vh - 120px) !important;
+          width: auto !important;
+          max-width: 100%;
         }
         .fullscreen-pdf .two-page-spread {
-          height: 100vh;
+          height: calc(100vh - 120px);
           align-items: center;
+          justify-content: center;
+          gap: 16px;
+          padding: 0 20px;
+          width: 100%;
+        }
+        .fullscreen-pdf .two-page-spread .pdf-page {
+          max-height: calc(100vh - 120px);
+          height: calc(100vh - 120px);
+          flex: 0 0 auto;
+          max-width: calc(50% - 8px);
+        }
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+          .fullscreen-pdf .two-page-spread {
+            flex-direction: column;
+            gap: 8px;
+            padding: 0 10px;
+          }
+          .fullscreen-pdf .two-page-spread .pdf-page {
+            max-width: 100%;
+            max-height: calc(50vh - 60px);
+          }
+          .fullscreen-pdf .two-page-spread .pdf-page canvas {
+            max-height: calc(50vh - 60px);
+            height: calc(50vh - 60px) !important;
+          }
+        }
+        /* Tablet responsive styles */
+        @media (max-width: 1024px) and (min-width: 769px) {
+          .fullscreen-pdf .two-page-spread {
+            gap: 12px;
+            padding: 0 15px;
+          }
+          .fullscreen-pdf .two-page-spread .pdf-page {
+            max-width: calc(50% - 6px);
+          }
+        }
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+          .fullscreen-pdf .pdf-page canvas {
+            touch-action: pan-y pinch-zoom;
+            -webkit-user-select: none;
+            user-select: none;
+          }
+        }
+        /* High DPI display optimizations */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+          .fullscreen-pdf .pdf-page canvas {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+          }
+        }
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-width: 896px) {
+          .fullscreen-pdf .two-page-spread {
+            flex-direction: row;
+            gap: 8px;
+          }
+          .fullscreen-pdf .two-page-spread .pdf-page {
+            max-width: calc(50% - 4px);
+            max-height: calc(100vh - 120px);
+          }
+        }
+        /* Prevent horizontal overflow */
+        .fullscreen-active * {
+          max-width: 100vw;
+          box-sizing: border-box;
+        }
+        /* Smooth transitions for fullscreen mode */
+        .fullscreen-pdf,
+        .fullscreen-pdf .pdf-page,
+        .fullscreen-pdf .pdf-page canvas {
+          transition: all 0.3s ease-in-out;
+          will-change: transform, opacity;
+        }
+        /* Enhanced page transition animations */
+        .page-transitioning {
+          opacity: 0.7;
+          transform: scale(0.98);
+        }
+        .slide-from-left {
+          animation: slideFromLeft 0.3s ease-out;
+        }
+        .slide-from-right {
+          animation: slideFromRight 0.3s ease-out;
+        }
+        @keyframes slideFromLeft {
+          from {
+            opacity: 0;
+            transform: translate3d(-30px, 0, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        @keyframes slideFromRight {
+          from {
+            opacity: 0;
+            transform: translate3d(30px, 0, 0);
+          }
+          to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+          }
+        }
+        /* Mobile-first responsive controls */
+        @media (max-width: 640px) {
+          .pdf-controls {
+            padding: 8px;
+            gap: 8px;
+          }
+          .pdf-controls .flex {
+            gap: 4px;
+          }
+          .pdf-controls button {
+            padding: 6px 8px;
+            font-size: 12px;
+          }
+          .pdf-controls button svg {
+            width: 14px;
+            height: 14px;
+          }
+        }
+        /* Prevent text selection during swipe */
+        .fullscreen-pdf {
+          -webkit-user-select: none;
+          user-select: none;
+          -webkit-touch-callout: none;
+        }
+        /* Improve touch target size on mobile */
+        @media (hover: none) and (pointer: coarse) {
+          .pdf-controls button {
+            min-height: 44px;
+            min-width: 44px;
+          }
+        }
+        /* Dark mode support for fullscreen */
+        .fullscreen-active[data-theme="dark"] {
+          background: #0a0a0a;
+        }
+        /* Loading state improvements */
+        .fullscreen-pdf .react-pdf__Document {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: calc(100vh - 120px);
+        }
+        .preload-page {
+          visibility: hidden;
+          width: 0 !important;
+          height: 0 !important;
         }
       `}} />
     </div>

@@ -71,7 +71,7 @@ export function ProfileWindow() {
   const longestStreak = streakData?.longestStreak || 0;
   const lastReadDate = streakData?.lastReadDate;
   const goals = (goalsData?.goals || []) as ReadingGoal[];
-  const createGoal = goalsData?.createGoal || ((goal: any) => {});
+  const createGoal = goalsData?.createGoal || ((goal: { title: string; target_books: number; deadline?: string; description?: string }) => {});
   const deleteGoal = goalsData?.deleteGoal || ((id: string) => {});
   const fetchGoals = goalsData?.refreshGoals || (() => {});
   const favoriteBookIds = favoritesData?.favoriteBooks || [];
@@ -336,6 +336,16 @@ export function ProfileWindow() {
   
   return (
     <div className="container mx-auto px-4 py-8">
+      {(bookmarksData?.loading || readingHistoryData?.loading) && (
+        <div className="mb-4 p-3 rounded border bg-muted text-muted-foreground text-sm">
+          Loading your profile data...
+        </div>
+      )}
+      {bookmarksData?.operationState?.status === 'error' && (
+        <div className="mb-4 p-3 rounded border border-destructive bg-destructive/10 text-destructive text-sm">
+          Failed to load bookmarks: {bookmarksData?.operationState?.error || 'Unknown error'}
+        </div>
+      )}
       <div className="flex justify-end mb-4">
         <Button 
           variant="outline" 

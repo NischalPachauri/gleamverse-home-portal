@@ -20,20 +20,38 @@ export function useReadingStreak() {
   const { history } = useReadingHistory();
 
   // Helper to check if two dates are the same day
-  const isSameDay = (date1: Date, date2: Date): boolean => {
+  const isSameDay = useCallback((date1: Date, date2: Date): boolean => {
     return (
       date1.getFullYear() === date2.getFullYear() &&
       date1.getMonth() === date2.getMonth() &&
       date1.getDate() === date2.getDate()
     );
-  };
+  }, []);
 
   // Helper to check if two dates are consecutive days
-  const isConsecutiveDay = (date1: Date, date2: Date): boolean => {
+  const isConsecutiveDay = useCallback((date1: Date, date2: Date): boolean => {
     const oneDayInMs = 24 * 60 * 60 * 1000;
     const diffTime = Math.abs(date1.getTime() - date2.getTime());
     return diffTime <= oneDayInMs && !isSameDay(date1, date2);
-  };
+  }, [isSameDay]);
+
+  // Helper to calculate longest streak from sorted dates
+  const calculateLongestStreak = useCallback((sortedDates: Date[]): number => {
+    if (sortedDates.length <= 1) return sortedDates.length;
+    let longestStreak = 1;
+    let currentStreak = 1;
+    for (let i = 0; i < sortedDates.length - 1; i++) {
+      const currentDate = sortedDates[i];
+      const nextDate = sortedDates[i + 1];
+      if (isConsecutiveDay(currentDate, nextDate)) {
+        currentStreak++;
+        longestStreak = Math.max(longestStreak, currentStreak);
+      } else {
+        currentStreak = 1;
+      }
+    }
+    return longestStreak;
+  }, [isConsecutiveDay]);
 
   // Calculate streak based on reading history
   const calculateStreak = useCallback(() => {
@@ -109,7 +127,6 @@ export function useReadingStreak() {
         }
       }
 
-      // Calculate longest streak
       const longestStreak = calculateLongestStreak(sortedDates);
 
       setStreakData({
@@ -127,29 +144,7 @@ export function useReadingStreak() {
     } finally {
       setLoading(false);
     }
-  }, [user, history]);
-
-  // Helper to calculate longest streak from sorted dates
-  const calculateLongestStreak = (sortedDates: Date[]): number => {
-    if (sortedDates.length <= 1) return sortedDates.length;
-    
-    let longestStreak = 1;
-    let currentStreak = 1;
-    
-    for (let i = 0; i < sortedDates.length - 1; i++) {
-      const currentDate = sortedDates[i];
-      const nextDate = sortedDates[i + 1];
-      
-      if (isConsecutiveDay(currentDate, nextDate)) {
-        currentStreak++;
-        longestStreak = Math.max(longestStreak, currentStreak);
-      } else {
-        currentStreak = 1;
-      }
-    }
-    
-    return longestStreak;
-  };
+  }, [user, history, calculateLongestStreak, isConsecutiveDay, isSameDay]);
 
   // Mark a day as read (for testing purposes)
   const markDayAsRead = async (date: Date = new Date()): Promise<boolean> => {

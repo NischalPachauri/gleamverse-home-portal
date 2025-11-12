@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'sonner';
 import { books } from "@/data/books";
+import { applyMetadata } from "@/utils/bookMetadataRegistry";
 import {
   Dialog,
   DialogContent,
@@ -432,40 +433,42 @@ export function EnhancedHeroSection({
                 
                 <div className="p-4 sm:p-6 pt-2 sm:pt-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-3 md:p-4 md:gap-4">
-                    {searchResults.map((book, index) => (
+                    {searchResults.map((book, index) => {
+                      const b = applyMetadata(book);
+                      return (
                       <div
                         key={index}
-                        onClick={() => handleResultClick(book.id)}
+                        onClick={() => handleResultClick(b.id)}
                         className="flex items-start space-x-3 p-3 rounded-xl hover:bg-slate-700/50 transition-colors focus-within:ring-2 focus-within:ring-slate-400"
                         role="button"
                         tabIndex={0}
-                        aria-label={`View details for ${book.title} by ${book.author}`}
+                        aria-label={`View details for ${b.title} by ${b.author}`}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ' ') {
-                            handleResultClick(book.id);
+                            handleResultClick(b.id);
                           }
                         }}
                       >
                         <div className="flex items-start gap-4">
-                          {book.coverImage && (
-                            <img 
-                              src={book.coverImage} 
-                              alt={book.title}
-                              className="h-20 w-14 object-cover rounded shadow-md flex-shrink-0"
-                              onError={(e) => {
-                                e.currentTarget.src = '/placeholder.svg';
-                              }}
-                            />
-                          )}
+                          <img 
+                            src={book.coverImage || require('@/utils/bookCoverMapping').getBookCover(b.title)} 
+                            alt={b.title}
+                            className="h-20 w-14 object-cover rounded shadow-md flex-shrink-0 transition-transform duration-200 hover:scale-105"
+                            onError={(e) => {
+                              e.currentTarget.src = '/placeholder.svg';
+                            }}
+                            loading="lazy"
+                            decoding="async"
+                          />
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-medium group-hover:text-blue-400 transition-colors text-lg truncate">{book.title}</h4>
+                            <h4 className="text-white font-medium group-hover:text-blue-400 transition-colors text-lg truncate">{b.title}</h4>
                             <p className="text-sm text-slate-300 mt-2 truncate">
-                              {book.author} • {book.genre}
+                              {(b.author === 'Unknown Author' ? '' : b.author) || ''} {b.genre && b.genre !== 'General' ? `• ${b.genre}` : ''}
                             </p>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );})}
                   </div>
                 </div>
               </div>

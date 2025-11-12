@@ -3,6 +3,8 @@ import { Search, X } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { books } from '@/data/books';
 import { useNavigate } from 'react-router-dom';
+import { getBookCover } from '@/utils/bookCoverMapping';
+import { applyMetadata } from '@/utils/bookMetadataRegistry';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -187,49 +189,51 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           }`}>
             {searchResults.length > 0 ? (
               <div className="p-2">
-                {searchResults.map((book, index) => (
+                {searchResults.map((book, index) => {
+                  const b = applyMetadata(book);
+                  return (
                   <div
-                    key={book.id}
-                    onClick={() => handleResultClick(book.id)}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${
-                      focusedResultIndex === index
-                        ? isDark 
-                          ? 'bg-blue-900/50 border border-blue-700'
-                          : 'bg-blue-100 border border-blue-200'
-                        : isDark
-                          ? 'hover:bg-slate-800 border border-transparent'
-                          : 'hover:bg-slate-100 border border-transparent'
-                    }`}
-                    role="option"
-                    aria-selected={focusedResultIndex === index}
-                    tabIndex={0}
-                  >
-                    <div className="flex items-start gap-3">
-                      {book.coverImage && (
+                      key={book.id}
+                      onClick={() => handleResultClick(b.id)}
+                      className={`p-3 rounded-lg cursor-pointer transition-all ${
+                        focusedResultIndex === index
+                          ? isDark 
+                            ? 'bg-blue-900/50 border border-blue-700'
+                            : 'bg-blue-100 border border-blue-200'
+                          : isDark
+                            ? 'hover:bg-slate-800 border border-transparent'
+                            : 'hover:bg-slate-100 border border-transparent'
+                      }`}
+                      role="option"
+                      aria-selected={focusedResultIndex === index}
+                      tabIndex={0}
+                    >
+                      <div className="flex items-start gap-3">
                         <img
-                          src={book.coverImage}
-                          alt={book.title}
-                          className="h-16 w-12 object-cover rounded shadow-md"
+                          src={getBookCover(b.title)}
+                          alt={b.title}
+                          className="h-16 w-12 object-cover rounded shadow-md transition-transform duration-200 hover:scale-105"
                           onError={(e) => {
                             e.currentTarget.src = '/placeholder.svg';
                           }}
+                          loading="lazy"
+                          decoding="async"
                         />
-                      )}
-                      <div className="flex-1">
-                        <h3 className={`font-medium ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}>
-                          {book.title}
-                        </h3>
-                        <p className={`text-sm mt-1 ${
-                          isDark ? 'text-slate-400' : 'text-slate-500'
-                        }`}>
-                          {book.author} • {book.genre}
-                        </p>
+                        <div className="flex-1">
+                          <h3 className={`font-medium ${
+                            isDark ? 'text-white' : 'text-slate-900'
+                          }`}>
+                            {b.title}
+                          </h3>
+                          <p className={`text-sm mt-1 ${
+                            isDark ? 'text-slate-400' : 'text-slate-500'
+                          }`}>
+                            {(b.author === 'Unknown Author' ? '' : b.author) || ''} {b.genre && b.genre !== 'General' ? `• ${b.genre}` : ''}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                );})}
               </div>
             ) : searchQuery ? (
               <div className="p-8 text-center">

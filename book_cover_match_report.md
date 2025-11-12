@@ -1,0 +1,358 @@
+# Book Cover Matching Report
+
+## Summary
+
+- Total books: 312
+- Total covers: 347
+- Exact matches: 167
+- Partial matches: 125
+- Forced matches: 20
+
+## Book Cover Naming Convention and Path Structure
+
+- **Standard Path Format**: All book covers should use the relative path format `/BookCoversNew/[cover_filename].[extension]`
+- **Naming Convention**: Cover filenames should match book titles with standardized formatting:
+  - Lowercase or title case is acceptable
+  - Special characters may be replaced with spaces
+  - File extensions can be .jpg, .jpeg, .png
+- **Fallback Mechanism**: If a cover image is missing, the system will use `/placeholder.svg`
+
+## Validation and Error Handling
+
+- **Validation Check**: The system validates all book cover links to ensure:
+  - All paths are relative (starting with `/BookCoversNew/`)
+  - Cover files actually exist in the specified location
+  - No books are using placeholder images unnecessarily
+- **Fallback Mechanism**: 
+  - When a cover image is missing, the system automatically falls back to `/placeholder.svg`
+  - Error logging is implemented to track missing covers in the console
+  - The fallback occurs in these scenarios:
+    1. No mapping exists for the book title
+    2. The mapped cover file doesn't exist
+    3. An error occurs during the cover retrieval process
+- **Backward Compatibility**: 
+  - All existing book records continue to work with the updated mapping
+  - The enhanced `getBookCover` function maintains the same interface
+  - Error handling is non-blocking and won't affect application functionality
+
+## Exact Matches
+
+- Book: "2 States The story of my Marriage" → Cover: "2 States The Story Of My Marriage"
+- Book: "A Half Baked Love Story" → Cover: "a half baked love story"
+- Book: "A Little Life" → Cover: "a little life"
+- Book: "A Second Chance" → Cover: "a second chance"
+- Book: "Accidental Love" → Cover: "Accidental love"
+- Book: "Accidentally in Love" → Cover: "accidentally in love"
+- Book: "Advantage Love" → Cover: "advantage love"
+- Book: "Albert Einstein" → Cover: "Albert Einstein"
+- Book: "American Short Stories" → Cover: "American short stories"
+- Book: "An Introduction To Buddhism" → Cover: "An Introduction To Buddhism"
+- Book: "An Unexpected Gift" → Cover: "An Unexpected Gift"
+- Book: "Atomic Habits" → Cover: "atomic habits"
+- Book: "Attitude is Everything" → Cover: "Attitude Is Everything"
+- Book: "Bared to You" → Cover: "bared to you"
+- Book: "Becoming Your Best Self" → Cover: "Becoming your best self"
+- Book: "Can Love Happen Twice" → Cover: "can love happen twice"
+- Book: "Charitraheen" → Cover: "charitraheen"
+- Book: "Chicot the Jester" → Cover: "Chicot the jester"
+- Book: "Chikitsa Sutra" → Cover: "chikitsa sutra"
+- Book: "CORONAVIRUS" → Cover: "coronavirus"
+- Book: "Crime and Punishment" → Cover: "crime and punishment"
+- Book: "Dan Brown Origin" → Cover: "Dan Brown Origin"
+- Book: "Don't Feed the Monkey Mind" → Cover: "Don T Feed The Monkey Mind"
+- Book: "Ego is the Enemy" → Cover: "ego is the enemy"
+- Book: "Eleven Minutes" → Cover: "Eleven minutes"
+- Book: "Emotional Intelligence" → Cover: "Emotional Intelligence"
+- Book: "Essentials of Pharmacoeconomics" → Cover: "Essentials Of Pharmacoeconomics"
+- Book: "Fables and Stories" → Cover: "fables and stories"
+- Book: "Feeling Good" → Cover: "feeling good"
+- Book: "Few Things Left Unsaid" → Cover: "few things left unsaid"
+- Book: "Finish What You Start" → Cover: "Finish what you start"
+- Book: "First We Make the Beast Beautiful" → Cover: "First We Make The Beast Beautiful"
+- Book: "Genius Foods" → Cover: "genius foods"
+- Book: "Get Epic Shit Done" → Cover: "get epic shit done"
+- Book: "Give and Take" → Cover: "give and take"
+- Book: "Gone Girl" → Cover: "Gone Girl"
+- Book: "Grandma''s  Bag of Stories" → Cover: "Grandma S Bag Of Stories"
+- Book: "Gunahon Ka Devta" → Cover: "Gunahon Ka Devta"
+- Book: "Half Girlfriend" → Cover: "Half Girlfriend"
+- Book: "Harry Potter and the Chamber of Secrets" → Cover: "Harry Potter And The Chamber Of Secrets"
+- Book: "Harry Potter and the Deathly Hallows" → Cover: "Harry Potter and the deathly hallows"
+- Book: "Harry Potter and the Goblet of FIre" → Cover: "Harry Potter and the goblet of fire"
+- Book: "Harry Potter and the Half Blood Prince" → Cover: "Harry Potter and the half blood prince"
+- Book: "Harry Potter and the Prisoner of Azkaban" → Cover: "Harry Potter and the prisoner of azkaban"
+- Book: "Harry Potter Complete Collection" → Cover: "Harry Potter Complete Collection"
+- Book: "Hast Rekha" → Cover: "Hast rekha"
+- Book: "Healing Depression The Mind Body Way" → Cover: "healing depression the mind body way"
+- Book: "Healing the Child Within" → Cover: "Healing the child within"
+- Book: "Henry and Mudge and a Very Merry Christmas" → Cover: "Henry and Mudge and a very merry christmas"
+- Book: "Henry and Mudge and the Careful Cousin" → Cover: "Henry and Mudge and the careful cousin"
+- Book: "Henry and Mudge and the Forever Sea" → Cover: "Henry and Mudge and the forever sea"
+- Book: "Henry and Mudge and the Happy Cat" → Cover: "Henry and Mudge and the happy cat"
+- Book: "Henry and Mudge and the Long Weekend" → Cover: "Henry and Mudge and the long weekend"
+- Book: "Henry and Mudge and the Snowman Plan" → Cover: "Henry And Mudge And The Snowman Plan"
+- Book: "Henry and Mudge and the Tall Tree House" → Cover: "Henry and Mudge and the tall tree house"
+- Book: "Henry and Mudge and the Tumbling Trip" → Cover: "Henry and Mudge and the tumbling trip"
+- Book: "Henry and Mudge and the Wild Wind" → Cover: "Henry and Mudge and the wild wind"
+- Book: "Henry and Mudge in Puddle Trouble" → Cover: "Henry and Mudge in puddle trouble"
+- Book: "Henry and Mudge in the Green Time" → Cover: "Henry and Mudge in the green time"
+- Book: "Henry and Mudge in the Sparkle Days" → Cover: "Henry and Mudge in the sparkle days"
+- Book: "Henry and Mudge Take the Big Test" → Cover: "Henry and Mudge take the big test"
+- Book: "Henry and Mudge Under the Yellow Moon" → Cover: "Henry and Mudge under the yellow moon"
+- Book: "HOLD MY HAND" → Cover: "hold my hand"
+- Book: "House of Cards" → Cover: "house of cards"
+- Book: "How to Become a Straight A Student" → Cover: "How To Become A Straight A Student"
+- Book: "How to Read People Like a Book" → Cover: "how to read people like a book"
+- Book: "How to Win Every Argument" → Cover: "How To Win Every Argument"
+- Book: "I Too had a Love Story" → Cover: "I Too Had A Love Story"
+- Book: "India that is Bharat" → Cover: "India That Is Bharat"
+- Book: "Inferno" → Cover: "inferno"
+- Book: "It Happens for a Reason" → Cover: "It happens for a reason"
+- Book: "It Started with a Friend Request" → Cover: "It Started With A Friend Request"
+- Book: "It's Not How Good You Are, It's How Good You Want to Be" → Cover: "It S Not How Good You Are, It S How Good You Want To Be"
+- Book: "Katie In Love" → Cover: "Katie in love"
+- Book: "Life Is What You Make It" → Cover: "life is what you make it"
+- Book: "Like It Happened Yesterday" → Cover: "Like It Happened Yesterday"
+- Book: "Long Walk to Freedom" → Cover: "long walk to Freedom"
+- Book: "Love Kisses And All Things Warm" → Cover: "Love Kisses And All Things Warm"
+- Book: "love@facebook" → Cover: "Love@facebook"
+- Book: "Mahayoddha Kalki  Sword of Shiva" → Cover: "Mahayoddha Kalki Sword Of Shiva"
+- Book: "Michael Jordan A Biography" → Cover: "Michael Jordan A Biography"
+- Book: "Midnights Children by Salman Rushdie" → Cover: "Midnights Children By Salman Rushdie"
+- Book: "Mistakes Like Love and Sex" → Cover: "Mistakes Like Love And Sex"
+- Book: "Modern Arabic Short Stories" → Cover: "Modern Arabic Short Stories"
+- Book: "Moonwalking with Einstein" → Cover: "Moonwalking With Einstein"
+- Book: "Mother Teresa - A Biography" → Cover: "Mother Teresa A Biography"
+- Book: "Mystery Short Stories" → Cover: "Mystery Short Stories"
+- Book: "Narendra Modi A Political Biography" → Cover: "Narendra Modi A Political Biography"
+- Book: "Nelson Mandela A Biography" → Cover: "Nelson Mandela A Biography"
+- Book: "Of Course I Love You" → Cover: "Of Course I Love You"
+- Book: "Oliver Twist" → Cover: "Oliver Twist"
+- Book: "One Arranged Murder" → Cover: "One Arranged Murder"
+- Book: "One Night at The Call Center" → Cover: "One night at the call center"
+- Book: "Our IMPossible Love" → Cover: "our impossible love"
+- Book: "Percy Jackson and The Last Olympian" → Cover: "Percy Jackson And The Last Olympian"
+- Book: "Percy Jackson and The Lightning Thief" → Cover: "Percy Jackson And The Lightning Thief"
+- Book: "Percy Jackson and The Sea of Monsters" → Cover: "Percy Jackson And The Sea Of Monsters"
+- Book: "Percy Jackson and The Titan s Curse" → Cover: "Percy Jackson And The Titan S Curse"
+- Book: "Prem Purana - Mythological Love Stories" → Cover: "Prem Purana Mythological Love Stories"
+- Book: "Rebecca" → Cover: "Rebecca"
+- Book: "Robinson Crusoe" → Cover: "Robinson Crusoe"
+- Book: "Saket" → Cover: "Saket"
+- Book: "Satyayoddha Kalki Eye of Brahma" → Cover: "Satyayoddha Kalki Eye Of Brahma"
+- Book: "Selected Short Stories" → Cover: "Selected Short Stories"
+- Book: "Short stories English" → Cover: "Short Stories English"
+- Book: "Short Stories For Children" → Cover: "Short Stories For Children"
+- Book: "Short Stories for English Courses" → Cover: "Short Stories For English Courses"
+- Book: "SHORT STORIES" → Cover: "SHORT STORIES"
+- Book: "Shutter Island" → Cover: "Shutter Island"
+- Book: "Soma in Yoga and Ayurveda" → Cover: "Soma in Yoga and Ayurveda"
+- Book: "Someone Like You" → Cover: "Someone Like You"
+- Book: "Something I Never Told You" → Cover: "Something I Never Told You"
+- Book: "Sorry You are Not My Type" → Cover: "sorry you are not my type"
+- Book: "Spanish Short Stories For Beginners" → Cover: "Spanish Short Stories For Beginners"
+- Book: "Stop Overthinking" → Cover: "Stop Overthinking"
+- Book: "Sweet Nothings" → Cover: "Sweet Nothings"
+- Book: "Sweet Sixteen" → Cover: "Sweet Sixteen"
+- Book: "Ten Years Later" → Cover: "Ten Years Later"
+- Book: "Textbook of Ayurveda" → Cover: "Textbook of Ayurveda"
+- Book: "The Anxiety and Phobia Workbook" → Cover: "The Anxiety And Phobia Workbook"
+- Book: "The Art of Public Speaking" → Cover: "The Art Of Public Speaking"
+- Book: "The Boy in The Striped Pajamas" → Cover: "The Boy In The Striped Pajamas"
+- Book: "The Boy with a Broken Heart" → Cover: "The Boy With A Broken Heart"
+- Book: "The Call of the Wild" → Cover: "The Call Of The Wild"
+- Book: "The Complete Short Stories" → Cover: "The Complete Short Stories"
+- Book: "The Courage to be Disliked" → Cover: "The Courage To Be Disliked"
+- Book: "The Day of the Jackal" → Cover: "The Day Of The Jackal"
+- Book: "The Extraordinary Miss Sunshine" → Cover: "The Extraordinary Miss Sunshine"
+- Book: "The Forty-Five Guardsmen" → Cover: "The Forty Five Guardsmen"
+- Book: "The Gifts of Imperfection" → Cover: "The Gifts Of Imperfection"
+- Book: "The Girl in Room 105" → Cover: "The Girl In Room 105"
+- Book: "The Happiness Trap" → Cover: "The Happiness Trap"
+- Book: "The House That BJ Built" → Cover: "The House That BJ Built"
+- Book: "The Intelligent Investor" → Cover: "The Intelligent Investor"
+- Book: "The Little Mermaid" → Cover: "The Little Mermaid"
+- Book: "The Lost Symbol" → Cover: "The Lost Symbol"
+- Book: "The Merry Adventures of Robin Hood" → Cover: "The Merry Adventures Of Robin Hood"
+- Book: "The Mother I Never  Knew" → Cover: "The Mother I Never Knew"
+- Book: "THE ONE YOU CANNOT HAVE" → Cover: "The One You Cannot Have"
+- Book: "The Palace of Illusions" → Cover: "The Palace Of Illusions"
+- Book: "The Paradoxical Prime Minister" → Cover: "The Paradoxical Prime Minister"
+- Book: "The Pilgrimage" → Cover: "The Pilgrimage"
+- Book: "The Ritual" → Cover: "the ritual"
+- Book: "The Science of Self Healing" → Cover: "The Science Of Self Healing"
+- Book: "The Secret Wish List" → Cover: "The Secret Wish List"
+- Book: "The Secret" → Cover: "The Secret"
+- Book: "The Way of the Superior Man" → Cover: "the way of the superior man"
+- Book: "The Wheel of Time" → Cover: "The Wheel Of Time"
+- Book: "The Zoya Factor" → Cover: "The Zoya Factor"
+- Book: "Think Like A Monk" → Cover: "think like a monk"
+- Book: "This Love that Feels Right . . ." → Cover: "This Love That Feels Right"
+- Book: "Three Ghost Stories" → Cover: "Three Ghost Stories"
+- Book: "Till The Last Breath" → Cover: "Till The Last Breath"
+- Book: "Trade and Grow Rich" → Cover: "Trade And Grow Rich"
+- Book: "Universal Magick" → Cover: "Universal Magick"
+- Book: "Veronika Decides to Die" → Cover: "Veronika Decides To Die"
+- Book: "Vicomte de Bragelonne" → Cover: "Vicomte De Bragelonne"
+- Book: "Wabi Sabi Japanese Wisdom for a Perfectly Imperfect Life" → Cover: "Wabi Sabi Japanese Wisdom For A Perfectly Imperfect Life"
+- Book: "What is Death" → Cover: "What Is Death"
+- Book: "When Dimple Met Rishi" → Cover: "When Dimple Met Rishi"
+- Book: "Wilde Oscar Short Stories" → Cover: "Wilde Oscar Short Stories"
+- Book: "Wings Of Fire" → Cover: "Wings of fire"
+- Book: "Winning Habits" → Cover: "winning habits"
+- Book: "Wonder" → Cover: "Wonder"
+- Book: "World's Best Boyfriend" → Cover: "World S Best Boyfriend"
+- Book: "You Were My Crush Till You Said You Love Me" → Cover: "You were my crush till you said you love me"
+- Book: "यन फरडम परयवरण और आतम नरभरत" → Cover: "/BookCoversNew/यन फरडम परयवरण और आतम नरभरत.png"
+
+## Partial Matches
+
+- Book: "10 Books in 1" → Cover: "Ten books in one" (Similarity: 100.00%)
+- Book: "10 Ways to Write More Effective Ads" → Cover: "10 ways to write effective ads" (Similarity: 100.00%)
+- Book: "100 years of the best American short stories" → Cover: "100 years of best American stories" (Similarity: 100.00%)
+- Book: "12Th Fail (Hindi Novel)" → Cover: "12th Fail" (Similarity: 80.00%)
+- Book: "50 Stories in English" → Cover: "50 stories in easy english" (Similarity: 100.00%)
+- Book: "A Day in the Life" → Cover: "A Day In The Life Robert Greenfield" (Similarity: 80.00%)
+- Book: "A Text Book of Dravyaguna Vijnana" → Cover: "a textbook of dravyaguna" (Similarity: 50.00%)
+- Book: "A Warrior's Life" → Cover: "Paulo Caelho A Warrior S Life" (Similarity: 80.00%)
+- Book: "Adventures of Huckleberry Finn" → Cover: "adventures of huckleberry fins" (Similarity: 66.67%)
+- Book: "Adventures of Pinocchio" → Cover: "The Adventures Of Pinocchio" (Similarity: 80.00%)
+- Book: "Adventures of Tom Bombadil" → Cover: "The adventures of Tom bombadil" (Similarity: 80.00%)
+- Book: "Akbar And Birbal" → Cover: "Akbar Aur Birbal" (Similarity: 66.67%)
+- Book: "Allen B Tucker Computer Science and Engineering Handbook" → Cover: "second edition computer science handbook" (Similarity: 60.00%)
+- Book: "American Folk Tales" → Cover: "american folktales" (Similarity: 50.00%)
+- Book: "Angels  Demons" → Cover: "Angels and demons" (Similarity: 100.00%)
+- Book: "Art Of Drawing The Human Body" → Cover: "Small Size Drawing The Human Body" (Similarity: 80.00%)
+- Book: "Ayurveda The Divine Science" → Cover: "ayurveda" (Similarity: 80.00%)
+- Book: "Bhagavad-Gita (Hindi))" → Cover: "The Bhagavad Gita A Biography" (Similarity: 66.67%)
+- Book: "Biography of Charlie Chaplin" → Cover: "Charlie Chaplin S Biography" (Similarity: 100.00%)
+- Book: "Biography of Swami Vivekananda" → Cover: "Swami vivekananda biography" (Similarity: 100.00%)
+- Book: "Buddhas Brain The Practical Neuroscience" → Cover: "Buddha S Brain" (Similarity: 50.00%)
+- Book: "Dear God! What's Happening to Us" → Cover: "Lynn Grabhorn Dear God What S Happening To Us" (Similarity: 80.00%)
+- Book: "Drawing Cartoons and Comics for Dummies ( PDF)" → Cover: "drawing cartoons and comics for dummies" (Similarity: 80.00%)
+- Book: "Elmers's Special Day" → Cover: "elmers special day" (Similarity: 100.00%)
+- Book: "English Fairy Tales and More English Fairy Tales" → Cover: "English Fairy tales" (Similarity: 80.00%)
+- Book: "English Short Stories" → Cover: "English through short stories and jokes" (Similarity: 100.00%)
+- Book: "Franny and Zooey" → Cover: "granny and zooey" (Similarity: 66.67%)
+- Book: "Harry Potter and the Philosophers Stone" → Cover: "harry-potter-1-philosophers-stone" (Similarity: 100.00%)
+- Book: "Henry and Mudge and Annie Good Move" → Cover: "Henry And Mudge And Annie S Good Move" (Similarity: 100.00%)
+- Book: "Henry and Mudge and Annie Perfect Pet" → Cover: "Henry And Mudge Annie S Perfect Pet" (Similarity: 116.67%)
+- Book: "Henry and Mudge and Mrs Hopper House" → Cover: "Henry And Mudge Mr Hopper S House" (Similarity: 120.00%)
+- Book: "Henry and Mudge and the Bedtime Thumps" → Cover: "Henry and Mudge and the bedtime thums" (Similarity: 85.71%)
+- Book: "Henry and Mudge and the Big Sleepover" → Cover: "Henry and Mudge and a big sleepover" (Similarity: 100.00%)
+- Book: "Henry and Mudge and the Great Grandpas" → Cover: "/BookCoversNew/Henry and Mudge and the great grandpa.png"
+- Book: "Henry and Mudge and the Sneaky Crackers" → Cover: "Henry and Mudge and sneaky crackers" (Similarity: 100.00%)
+- Book: "Henry and Mudge and the Starry Night May" → Cover: "Henry and Mudge and the starry night" (Similarity: 80.00%)
+- Book: "Henry and Mudge and the Wild Goose Chase" → Cover: "Henry and Mudge and the wild goose" (Similarity: 80.00%)
+- Book: "Henry and Mudge Get the Cold Shivers" → Cover: "Henry and Mudge and the cold shivers" (Similarity: 85.71%)
+- Book: "Henry and Mudge in the Family Trees" → Cover: "/BookCoversNew/Henry and Mudge and the tall tree house.png"
+- Book: "Henry and Mudge The First Book of Their Adventures" → Cover: "/BookCoversNew/Henry and Mudge the first book.png"
+- Book: "Hotel by Arthur Hailey" → Cover: "hotel" (Similarity: 80.00%)
+- Book: "How I Topped The UPSC and How You Can Too" → Cover: "how I topped the upsc" (Similarity: 80.00%)
+- Book: "How To Analyze People" → Cover: "How To Analyse People" (Similarity: 66.67%)
+- Book: "How to Talk to Anyone 92 Little Tricks for Big Success" → Cover: "How To Talk To Anyone 92 Trick" (Similarity: 75.00%)
+- Book: "If It's Not Forever" → Cover: "If It S Not Forever, It S Not Love" (Similarity: 80.00%)
+- Book: "Its All In The Planets" → Cover: "It S All In The Planets" (Similarity: 100.00%)
+- Book: "Julius Caesar  The Colossus of Rome" → Cover: "the colossus of rome" (Similarity: 80.00%)
+- Book: "Konark Hindi Novel" → Cover: "/BookCoversNew/Konark.png"
+- Book: "Legal Eagles Stories of the Top Seven Indian Lawyers" → Cover: "legal eagles" (Similarity: 80.00%)
+- Book: "Lord Of The Rings - The Return Of The King" → Cover: "/BookCoversNew/The Lord Of The Rings 3.jpeg"
+- Book: "Losing My Virginity and Other Dumb Ideas" → Cover: "Losing My Virginity And All Other Dares" (Similarity: 66.67%)
+- Book: "Mahabharat" → Cover: "Mahabharat Ved Vyas" (Similarity: 80.00%)
+- Book: "Marry Poppins" → Cover: "Mary poppins 1967" (Similarity: 50.00%)
+- Book: "My Clingy Girlfriend" → Cover: "My Clingy Girlfriend Madhuri" (Similarity: 80.00%)
+- Book: "Napoleon A Biography" → Cover: "Napolean A Biography" (Similarity: 50.00%)
+- Book: "Now That You are Rich" → Cover: "Now That You Re Rich, Let S Fall In Love" (Similarity: 80.00%)
+- Book: "Oh Yes I m Single" → Cover: "Ohh Yes I M Single And So Is D" (Similarity: 100.00%)
+- Book: "One Hundred Years Of Solitude" → Cover: "One Hundred Years Of Soltitude" (Similarity: 75.00%)
+- Book: "One Indian Girl" → Cover: "One Indian Girl Chetan Bhagat" (Similarity: 80.00%)
+- Book: "Our Story Needs No Filter" → Cover: "Our Story Needs No Filter Sudeep" (Similarity: 80.00%)
+- Book: "Outsiders. American Short Stories for students of ESL" → Cover: "Outsiders American Short Stories for students of esl" (Similarity: 80.00%)
+- Book: "Percy Jackson and The Battle of the Labyrinth" → Cover: "Percy Jackson And The Battle Of The Labyrimin" (Similarity: 85.71%)
+- Book: "Picture Dictionary" → Cover: "Picture Dictionary Longman Children" (Similarity: 80.00%)
+- Book: "Presentation Secrets Of Steve Jobs" → Cover: "Presentation Secets Of Steve Jobs" (Similarity: 75.00%)
+- Book: "Python API Development Fundamentals" → Cover: "Python API Deevelopment Fundamentals" (Similarity: 75.00%)
+- Book: "Reasons to Stay Alive" → Cover: "Reasons To Stay Alive Matt Haig" (Similarity: 80.00%)
+- Book: "Reconsidering REDD+ Authority, Power and Law" → Cover: "Reconsidering Redd+ Authority Ananya Sharma" (Similarity: 60.00%)
+- Book: "Reflections Of A Man" → Cover: "Reflections Of A Man Amari Soul" (Similarity: 80.00%)
+- Book: "Religious Therapeutics" → Cover: "Religious Therapeutics Body" (Similarity: 80.00%)
+- Book: "Revolution 2020" → Cover: "Revolution 2020 Chetan Bhagat" (Similarity: 80.00%)
+- Book: "Rich Dads - Increase Your Financial IQ Get Smarter with Your Money" → Cover: "Rich Dads Increase Your Financial IQ" (Similarity: 80.00%)
+- Book: "Right Here Right Now" → Cover: "Right Here Right Now Nikita Singh" (Similarity: 80.00%)
+- Book: "Ruk Jaana Nahin" → Cover: "Ruk Jaana Nahin Nishant Jain" (Similarity: 80.00%)
+- Book: "Sacred Games" → Cover: "Sacred Games A Novel" (Similarity: 80.00%)
+- Book: "Scion of Ikshvaku" → Cover: "Scian Of Ikshvaku Ram Chandra" (Similarity: 50.00%)
+- Book: "She Broke Up I Didn t" → Cover: "She Broke Up I Didn T I Just Kissed" (Similarity: 80.00%)
+- Book: "Short Stories for Children for Spoken English" → Cover: "Short Stories For Children For Spoken English Practice" (Similarity: 80.00%)
+- Book: "Short Stories of The Day" → Cover: "stories" (Similarity: 80.00%)
+- Book: "Short-Stories" → Cover: "100 Selected Short Stories" (Similarity: 80.00%)
+- Book: "Shri Ramcharitmanas - (Hindi)" → Cover: "Shri Ramcharitramanas (Hindi)" (Similarity: 66.67%)
+- Book: "Sri Ramcharitmanas (English)" → Cover: "Sri Ramcharitramanas English All Pages" (Similarity: 66.67%)
+- Book: "Steal the Show" → Cover: "Steal the show for speeches to stage" (Similarity: 80.00%)
+- Book: "Stories From My Teacher" → Cover: "Stories 198" (Similarity: 50.00%)
+- Book: "Stories from PANCHATANTRA" → Cover: "Stories Of Panchatantra" (Similarity: 100.00%)
+- Book: "Story Craft" → Cover: "i too had love story" (Similarity: 50.00%)
+- Book: "Super Immunity" → Cover: "Super Immunity The Essential Nutrition" (Similarity: 80.00%)
+- Book: "Tea for Two and a Piece of Cake" → Cover: "Tea For Two And A Piece Of Cake Sudeep Menon" (Similarity: 80.00%)
+- Book: "Tell The Last Breath" → Cover: "The Girl I Last Loved Smita Kau" (Similarity: 50.00%)
+- Book: "Thats The Way We Met" → Cover: "That S The Way We Met Sudeep Menon" (Similarity: 75.00%)
+- Book: "The %5 Second Rule" → Cover: "Mel Robbins The 5 Second Rule" (Similarity: 80.00%)
+- Book: "The 3 (Three) Mistakes of My Life" → Cover: "The Mistakes Of My Life" (Similarity: 100.00%)
+- Book: "The 5AM Club" → Cover: "The 5 Am Club Robin Sharma" (Similarity: 66.67%)
+- Book: "The adventures of Tom Sawyer" → Cover: "Mark Twain The adventures of Tom Swain" (Similarity: 75.00%)
+- Book: "The Alchemist" → Cover: "Paulo Caelho The Alchemist (1993)" (Similarity: 80.00%)
+- Book: "The Count Of MonteCristo" → Cover: "The Count Of Monte Cristo" (Similarity: 66.67%)
+- Book: "The DaVinci Code" → Cover: "The Davinci Code Dan Brown" (Similarity: 80.00%)
+- Book: "The Fisher Queens Dynasty" → Cover: "The Fisher Queens Dyansty" (Similarity: 75.00%)
+- Book: "The Fox" → Cover: "The Fox Frederick Forysyth" (Similarity: 80.00%)
+- Book: "The Jungle Book" → Cover: "The Jungle Book Rudyard Kipling" (Similarity: 80.00%)
+- Book: "The Kalam Effect" → Cover: "PM Nair The Kalam Effect" (Similarity: 80.00%)
+- Book: "The Lord of the Rings - The Fellowship of the Ring" → Cover: "/BookCoversNew/The Lord Of The Rings 1.jpeg"
+- Book: "The Lord of the Rings - The Two Towers" → Cover: "/BookCoversNew/The Lord Of The Rings 2.jpeg"
+- Book: "The Man Who Saved India" → Cover: "The Man Who Saved India SARDAR PATEL" (Similarity: 80.00%)
+- Book: "The Monk who Sold His Ferrari" → Cover: "The Monk Who Sold His Ferrari Robin S Sharma" (Similarity: 80.00%)
+- Book: "The Promise" → Cover: "The Promise Nikita Singh" (Similarity: 80.00%)
+- Book: "The Psychology of Money" → Cover: "Morgan Housel Psychology of Money" (Similarity: 66.67%)
+- Book: "The Road Less Traveled" → Cover: "The Road Less Travelled" (Similarity: 75.00%)
+- Book: "The Secret Wishlist" → Cover: "The Secret Wishlist Preeti Shenoy" (Similarity: 80.00%)
+- Book: "The Silent Patient by Alex Michaelides" → Cover: "The Silent Patient" (Similarity: 80.00%)
+- Book: "The Theory of Everything" → Cover: "Stephen W Hawking The Theory Of Everything" (Similarity: 80.00%)
+- Book: "The Three Body Problem" → Cover: "/BookCoversNew/The Three Body Problem.png"
+- Book: "The Worlds Best Boyfriend" → Cover: "The World S Best Boyfriend" (Similarity: 75.00%)
+- Book: "Three Mistakes of My Life" → Cover: "Th 3 (Three) Mistakes Of My Life Chetan Bhagat" (Similarity: 80.00%)
+- Book: "Time Stops At Shamli Other Stories" → Cover: "Time Stops At Shamli" (Similarity: 80.00%)
+- Book: "Trading Price Action" → Cover: "Trading Price Action Trading Ranges" (Similarity: 80.00%)
+- Book: "Very Hungry Caterpillar" → Cover: "Very Hungry Cterpillar" (Similarity: 66.67%)
+- Book: "Vladimir Nabokov Lolita" → Cover: "Vladmir Nabokov Lolita Penguin Modern Classics" (Similarity: 66.67%)
+- Book: "When Bad Things Happen to Good People" → Cover: "When Bad Things Happens To Good People" (Similarity: 83.33%)
+- Book: "When Only Love Remains" → Cover: "When Only Love Remains -Durjoy Datta " (Similarity: 80.00%)
+- Book: "Will You Still Love Me By Ravinder Singh" → Cover: "Will You Still Love Me Ravindra Singh" (Similarity: 83.33%)
+- Book: "You are the Best Wife A True Love Story" → Cover: "You Are The Best Wife" (Similarity: 80.00%)
+- Book: "You are the Password of My Life" → Cover: "You Re The Password Of My Life" (Similarity: 100.00%)
+- Book: "You are Trending in my Dreams" → Cover: "You Are Trending In My Dreams Now" (Similarity: 80.00%)
+- Book: "You Were My Crush Hindi" → Cover: "You Were My Crush Till You Said Durjoy Datta" (Similarity: 75.00%)
+- Book: "Your Dreams are Mine Now" → Cover: "Your Dreams Are Mine Now Novel" (Similarity: 80.00%)
+
+## Forced Matches
+
+- Book: "Ayurveda Treatment for Beginner" → Cover: "/BookCoversNew/ayurveda.jpg"
+- Book: "Complete Sherlock Holmes (1960)" → Cover: "/BookCoversNew/Sir Arthur Conan Doyle Complete.jpeg"
+- Book: "Do Bailo Ki Katha" → Cover: "/BookCoversNew/दो बैलों की कथा.png"
+- Book: "Do Kadam Aur Sahi" → Cover: "/BookCoversNew/DO Kadam Aur Sahi.png"
+- Book: "Elmer's Friends" → Cover: "/BookCoversNew/elmers friend.jpg"
+- Book: "Essentials of Medical Microbiology" → Cover: "/BookCoversNew/Essentials of Microbiology.png"
+- Book: "Five Point Someone" → Cover: "/BookCoversNew/5 points someone what not to do at iit.jpg"
+- Book: "Frankenstein or The Mordern Prometheus" → Cover: "/BookCoversNew/frankenstein.jpg"
+- Book: "Fundamental Theories of Physics" → Cover: "/BookCoversNew/Black Hole Physics.jpg"
+- Book: "Guide to Competetive Programming" → Cover: "harry-potter-2-chamber-of-secrets"
+- Book: "Life is a Soap Bubble" → Cover: "/BookCoversNew/Life of A Soap Bubble.png"
+- Book: "Mahabharata - Veda Vyasa (eng)" → Cover: "/BookCoversNew/Mahabharat Ved Vyas.jpeg"
+- Book: "Microprocessors Microcontroller Systems" → Cover: "/BookCoversNew/microprocessor and microcontroller system.jpg"
+- Book: "Self Liberation From Fear,Worry and Angry" → Cover: "/BookCoversNew/Self Liberation from Fear,Worry and Angry.png"
+- Book: "Swadeshi Chikitsa" → Cover: "/BookCoversNew/SwadeshiChikitsa Vol 1.jpeg"
+- Book: "The Bhagavad Gita" → Cover: "/BookCoversNew/The Bhagavad Gita A Biography.jpeg"
+- Book: "The Girl I Last Loved" → Cover: "/BookCoversNew/pingpdf.com The girl of my dreams.jpeg"
+- Book: "The Girls Of My Dreams" → Cover: "/BookCoversNew/pingpdf.com The girl of my dreams.jpeg"
+- Book: "The Three Musketeers" → Cover: "/BookCoversNew/THE THREE MUSKETERS.jpeg"
+- Book: "You Were My Crush" → Cover: "/BookCoversNew/You were my crush till you said you love me.jpg"
+

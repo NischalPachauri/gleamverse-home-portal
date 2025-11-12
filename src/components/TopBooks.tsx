@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { books as localBooks } from "@/data/books";
 import { Link } from "react-router-dom";
-import { getBookCover } from "@/utils/bookCoverGenerator";
+import { getBookCover } from "@/utils/bookCoverMapping";
 
 // Import cover images
 import hp1 from "@/assets/covers/hp1.jpg";

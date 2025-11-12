@@ -21,7 +21,7 @@ const RAZORPAY_KEY_ID = 'rzp_test_RY3WvDTVIw8cad';
 // Type definition for Razorpay
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -145,7 +145,7 @@ export function PaymentModal({ isOpen, onClose, amount = 0, purpose }: PaymentMo
       
       const razorpay = new window.Razorpay(options);
       
-      razorpay.on('payment.failed', function (response: any) {
+      razorpay.on('payment.failed', function (response: { error: { description: string } }) {
         console.error('Payment failed:', response.error);
         toast.error(`Payment failed: ${response.error.description || 'Unknown error'}`);
         setIsProcessing(false);
@@ -153,9 +153,9 @@ export function PaymentModal({ isOpen, onClose, amount = 0, purpose }: PaymentMo
       
       razorpay.open();
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Payment error:', error);
-      toast.error(error.message || 'An error occurred during payment');
+      toast.error((error as Error).message || 'An error occurred during payment');
       setIsProcessing(false);
     }
   };

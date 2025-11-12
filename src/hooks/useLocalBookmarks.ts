@@ -75,24 +75,39 @@ const useLocalBookmarks = () => {
       return false;
     }
     
-    // Implement FIFO queue system - if we're at capacity, remove the oldest book
-    let updatedBookmarks: string[];
+    let updatedBookmarks: string[] = [...bookmarkedBooks];
+    let updatedStatuses = { ...bookmarkStatuses };
+
     if (bookmarkedBooks.length >= MAX_LIBRARY_CAPACITY) {
-      // Remove the oldest book (first one in the array)
-      const oldestBookId = bookmarkedBooks[0];
-      // Get the book title from the books data for better user feedback
-      const oldestBook = books.find(book => book.id === oldestBookId);
-      const oldestBookTitle = oldestBook ? oldestBook.title : oldestBookId;
+      const removalPriority: BookmarkStatusType[] = ['Completed', 'On Hold', 'Planning to Read', 'Reading'];
+      let bookToRemove: string | null = null;
+
+      for (const status of removalPriority) {
+        const booksWithStatus = bookmarkedBooks.filter(id => updatedStatuses[id] === status);
+        if (booksWithStatus.length > 0) {
+          bookToRemove = booksWithStatus[0]; // Remove the oldest book with this status
+          break;
+        }
+      }
+
+      if (!bookToRemove) {
+        // Fallback to removing the oldest book if no other criteria met
+        bookToRemove = bookmarkedBooks[0];
+      }
       
-      // Remove oldest and add new one
-      updatedBookmarks = [...bookmarkedBooks.slice(1), bookId];
-      toast.info(`"${oldestBookTitle}" was removed from your library as you've reached the 5-book limit.`);
-    } else {
-      // Just add the new book
-      updatedBookmarks = [...bookmarkedBooks, bookId];
+      if (bookToRemove) {
+        const oldestBook = books.find(book => book.id === bookToRemove!);
+        const oldestBookTitle = oldestBook ? oldestBook.title : bookToRemove;
+        
+        updatedBookmarks = updatedBookmarks.filter(id => id !== bookToRemove);
+        delete updatedStatuses[bookToRemove];
+        
+        toast.info(`"${oldestBookTitle}" was removed from your library as you've reached the 5-book limit.`);
+      }
     }
     
-    const updatedStatuses = { ...bookmarkStatuses, [bookId]: status };
+    updatedBookmarks.push(bookId);
+    updatedStatuses[bookId] = status;
     
     try {
       // Update localStorage
@@ -106,11 +121,11 @@ const useLocalBookmarks = () => {
       setOperationState({ status: 'success', error: null });
       toast.success('Book added to your library');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding bookmark:', error);
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to add bookmark' 
+        error: (error as Error).message || 'Failed to add bookmark' 
       });
       toast.error('Failed to add bookmark. Please try again.');
       return false;
@@ -148,7 +163,7 @@ const useLocalBookmarks = () => {
       setOperationState({ status: 'success', error: null });
       // Removed toast notification for silent removal
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error removing bookmark:', error);
       
       // Revert optimistic update on error
@@ -157,7 +172,7 @@ const useLocalBookmarks = () => {
       
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to remove bookmark' 
+        error: (error as Error).message || 'Failed to remove bookmark' 
       });
       toast.error('Failed to remove bookmark. Please try again.');
       return false;
@@ -187,7 +202,7 @@ const useLocalBookmarks = () => {
       setOperationState({ status: 'success', error: null });
       toast.success(`Book status updated to "${status}"`);
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating bookmark status:', error);
       
       // Revert optimistic update on error
@@ -195,7 +210,7 @@ const useLocalBookmarks = () => {
       
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to update bookmark status' 
+        error: (error as Error).message || 'Failed to update bookmark status' 
       });
       toast.error('Failed to update bookmark status. Please try again.');
       return false;
@@ -260,11 +275,11 @@ const useLocalBookmarks = () => {
       setOperationState({ status: 'success', error: null });
       toast.success('All bookmarks have been cleared');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error clearing bookmarks:', error);
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to clear bookmarks' 
+        error: (error as Error).message || 'Failed to clear bookmarks' 
       });
       toast.error('Failed to clear bookmarks. Please try again.');
       return false;

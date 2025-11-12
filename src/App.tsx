@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { MusicPlayerProvider } from "@/contexts/MusicPlayerContext";
+import { MusicPlayerBar } from "@/components/MusicPlayerBar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
@@ -13,6 +15,7 @@ import { ProfileWindow } from "@/components/ProfileWindow";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import TestApp from "./TestApp";
+import { PDFTest } from "@/components/PDFTest";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DonatePage from "./pages/Donate";
 import HelpPage from "./pages/Help";
@@ -38,15 +41,17 @@ const App = () => {
                 <TooltipProvider>
                   <Toaster />
                   <Sonner />
-                  <BrowserRouter>
-                    <div className="min-h-screen dark:bg-background" style={{ backgroundColor: 'var(--background-color)', visibility: 'visible', opacity: 1 }}>
-                      <Routes>
+                  <MusicPlayerProvider>
+                    <BrowserRouter>
+                      <div className="min-h-screen dark:bg-background" style={{ backgroundColor: 'var(--background-color)', visibility: 'visible', opacity: 1 }}>
+                        <Routes>
                         <Route path="/" element={
                           <ErrorBoundary name="IndexPage">
                             <Index />
                           </ErrorBoundary>
                         } />
                         <Route path="/test" element={<TestApp />} />
+                        <Route path="/pdf-test" element={<PDFTest />} />
                         <Route path="/book/:id" element={<BookDetail />} />
                         <Route path="/bookmarks" element={<Bookmarks />} />
                         <Route path="/favorites" element={
@@ -76,10 +81,12 @@ const App = () => {
                         } />
                         <Route path="/component-test" element={<TestComponent />} />
                         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </div>
-                  </BrowserRouter>
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                        <MusicPlayerBar />
+                      </div>
+                    </BrowserRouter>
+                  </MusicPlayerProvider>
                 </TooltipProvider>
               </AuthProvider>
             </ErrorBoundary>

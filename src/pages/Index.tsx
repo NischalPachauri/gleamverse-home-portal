@@ -40,6 +40,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(true);
   const { theme, toggleTheme } = useTheme();
+  const [pageInputValue, setPageInputValue] = useState("1");
 
   const BOOKS_PER_PAGE = 16;
 
@@ -79,8 +80,6 @@ const Index = () => {
     const uniqueCategories = Array.from(allGenres).sort();
     return ["All", ...uniqueCategories];
   }, []);
-  
-  try {
 
   const filteredBooks = useMemo(() => {
     const filtered = books.filter((book) => {
@@ -129,14 +128,6 @@ const Index = () => {
   };
   
   // Handle direct page input
-  const [pageInputValue, setPageInputValue] = useState("1");
-  
-  // Update page input when page changes
-  useEffect(() => {
-    setPageInputValue((currentPage + 1).toString());
-  }, [currentPage]);
-  
-  // Handle page input change
   const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPageInputValue(e.target.value);
   };
@@ -171,6 +162,11 @@ const Index = () => {
   useEffect(() => {
     setCurrentPage(0);
   }, [searchQuery, selectedCategory]);
+
+  // Update page input when page changes
+  useEffect(() => {
+    setPageInputValue((currentPage + 1).toString());
+  }, [currentPage]);
 
   const getRandomBook = () => {
     const randomBook = books[Math.floor(Math.random() * books.length)];
@@ -342,10 +338,6 @@ const Index = () => {
       <Footer />
     </div>
   );
-  } catch (error) {
-    console.error('Index component error:', error);
-    return <IndexFallback />;
-  }
 };
 
 export default Index;

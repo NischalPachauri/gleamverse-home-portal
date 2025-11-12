@@ -43,9 +43,9 @@ export function PasswordResetForm({ onBack, onClose }: PasswordResetFormProps) {
       await resetPassword(email);
       setIsSuccess(true);
       setErrors({});
-    } catch (error: any) {
+    } catch (error: unknown) {
       setErrors({
-        general: error.message || 'Failed to send reset email. Please try again.'
+        general: (error as Error).message || 'Failed to send reset email. Please try again.'
       });
     } finally {
       setIsLoading(false);

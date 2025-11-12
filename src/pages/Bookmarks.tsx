@@ -5,7 +5,10 @@ import { BookMarked, BookOpen, Clock, CheckCircle2, Loader2, ArrowLeft, Filter, 
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalBookmarks } from '@/hooks/useLocalBookmarks';
-import { Book } from '@/data/books';
+import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
+import { Filter, Grid, List, Plus } from 'lucide-react';
+import { Book } from '@/types/book';
+import { books } from '@/data/books';
 import { toast } from 'sonner';
 import BookmarkGrid from '@/components/BookmarkGrid';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -40,9 +43,9 @@ export default function Bookmarks() {
   const completedRef = useRef<HTMLDivElement>(null);
 
   // Debounce function for scroll events
-  const debounce = (fn: Function, ms = 300) => {
+  const debounce = <T extends (...args: unknown[]) => void>(fn: T, ms = 300) => {
     let timeoutId: ReturnType<typeof setTimeout>;
-    return function(...args: any[]) {
+    return function(...args: Parameters<T>) {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => fn.apply(this, args), ms);
     };
@@ -77,7 +80,7 @@ export default function Bookmarks() {
     } catch (error) {
       console.error('Error loading bookmark dates:', error);
     }
-  }, []);
+  }, [bookmarkedBooks]);
   
   // Save new bookmark dates when bookmarks change
   useEffect(() => {
@@ -97,7 +100,7 @@ export default function Bookmarks() {
     
     localStorage.setItem('bookmark_add_dates', JSON.stringify(updatedDates));
     setBookAddDates(updatedDates);
-  }, [bookmarkedBooks]);
+  }, [bookmarkedBooks, bookAddDates]);
   
   useEffect(() => {
     setCountLoading(true);
@@ -110,7 +113,7 @@ export default function Bookmarks() {
   
   // Apply filtering and sorting
   useEffect(() => {
-    let filtered = [...processedBooks];
+    const filtered = [...processedBooks];
     
     // No filtering by status - show all books in their respective sections
     

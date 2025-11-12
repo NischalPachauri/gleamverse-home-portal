@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,17 +12,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { 
-  User, LogOut, BookMarked, Settings, 
-  Moon, Sun, Menu, X, LogIn, UserPlus, History
-} from 'lucide-react';
-import { useTheme } from '@/contexts/ThemeContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { AuthModal } from '@/components/auth/AuthModal';
 import { Badge } from '@/components/ui/badge';
 import { SearchBar } from '@/components/SearchBar';
 import { TestProfileIcon } from '@/components/TestProfileIcon';
+import { 
+  User, LogOut, BookMarked, Settings, 
+  Moon, Sun, Menu, X, LogIn, UserPlus, History, Activity
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { AuthModal } from '@/components/auth/AuthModal';
+import PerformanceDashboard from '@/components/PerformanceDashboard';
 
 export function Header() {
   const navigate = useNavigate();
@@ -29,6 +31,7 @@ export function Header() {
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showPerformanceDashboard, setShowPerformanceDashboard] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -196,6 +199,18 @@ export function Header() {
                 )}
                 <span className="sr-only">Toggle theme</span>
               </Button>
+              
+              {/* Performance Dashboard Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowPerformanceDashboard(!showPerformanceDashboard)}
+                className="h-9 w-9 text-white hover:bg-white/20"
+                title="Toggle Performance Dashboard"
+              >
+                <Activity className="h-4 w-4" />
+                <span className="sr-only">Performance Dashboard</span>
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -314,6 +329,12 @@ export function Header() {
         isOpen={authModalOpen} 
         onClose={() => setAuthModalOpen(false)}
         initialMode={authModalMode}
+      />
+      
+      {/* Performance Dashboard */}
+      <PerformanceDashboard 
+        isVisible={showPerformanceDashboard} 
+        onClose={() => setShowPerformanceDashboard(false)}
       />
     </>
   );

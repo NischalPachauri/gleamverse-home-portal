@@ -17,30 +17,6 @@ export function useBookmarks() {
   });
   const { user } = useAuth();
 
-  // Set up real-time subscription for bookmark changes
-  useEffect(() => {
-    if (!user) return;
-    
-    // Subscribe to changes in the user_library table
-    const subscription = supabase
-      .channel('user_library_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'user_library',
-        filter: `user_id=eq.${user.id}`,
-      }, (payload) => {
-        console.log('Real-time update received:', payload);
-        // Refresh bookmarks when changes occur
-        loadBookmarks();
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [user]);
-
   const loadBookmarks = useCallback(async () => {
     if (!user) {
       setBookmarks([]);
@@ -62,7 +38,7 @@ export function useBookmarks() {
 
       setBookmarks(data?.map(item => item.book_id) || []);
       setOperationState({ status: 'success', error: null });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error loading bookmarks from Supabase:', error);
       
       // Fallback to local storage if Supabase fails
@@ -93,7 +69,7 @@ export function useBookmarks() {
         setBookmarks([]);
         setOperationState({ 
           status: 'error', 
-          error: error.message || 'Failed to load your bookmarks' 
+          error: (error as Error).message || 'Failed to load your bookmarks' 
         });
         
         // More user-friendly error message with retry option
@@ -109,6 +85,26 @@ export function useBookmarks() {
       setLoading(false);
     }
   }, [user]);
+
+  // Set up real-time subscription for bookmark changes
+  useEffect(() => {
+    if (!user) return;
+    const subscription = supabase
+      .channel('user_library_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'user_library',
+        filter: `user_id=eq.${user.id}`,
+      }, (payload) => {
+        console.log('Real-time update received:', payload);
+        loadBookmarks();
+      })
+      .subscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [user, loadBookmarks]);
 
   const addBookmark = async (bookId: string) => {
     if (!user) return false;
@@ -133,13 +129,13 @@ export function useBookmarks() {
       setOperationState({ status: 'success', error: null });
       toast.success('Book added to your bookmarks');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding bookmark:', error);
       // Revert optimistic update
       setBookmarks(prev => prev.filter(id => id !== bookId));
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to add bookmark' 
+        error: (error as Error).message || 'Failed to add bookmark' 
       });
       toast.error('Failed to add bookmark. Please try again.');
       return false;
@@ -167,13 +163,13 @@ export function useBookmarks() {
       setOperationState({ status: 'success', error: null });
       toast.success('Book removed from your bookmarks');
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error removing bookmark:', error);
       // Revert optimistic update
       setBookmarks(previousBookmarks);
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to remove bookmark' 
+        error: (error as Error).message || 'Failed to remove bookmark' 
       });
       toast.error('Failed to remove bookmark. Please try again.');
       return false;

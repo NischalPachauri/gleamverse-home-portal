@@ -1,0 +1,33 @@
+<svg width="200" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bookGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a5568;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d3748;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Book background -->
+  <rect width="200" height="300" fill="url(#bookGradient)" rx="8"/>
+  
+  <!-- Book spine -->
+  <rect x="0" y="0" width="20" height="300" fill="#1a202c" rx="8"/>
+  
+  <!-- Book pages -->
+  <rect x="180" y="5" width="15" height="290" fill="#f7fafc" rx="2"/>
+  
+  <!-- Title placeholder -->
+  <rect x="30" y="80" width="140" height="20" fill="#e2e8f0" rx="4"/>
+  <rect x="30" y="110" width="120" height="20" fill="#e2e8f0" rx="4"/>
+  
+  <!-- Author placeholder -->
+  <rect x="30" y="180" width="100" height="15" fill="#cbd5e0" rx="3"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="220" r="25" fill="none" stroke="#a0aec0" stroke-width="2"/>
+  <line x1="75" y1="220" x2="125" y2="220" stroke="#a0aec0" stroke-width="2"/>
+  <line x1="100" y1="195" x2="100" y2="245" stroke="#a0aec0" stroke-width="2"/>
+  
+  <!-- Book icon -->
+  <rect x="85" y="240" width="30" height="20" fill="#4a5568" rx="2"/>
+  <rect x="87" y="242" width="26" height="16" fill="#e2e8f0" rx="1"/>
+</svg>

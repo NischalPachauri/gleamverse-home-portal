@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { 
-  Download, BookOpen, MoreVertical, Check, Sparkles, Heart, BookMarked, Baby, 
+  Download, MoreVertical, Check, Sparkles, Heart, BookMarked, Baby, 
   Landmark, FlaskConical, Globe, Scroll, Swords, Brain, Users, GraduationCap,
   Castle, Fingerprint, Scale, Briefcase, Rocket, TreePine, Palette, Music,
   Clock, CheckCircle2
@@ -8,11 +8,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
+import { applyMetadata } from "@/utils/bookMetadataRegistry";
 import { useState, useEffect, useRef } from "react";
-import { getBookCover } from "@/utils/bookCoverMapping";
 import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
+import { useReadingProgress } from "@/hooks/useReadingProgress";
 import { toast } from "sonner";
-import { ImageWithFallback } from "./ImageWithFallback";
+import EnhancedImage from "./EnhancedImage";
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   const g = genre.toLowerCase();
@@ -48,13 +49,18 @@ const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   return <BookOpen className={cls} />;
 };
 
+import { BookOpen } from 'lucide-react';
+
 export function BookCard({ book }: { book: Book }) {
+  const b = applyMetadata(book);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { bookmarkedBooks, addBookmark, removeBookmark, bookmarkStatuses, updateBookmarkStatus } = useLocalBookmarks();
-  const isBookmarked = bookmarkedBooks.includes(book.id.toString());
-  const bookStatus = bookmarkStatuses[book.id];
+  const isBookmarked = bookmarkedBooks.includes(b.id.toString());
+  const bookStatus = bookmarkStatuses[b.id];
   const [favorites, setFavorites] = useState<string[]>([]);
+  const { getProgress } = useReadingProgress();
+  const progress = getProgress(book.id);
   
   // Load favorites from localStorage
   useEffect(() => {
@@ -93,25 +99,23 @@ export function BookCard({ book }: { book: Book }) {
 
   const setBookStatus = async (newStatus: string) => {
     try {
-      const raw = localStorage.getItem('bookStatus');
-      const map: Record<string,string> = raw ? JSON.parse(raw) : {};
       if (newStatus) {
-        map[book.id] = newStatus;
         if (!isBookmarked) {
           await addBookmark(book.id);
           toast.success(`Added to ${newStatus}`);
         }
       } else {
-        delete map[book.id];
         if (isBookmarked) {
           await removeBookmark(book.id);
           toast.success('Removed from bookmarks');
         }
       }
-      localStorage.setItem('bookStatus', JSON.stringify(map));
-      updateBookmarkStatus(book.id, newStatus as any);
+      updateBookmarkStatus(book.id, newStatus as 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed' | '');
       setMenuOpen(false);
-    } catch {}
+    } catch (error) {
+      console.error("Failed to update book status:", error);
+      toast.error("Could not update book status. Please try again.");
+    }
   };
 
   const handleMenuToggle = (e: React.MouseEvent) => {
@@ -125,39 +129,27 @@ export function BookCard({ book }: { book: Book }) {
     e.preventDefault();
     const link = document.createElement('a');
     link.href = book.pdfPath;
-    link.download = `${book.title}.pdf`;
+    const safeTitle = book.title.replace(/[^A-Za-z0-9 _().,-]/g, ' ').replace(/\s+/g, ' ').trim();
+    link.download = `${safeTitle}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Get book cover using the updated getBookCover function
-  const bookCover = getBookCover(book.title);
-  
-  // Enhanced debug logging for cover resolution
-  useEffect(() => {
-    if (bookCover === '/placeholder.svg') {
-      console.warn(`Using placeholder for book: "${book.title}" with path: ${book.pdfPath}`);
-    }
-  }, [book.title, book.pdfPath, bookCover]);
-
   return (
     <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
-      <Link to={`/book/${book.id}`} className="block">
+      <Link to={`/book/${b.id}`} className="block">
         <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
-          <ImageWithFallback
-            src={bookCover || '/placeholder.svg'}
-            alt={`Cover of ${book.title} by ${book.author}`}
-            fallbackSrc="/placeholder.svg"
+          <EnhancedImage
+            bookTitle={b.title}
+            alt={`Cover of ${b.title} by ${b.author}`}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             style={{ objectFit: 'cover' }}
             onLoad={() => {
-              if (bookCover) {
-                console.log(`✅ Image loaded successfully: ${book.title}`);
-              }
+                console.log(`✅ Image loaded successfully: ${b.title}`);
             }}
             onError={() => {
-              console.error(`❌ Image failed to load: ${book.title}`, bookCover);
+              console.error(`❌ Image failed to load: ${b.title}`);
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -179,9 +171,14 @@ export function BookCard({ book }: { book: Book }) {
               )}
             </div>
           )}
+          {progress && typeof progress.percentage === 'number' && (
+            <div className="absolute bottom-2 left-2 z-10 px-2 py-1 rounded bg-background/80 backdrop-blur-sm border border-border text-xs">
+              {Math.round(progress.percentage)}%
+            </div>
+          )}
           
           {/* Three-dot status menu */}
-          <div className="absolute top-2 right-2 z-30 bookmark-dots" ref={menuRef} data-book-id={book.id}>
+          <div className="absolute top-2 right-2 z-30 bookmark-dots" ref={menuRef} data-book-id={b.id}>
             <button
               className="h-8 w-8 rounded-full bg-background/70 hover:bg-background/90 border border-border shadow flex items-center justify-center"
               onClick={handleMenuToggle}
@@ -254,34 +251,39 @@ export function BookCard({ book }: { book: Book }) {
                   toast.success('Added to favorites');
                 }
               }}
-              aria-label={favorites.includes(book.id.toString()) ? "Remove from favorites" : "Add to favorites"}
+                aria-label={favorites.includes(b.id.toString()) ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart 
                 className={`w-5 h-5 ${
-                  favorites.includes(book.id.toString()) 
+                  favorites.includes(b.id.toString()) 
                     ? "fill-red-500 text-red-500" 
                     : "text-gray-600 hover:text-red-500 hover:fill-red-500/50"
                 } transition-all duration-300 transform hover:scale-110`} 
-              />
+             />
             </Button>
           </div>
         </div>
         
         <div className="p-4 space-y-2">
           <h3 className="font-semibold text-lg leading-tight line-clamp-1 text-foreground group-hover:text-primary transition-colors whitespace-normal">
-            {book.title}
+            {b.title}
           </h3>
-          <p className="text-sm text-muted-foreground">{book.author}</p>
+          <p className="text-sm text-muted-foreground">{b.author === 'Unknown Author' ? '' : b.author}</p>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <span>{book.year}</span>
+            <span>{b.year}</span>
             <span>•</span>
-            <span>{book.pages} pages</span>
+            <span>{b.pages ? `${b.pages} pages` : ''}</span>
             <span>•</span>
-            <span>{book.genre}</span>
+            <span>{b.genre === 'General' ? '' : b.genre}</span>
           </div>
           {bookStatus && (
             <div className="text-xs font-medium inline-flex items-center gap-2 rounded-full px-2 py-1 bg-primary/10 text-primary">
               Status: {bookStatus}
+            </div>
+          )}
+          {progress && typeof progress.percentage === 'number' && (
+            <div className="text-xs inline-flex items-center gap-2 rounded-full px-2 py-1 bg-muted text-muted-foreground">
+              Progress: {Math.round(progress.percentage)}%
             </div>
           )}
         </div>

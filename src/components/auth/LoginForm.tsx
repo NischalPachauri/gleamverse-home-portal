@@ -51,10 +51,10 @@ export function LoginFormContent({ onToggleMode, onForgotPassword, onClose }: Lo
     try {
       await signIn(email, password);
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Even though errors are handled by the auth context, we can provide more specific UI feedback
       setErrors({
-        general: error.message || 'Failed to sign in. Please check your credentials.'
+        general: (error as Error).message || 'Failed to sign in. Please check your credentials.'
       });
     } finally {
       setIsLoading(false);

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import supabase from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 export interface ReadingHistoryItem {
   id: string;
@@ -72,9 +73,9 @@ export function useReadingHistory() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, history.length]);
 
-  const updateReadingProgress = async (bookId: string, page: number) => {
+  const updateReadingProgress = useCallback(async (bookId: string, page: number) => {
     if (!user) return false;
     
     try {
@@ -157,12 +158,12 @@ export function useReadingHistory() {
         return false;
       }
     }
-  };
+  }, [user]);
 
-  const getLastReadPage = (bookId: string): number => {
+  const getLastReadPage = useCallback((bookId: string): number => {
     const item = history.find(h => h.book_id === bookId);
     return item?.last_read_page || 0;
-  };
+  }, [history]);
 
   useEffect(() => {
     loadHistory();

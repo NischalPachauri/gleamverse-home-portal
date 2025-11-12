@@ -57,11 +57,11 @@ const useFavorites = () => {
       
       setOperationState({ status: 'success', error: null });
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding favorite:', error);
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to add favorite' 
+        error: (error as Error).message || 'Failed to add favorite' 
       });
       toast.error('Failed to add to favorites. Please try again.');
       return false;
@@ -87,11 +87,11 @@ const useFavorites = () => {
       
       setOperationState({ status: 'success', error: null });
       return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error removing favorite:', error);
       setOperationState({ 
         status: 'error', 
-        error: error.message || 'Failed to remove favorite' 
+        error: (error as Error).message || 'Failed to remove favorite' 
       });
       toast.error('Failed to remove from favorites. Please try again.');
       return false;

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Test</title>
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+</head>
+<body>
+    <h1>PDF Loading Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const testPdfs = [
+            "/books/10 Books in 1.pdf",
+            "/books/2 States The story of my Marriage.pdf",
+            "/books/Harry Potter and the Chamber of Secrets.pdf"
+        ];
+        
+        const results = document.getElementById('results');
+        
+        async function testPdf(pdfPath) {
+            try {
+                console.log(`Testing: ${pdfPath}`);
+                const loadingTask = pdfjsLib.getDocument(pdfPath);
+                const pdf = await loadingTask.promise;
+                
+                const result = document.createElement('div');
+                result.innerHTML = `
+                    <h3>${pdfPath}</h3>
+                    <p style="color: green;">✅ Successfully loaded - ${pdf.numPages} pages</p>
+                `;
+                results.appendChild(result);
+                
+                console.log(`✅ Success: ${pdfPath} - ${pdf.numPages} pages`);
+            } catch (error) {
+                const result = document.createElement('div');
+                result.innerHTML = `
+                    <h3>${pdfPath}</h3>
+                    <p style="color: red;">❌ Failed to load: ${error.message}</p>
+                    <pre>${error.stack}</pre>
+                `;
+                results.appendChild(result);
+                
+                console.error(`❌ Error loading ${pdfPath}:`, error);
+            }
+        }
+        
+        async function runTests() {
+            for (const pdfPath of testPdfs) {
+                await testPdf(pdfPath);
+            }
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>

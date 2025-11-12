@@ -41,6 +41,11 @@ const supabase = createClient(primarySupabaseUrl, primarySupabaseKey, {
   }
 });
 
+interface SupabaseError extends Error {
+  error_description?: string;
+  status?: number;
+}
+
 // Export key rotation function for use in error recovery
 export const refreshApiKey = () => {
   // In a real implementation, this would fetch a new key from a secure source
@@ -134,20 +139,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Registration successful for:', email);
       toast.success('Registration successful! Please check your email to verify your account.');
       return data.user;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
       // Enhanced error logging with structured data
       console.error('Sign up error:', {
-        message: error.message,
-        description: error.error_description,
-        status: error.status,
-        stack: error.stack
+        message: supabaseError.message,
+        description: supabaseError.error_description,
+        status: supabaseError.status,
+        stack: supabaseError.stack
       });
       
       // User-friendly error messages
-      if (error.message?.includes('API key')) {
+      if (supabaseError.message?.includes('API key')) {
         toast.error('Authentication service unavailable. Please try again later.');
       } else {
-        toast.error(error.error_description || error.message || 'Failed to create account');
+        toast.error(supabaseError.error_description || supabaseError.message || 'Failed to create account');
       }
       return null;
     } finally {
@@ -219,16 +225,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast.success('Signed in successfully!');
       setUser(data.user);
       return data.user;
-    } catch (error: any) {
-      console.error('Sign in error:', error);
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Sign in error:', supabaseError);
       
       // Detailed error handling with specific user messages
-      if (error.status === 429) {
+      if (supabaseError.status === 429) {
         toast.error('Too many sign-in attempts. Please try again later.');
-      } else if (error.status >= 500) {
+      } else if (supabaseError.status >= 500) {
         toast.error('Authentication service is currently unavailable. Please try again later.');
       } else {
-        toast.error(error.error_description || error.message || 'Invalid email or password');
+        toast.error(supabaseError.error_description || supabaseError.message || 'Invalid email or password');
       }
       return null;
     } finally {
@@ -251,9 +258,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       setUser(null);
       toast.success('Signed out successfully');
-    } catch (error: any) {
-      console.error('Sign out error:', error);
-      toast.error(error.error_description || error.message || 'Failed to sign out');
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Sign out error:', supabaseError);
+      toast.error(supabaseError.error_description || supabaseError.message || 'Failed to sign out');
       
       // Force sign out on client side even if API call fails
       setUser(null);
@@ -279,19 +287,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) throw error;
       
       toast.success('Password reset email sent! Check your inbox.');
-    } catch (error: any) {
-      console.error('Password reset error:', error);
+    } catch (error: unknown) {
+      const supabaseError = error as SupabaseError;
+      console.error('Password reset error:', supabaseError);
       
       // Specific error messages based on error type
-      if (error.status === 429) {
+      if (supabaseError.status === 429) {
         toast.error('Too many password reset attempts. Please try again later.');
-      } else if (error.status >= 500) {
+      } else if (supabaseError.status >= 500) {
         toast.error('Service temporarily unavailable. Please try again later.');
-      } else if (error.message?.includes('User not found')) {
+      } else if (supabaseError.message?.includes('User not found')) {
         // Don't reveal if email exists for security reasons
         toast.success('If your email exists in our system, you will receive reset instructions.');
       } else {
-        const errorMessage = error.message || 'Error sending password reset email. Please try again.';
+        const errorMessage = supabaseError.message || 'Error sending password reset email. Please try again.';
         toast.error(errorMessage);
       }
     } finally {
