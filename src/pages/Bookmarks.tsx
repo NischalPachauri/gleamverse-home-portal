@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocalBookmarks } from '@/hooks/useLocalBookmarks';
 import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
-import { Filter, Grid, List, Plus } from 'lucide-react';
+import { Grid, List, Plus } from 'lucide-react';
 import { Book } from '@/types/book';
 import { books } from '@/data/books';
 import { toast } from 'sonner';

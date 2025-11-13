@@ -19,6 +19,7 @@ import { PDFTest } from "@/components/PDFTest";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DonatePage from "./pages/Donate";
 import HelpPage from "./pages/Help";
+import CoverTest from "./pages/CoverTest";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => {
                         } />
                         <Route path="/test" element={<TestApp />} />
                         <Route path="/pdf-test" element={<PDFTest />} />
+                        <Route path="/cover-test" element={<CoverTest />} />
                         <Route path="/book/:id" element={<BookDetail />} />
                         <Route path="/bookmarks" element={<Bookmarks />} />
                         <Route path="/favorites" element={
