@@ -51,7 +51,7 @@ const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
 
 import { BookOpen } from 'lucide-react';
 
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({ book, onCoverLoad }: { book: Book; onCoverLoad?: (id: number) => void }) {
   const b = applyMetadata(book);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -146,7 +146,7 @@ export function BookCard({ book }: { book: Book }) {
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             style={{ objectFit: 'cover' }}
             onLoad={() => {
-                console.log(`✅ Image loaded successfully: ${b.title}`);
+                if (onCoverLoad) onCoverLoad(b.id);
             }}
             onError={() => {
               console.error(`❌ Image failed to load: ${b.title}`);

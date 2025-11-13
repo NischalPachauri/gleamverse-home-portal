@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useLocalBookmarks } from "@/hooks/useLocalBookmarks";
 import { getBookCover } from "@/utils/bookCoverMapping";
+import ImageWithFallback from "./ImageWithFallback";
 import { useEffect } from "react";
 
 // Maximum number of books allowed in the library
@@ -92,7 +93,7 @@ export const ReadingList = () => {
           <h2 className="text-4xl font-bold text-foreground dark:text-white">Your Library</h2>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 px-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-5 gap-6 px-2">
           {libraryBooks.map((book, index) => (
             <div
               key={book.id}
@@ -108,11 +109,10 @@ export const ReadingList = () => {
                     {getStatusIcon(book.id)}
                   </div>
                   
-                  <img
+                  <ImageWithFallback
                     src={getBookCover(book.title) || '/placeholder.svg'}
                     alt={book.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src='/placeholder.svg'; }}
                   />
                 </div>
                 {/* Book title */}

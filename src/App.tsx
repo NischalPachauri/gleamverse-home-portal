@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MusicPlayerProvider } from "@/contexts/MusicPlayerContext";
 import { MusicPlayerBar } from "@/components/MusicPlayerBar";
@@ -29,6 +29,12 @@ const TestComponent = () => (
     <p>If you can see this, the basic setup is working.</p>
   </div>
 );
+
+const RouteAwareMusicBar = () => {
+  const location = useLocation();
+  const show = location.pathname.startsWith('/book/');
+  return show ? <MusicPlayerBar /> : null;
+};
 
 const App = () => {
   return (
@@ -83,7 +89,7 @@ const App = () => {
                         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                           <Route path="*" element={<NotFound />} />
                         </Routes>
-                        <MusicPlayerBar />
+                        <RouteAwareMusicBar />
                       </div>
                     </BrowserRouter>
                   </MusicPlayerProvider>

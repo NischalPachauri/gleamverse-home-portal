@@ -8,6 +8,7 @@ import { AuthModal } from '@/components/auth/AuthModal';
 import { toast } from 'sonner';
 import { books } from "@/data/books";
 import { applyMetadata } from "@/utils/bookMetadataRegistry";
+import { getBookCover } from "@/utils/bookCoverMapping";
 import {
   Dialog,
   DialogContent,
@@ -76,15 +77,21 @@ export function EnhancedHeroSection({
 
   // Handle search results in real-time
   useEffect(() => {
-    if (searchQuery.trim().length > 0) {
-      const query = searchQuery.toLowerCase();
-      const results = books.filter(book => 
-        book.title.toLowerCase().includes(query) || 
-        book.author.toLowerCase().includes(query) ||
-        book.genre.toLowerCase().includes(query)
-      ).slice(0, 10); // Limit to 10 results for better performance
-      setSearchResults(results);
-    } else {
+    try {
+      if (searchQuery.trim().length > 0) {
+        const query = searchQuery.toLowerCase();
+        const results = books.filter(book => 
+          book.title.toLowerCase().includes(query) || 
+          book.author.toLowerCase().includes(query) ||
+          book.genre.toLowerCase().includes(query)
+        ).slice(0, 10);
+        setSearchResults(results);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (err) {
+      console.error('Search failed:', err);
+      toast.error('Search encountered an issue. Please try again.');
       setSearchResults([]);
     }
   }, [searchQuery]);
@@ -451,7 +458,7 @@ export function EnhancedHeroSection({
                       >
                         <div className="flex items-start gap-4">
                           <img 
-                            src={book.coverImage || require('@/utils/bookCoverMapping').getBookCover(b.title)} 
+                            src={book.coverImage || getBookCover(b.title)} 
                             alt={b.title}
                             className="h-20 w-14 object-cover rounded shadow-md flex-shrink-0 transition-transform duration-200 hover:scale-105"
                             onError={(e) => {

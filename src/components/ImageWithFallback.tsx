@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const ERROR_IMG_SRC =
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg==';
@@ -32,11 +32,25 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [imgSrc, setImgSrc] = useState<string>(src);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
+  const imageMetrics = (window as any).__imageMetrics || ((window as any).__imageMetrics = { success: 0, failure: 0 });
+  const coverCache = (window as any).__coverCache || ((window as any).__coverCache = new Map<string, Promise<void>>());
 
   useEffect(() => {
     setImgSrc(src);
     setIsLoading(true);
     setHasError(false);
+    if (src) {
+      const ensureLoaded = () => new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Image failed to load'));
+        img.src = src;
+        img.decoding = 'async' as any;
+      });
+      if (!coverCache.get(src)) {
+        coverCache.set(src, ensureLoaded());
+      }
+    }
   }, [src]);
 
   const handleError = () => {
@@ -44,6 +58,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
       console.warn(`Image failed to load: ${imgSrc}. Using fallback image.`);
       setImgSrc(fallbackSrc);
       setHasError(true);
+      imageMetrics.failure++;
       if (onError) onError();
     } else {
       // If even the fallback fails, use inline SVG as final fallback
@@ -55,6 +70,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
   const handleLoad = () => {
     setIsLoading(false);
+    imageMetrics.success++;
     if (onLoad) onLoad();
   };
 
@@ -76,6 +92,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
         onLoad={handleLoad}
         data-original-url={hasError ? src : undefined}
         loading="lazy"
+        decoding="async"
         {...rest}
       />
     </div>

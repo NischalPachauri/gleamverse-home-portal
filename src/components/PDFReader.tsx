@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useReadingProgress } from '@/hooks/useReadingProgress';
 const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download, Moon, Sun, Maximize, Minimize, BookmarkPlus, BookmarkCheck, Layout, Columns, Search, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,9 @@ try {
 interface PDFReaderProps {
   pdfPath: string;
   title: string;
+  author?: string;
+  bookCoverSrc?: string;
+  onBack?: () => void;
 }
 
 const extractFilename = (path: string) => {
@@ -53,7 +56,7 @@ function isDomException(error: unknown): error is DOMException {
   return error instanceof DOMException;
 }
 
-export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
+export const PDFReader = ({ pdfPath, title, author, bookCoverSrc, onBack }: PDFReaderProps) => {
   // Normalize PDF path to handle renamed files
   const normalizedPdfPath = pdfPath.replace(/\s+/g, ' ').trim();
   console.log('PDFReader initialized with:', { pdfPath: normalizedPdfPath, title });
@@ -120,8 +123,16 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   // Remove page turning state to avoid flicker
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  // Page transition states
-  const [pageTransitioning, setPageTransitioning] = useState<boolean>(false);
+  const [isRendering, setIsRendering] = useState<boolean>(false);
+  
+  // Performance monitoring
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    pageLoadTime: 0,
+    renderTime: 0,
+    cacheHitRate: 0,
+    totalPagesCached: 0,
+    memoryUsage: 0
+  });
   // Magnifier functionality
   const [magnifierActive, setMagnifierActive] = useState<boolean>(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
@@ -158,8 +169,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
   const [cachedPages, setCachedPages] = useState<Record<number, boolean>>({});
   
   // Enhanced transition management
-  const [transitionDirection, setTransitionDirection] = useState<'left' | 'right' | null>(null);
-  const [isRendering, setIsRendering] = useState<boolean>(false);
+  
   
   // Music controls moved to global persistent player
 
@@ -291,27 +301,18 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
     });
   }, [numPages, twoPageMode]);
 
-  const goToPrevPage = () => {
-    if (pageNumber <= 1 || isRendering) return;
+  // Enhanced direct page navigation with smooth transitions and performance monitoring
+  const goToPage = useCallback((targetPage: number) => {
+    if (targetPage < 1 || targetPage > numPages) return;
     
-    // Set transitioning state
-    setPageTransitioning(true);
-    setTransitionDirection('left');
+    const startTime = performance.now();
     setIsRendering(true);
     
-    // Calculate the new page number
-    const newPageNumber = twoPageMode 
-      ? Math.max(pageNumber - 2, 1) 
-      : Math.max(pageNumber - 1, 1);
-    
-    // Normalize for two-page mode
-    const normalizedPage = twoPageMode && newPageNumber % 2 === 0 
-      ? newPageNumber - 1 
-      : newPageNumber;
-    
-    // Apply the page change with optimized timing
-    setTimeout(() => {
+    // Add smooth transition effect
+    requestAnimationFrame(() => {
+      const normalizedPage = twoPageMode && targetPage % 2 === 0 ? targetPage - 1 : targetPage;
       setPageNumber(normalizedPage);
+      
       if (id) {
         updateProgress(id, normalizedPage, numPages);
         if (!bookmarkedBooks.includes(id)) addBookmark(id);
@@ -321,56 +322,40 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           if (bookmarkStatuses[id] !== 'Reading') updateBookmarkStatus(id, 'Reading');
         }
       }
-      // Preload adjacent pages for smoother future transitions
+      
+      // Preload adjacent pages for seamless navigation
       preloadAdjacentPages(normalizedPage);
-      // End transition effect after rendering completes
+      
+      // End rendering state after transition and update metrics
       setTimeout(() => {
-        setPageTransitioning(false);
-        setTransitionDirection(null);
         setIsRendering(false);
-      }, 200);
-    }, 50);
+        const endTime = performance.now();
+        const loadTime = endTime - startTime;
+        
+        setPerformanceMetrics(prev => ({
+          ...prev,
+          pageLoadTime: loadTime,
+          totalPagesCached: Object.keys(cachedPages).length
+        }));
+        
+        // Log performance for monitoring
+        if (loadTime > 500) {
+          console.warn(`Page ${normalizedPage} load time exceeded 500ms: ${loadTime}ms`);
+        }
+      }, 150);
+    });
+  }, [numPages, twoPageMode, id, updateProgress, bookmarkedBooks, addBookmark, bookmarkStatuses, updateBookmarkStatus, preloadAdjacentPages, cachedPages]);
+
+  const goToPrevPage = () => {
+    if (pageNumber <= 1) return;
+    const newPageNumber = twoPageMode ? Math.max(pageNumber - 2, 1) : Math.max(pageNumber - 1, 1);
+    goToPage(newPageNumber);
   };
 
   const goToNextPage = () => {
-    if (pageNumber >= numPages || isRendering) return;
-    
-    // Set transitioning state
-    setPageTransitioning(true);
-    setTransitionDirection('right');
-    setIsRendering(true);
-    
-    // Calculate the new page number
-    const newPageNumber = twoPageMode 
-      ? Math.min(pageNumber + 2, numPages) 
-      : Math.min(pageNumber + 1, numPages);
-    
-    // Normalize for two-page mode
-    const normalizedPage = twoPageMode && newPageNumber % 2 === 0 
-      ? newPageNumber - 1 
-      : newPageNumber;
-    
-    // Apply the page change with optimized timing
-    setTimeout(() => {
-      setPageNumber(normalizedPage);
-      if (id) {
-        updateProgress(id, normalizedPage, numPages);
-        if (!bookmarkedBooks.includes(id)) addBookmark(id);
-        if (normalizedPage >= numPages) {
-          if (bookmarkStatuses[id] !== 'Completed') updateBookmarkStatus(id, 'Completed');
-        } else if (normalizedPage > 1) {
-          if (bookmarkStatuses[id] !== 'Reading') updateBookmarkStatus(id, 'Reading');
-        }
-      }
-      // Preload adjacent pages for smoother future transitions
-      preloadAdjacentPages(normalizedPage);
-      // End transition effect after rendering completes
-      setTimeout(() => {
-        setPageTransitioning(false);
-        setTransitionDirection(null);
-        setIsRendering(false);
-      }, 200);
-    }, 50);
+    if (pageNumber >= numPages) return;
+    const newPageNumber = twoPageMode ? Math.min(pageNumber + 2, numPages) : Math.min(pageNumber + 1, numPages);
+    goToPage(newPageNumber);
   };
 
   const zoomIn = () => setScale((prev) => Math.min(prev + 0.2, 2.0));
@@ -554,6 +539,22 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         onMouseEnter={() => isFullscreen && showControlsTemporarily()}
         onMouseMove={() => isFullscreen && showControlsTemporarily()}
       >
+        <div className="flex items-center gap-3 flex-1 min-w-[220px]">
+          {onBack && (
+            <Button variant="ghost" size="sm" onClick={onBack} aria-label="Back to Library">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Library
+            </Button>
+          )}
+          {bookCoverSrc && (
+            <img src={bookCoverSrc} alt={title} className="h-10 w-8 rounded shadow-md" />
+          )}
+          <div className="truncate">
+            <div className="text-sm font-semibold truncate">{title}</div>
+            {author && <div className="text-xs text-muted-foreground truncate">{author}</div>}
+          </div>
+        </div>
+
         <div className="flex items-center gap-2">
           <Button
             onClick={goToPrevPage}
@@ -578,32 +579,48 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
           </Button>
           <div className="flex items-center gap-2 ml-4">
             <span className="text-sm font-medium">Go to:</span>
-            <input
-              type="text"
-              min="1"
-              max={numPages}
-              value={pageNumber}
-              onChange={(e) => {
-                const value = e.target.value;
-                // Allow empty string for backspace support
-                if (value === '') {
-                  return;
-                }
-                const page = parseInt(value);
-                if (!isNaN(page) && page >= 1 && page <= numPages) {
-                  setPageNumber(page);
-                }
-              }}
-              onKeyDown={(e) => {
-                // Allow backspace to work normally
-                if (e.key === 'Backspace') {
-                  e.stopPropagation();
-                }
-              }}
-              className="w-16 px-2 py-1 text-sm border border-border rounded bg-background text-foreground"
-              placeholder="Page"
-            />
+            <div className="flex items-center gap-1">
+              <input
+                type="number"
+                min="1"
+                max={numPages}
+                value={pageNumber}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') return;
+                  const page = parseInt(value);
+                  if (!isNaN(page) && page >= 1 && page <= numPages) {
+                    goToPage(page);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const page = parseInt((e.target as HTMLInputElement).value);
+                    if (!isNaN(page) && page >= 1 && page <= numPages) {
+                      goToPage(page);
+                    }
+                  }
+                  if (e.key === 'Backspace') {
+                    e.stopPropagation();
+                  }
+                }}
+                className="w-16 px-2 py-1 text-sm border border-border rounded bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                placeholder="Page"
+              />
+              <span className="text-sm text-muted-foreground">of {numPages}</span>
+            </div>
           </div>
+          
+          {/* Performance Metrics */}
+          {performanceMetrics.pageLoadTime > 0 && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>Load: {Math.round(performanceMetrics.pageLoadTime)}ms</span>
+              {performanceMetrics.totalPagesCached > 0 && (
+                <span>• Cached: {performanceMetrics.totalPagesCached}</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2 justify-center flex-1">
@@ -664,7 +681,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         </div>
       </div>
 
-      {/* PDF Viewer - supports Single/Two-page. Duplicate text fix: text layer disabled. */}
+      {/* PDF Viewer - supports Single/Two-page. Enhanced layout with expanded bottom section. */}
       <div 
         className={`flex-1 overflow-auto transition-colors ${
           nightMode ? "bg-gray-900" : "bg-muted"
@@ -677,81 +694,134 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className={`flex flex-col items-center ${isFullscreen ? 'gap-0 fullscreen-pdf' : 'gap-1'}`}>
-          {!isFullscreen && <p className="text-sm text-muted-foreground">Where Learning Never Stops</p>}
-          <div className={isFullscreen ? 'fullscreen-pdf' : ''}>
-            <Document
-              file={normalizedPdfPath}
-              onLoadSuccess={onDocumentLoadSuccess}
-              onLoadError={onDocumentLoadError}
-              loading={
-                <div className="flex flex-col items-center justify-center p-12 gap-4">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary animate-pulse"></div>
-                  <p className="text-muted-foreground animate-pulse">Loading your book...</p>
-                  <div className="text-xs text-muted-foreground opacity-70">Optimizing for smooth reading</div>
+        <div className={`flex ${isFullscreen ? 'gap-0 fullscreen-pdf' : 'gap-4'} ${!isFullscreen ? 'items-start' : 'flex-col items-center'}`}>
+          
+          {/* Enhanced Book Cover Display - Utilizes left-side space */}
+          {!isFullscreen && (
+            <div className="flex-shrink-0 w-64 bg-card rounded-lg shadow-lg p-4 sticky top-4">
+              <div className="space-y-4">
+                <div className="aspect-[3/4] bg-gradient-to-br from-violet-500/20 to-blue-500/20 rounded-lg overflow-hidden">
+                  {bookCoverSrc && (
+                    <img 
+                      src={bookCoverSrc} 
+                      alt={title} 
+                      className="w-full h-full object-cover rounded-lg shadow-md"
+                      loading="eager"
+                      fetchpriority="high"
+                    />
+                  )}
                 </div>
-              }
-              options={optionsMemo}
-            >
-              {twoPageMode ? (
-                <div className="two-page-spread" onMouseMove={handleMouseMove}>
-                  {magnifierActive && (
-                    <div 
-                      className="magnifier" 
-                      style={{
-                        left: `${magnifierPosition.x}px`,
-                        top: `${magnifierPosition.y}px`,
-                        transform: `translate(-50%, -50%) scale(${magnifierZoom})`,
-                        pointerEvents: 'none',
-                        position: 'absolute',
-                        width: '150px',
-                        height: '150px',
-                        borderRadius: '50%',
-                        border: '2px solid #333',
-                        overflow: 'hidden',
-                        zIndex: 100,
-                        boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-                        background: 'white'
-                      }}
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm text-foreground line-clamp-2">{title}</h3>
+                  {author && <p className="text-xs text-muted-foreground">{author}</p>}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{numPages} pages</span>
+                    <span>•</span>
+                    <span>Page {pageNumber}</span>
+                  </div>
+                </div>
+                
+                {/* Quick Navigation Panel */}
+                <div className="space-y-3 pt-4 border-t border-border">
+                  <div className="text-xs font-medium text-muted-foreground">Quick Navigation</div>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={() => setPageNumber(1)}
+                      size="sm"
+                      variant="ghost"
+                      className="justify-start text-xs"
+                      disabled={pageNumber === 1}
                     >
+                      ← First Page
+                    </Button>
+                    <Button
+                      onClick={() => setPageNumber(Math.max(1, pageNumber - 10))}
+                      size="sm"
+                      variant="ghost"
+                      className="justify-start text-xs"
+                      disabled={pageNumber <= 10}
+                    >
+                      ← -10 Pages
+                    </Button>
+                    <Button
+                      onClick={() => setPageNumber(Math.min(numPages, pageNumber + 10))}
+                      size="sm"
+                      variant="ghost"
+                      className="justify-start text-xs"
+                      disabled={pageNumber >= numPages - 10}
+                    >
+                      +10 Pages →
+                    </Button>
+                    <Button
+                      onClick={() => setPageNumber(numPages)}
+                      size="sm"
+                      variant="ghost"
+                      className="justify-start text-xs"
+                      disabled={pageNumber === numPages}
+                    >
+                      Last Page →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Main PDF Content Area - Expanded to fill remaining space */}
+          <div className={`${isFullscreen ? 'w-full' : 'flex-1'} ${!isFullscreen ? 'min-w-0' : ''}`}>
+            <div className={isFullscreen ? 'fullscreen-pdf' : ''}>
+              <Document
+                file={normalizedPdfPath}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                loading={
+                  <div className="flex flex-col items-center justify-center p-12 gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary animate-pulse"></div>
+                    <p className="text-muted-foreground animate-pulse">Loading your book...</p>
+                    <div className="text-xs text-muted-foreground opacity-70">Optimizing for smooth reading</div>
+                  </div>
+                }
+                options={optionsMemo}
+              >
+                {twoPageMode ? (
+                  <div className={`two-page-spread transition-all duration-300 ease-in-out ${isRendering ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`} onMouseMove={handleMouseMove}>
+                    {magnifierActive && (
                       <div 
+                        className="magnifier" 
                         style={{
-                          transform: `translate(${-magnifierPosition.x * magnifierZoom + 75}px, ${-magnifierPosition.y * magnifierZoom + 75}px) scale(${magnifierZoom})`,
-                          width: '100%',
-                          height: '100%'
+                          left: `${magnifierPosition.x}px`,
+                          top: `${magnifierPosition.y}px`,
+                          transform: `translate(-50%, -50%) scale(${magnifierZoom})`,
+                          pointerEvents: 'none',
+                          position: 'absolute',
+                          width: '150px',
+                          height: '150px',
+                          borderRadius: '50%',
+                          border: '2px solid #333',
+                          overflow: 'hidden',
+                          zIndex: 100,
+                          boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+                          background: 'white'
                         }}
                       >
-                        {/* This is a visual representation only - actual magnification happens via CSS */}
+                        <div 
+                          style={{
+                            transform: `translate(${-magnifierPosition.x * magnifierZoom + 75}px, ${-magnifierPosition.y * magnifierZoom + 75}px) scale(${magnifierZoom})`,
+                            width: '100%',
+                            height: '100%'
+                          }}
+                        >
+                          {/* This is a visual representation only - actual magnification happens via CSS */}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <div className="pdf-page">
-                    <Page
-                      pageNumber={pageNumber}
-                      scale={scale}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={true}
-                      className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''} ${transitionDirection === 'left' ? 'slide-from-left' : transitionDirection === 'right' ? 'slide-from-right' : ''}`}
-                      onRenderSuccess={() => {
-                        setCachedPages(prev => ({...prev, [pageNumber]: true}));
-                        setIsRendering(false);
-                      }}
-                      onRenderError={(error) => {
-                        console.error('Page render error:', error);
-                        setIsRendering(false);
-                      }}
-                      loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
-                      error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
-                    />
-                  </div>
-                  {pageNumber + 1 <= numPages && (
+                    )}
                     <div className="pdf-page">
                       <Page
                         pageNumber={pageNumber}
                         scale={scale}
                         renderTextLayer={false}
-                        renderAnnotationLayer={true}
-                        className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''} ${transitionDirection === 'left' ? 'slide-from-left' : transitionDirection === 'right' ? 'slide-from-right' : ''}`}
+                        renderAnnotationLayer={false}
+                        className={`shadow-2xl ${nightMode ? "invert" : ""}`}
                         onRenderSuccess={() => {
                           setCachedPages(prev => ({...prev, [pageNumber]: true}));
                           setIsRendering(false);
@@ -764,59 +834,80 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
                         error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
                       />
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="single-page-container">
-                  <div className="pdf-page">
+                    {pageNumber + 1 <= numPages && (
+                      <div className="pdf-page">
+                        <Page
+                          pageNumber={pageNumber + 1}
+                          scale={scale}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                          className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                          onRenderSuccess={() => {
+                            setCachedPages(prev => ({...prev, [pageNumber]: true}));
+                            setIsRendering(false);
+                          }}
+                          onRenderError={(error) => {
+                            console.error('Page render error:', error);
+                            setIsRendering(false);
+                          }}
+                          loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
+                          error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className={`single-page-container transition-all duration-300 ease-in-out ${isRendering ? 'opacity-50 scale-95' : 'opacity-100 scale-100'}`}>
+                    <div className="pdf-page">
+                      <Page
+                        pageNumber={pageNumber}
+                        scale={scale}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
+                        className={`shadow-2xl ${nightMode ? "invert" : ""}`}
+                        onRenderSuccess={() => setIsRendering(false)}
+                        onRenderError={(error) => {
+                          console.error('Page render error:', error);
+                          setIsRendering(false);
+                        }}
+                        loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
+                        error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
+                      />
+                    </div>
+                  </div>
+                )}
+              </Document>
+            </div>
+
+            <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', top: 0, width: 0, height: 0, overflow: 'hidden' }}>
+              <Document file={normalizedPdfPath} options={optionsMemo}>
+                {Object.keys(cachedPages)
+                  .map((p) => parseInt(p, 10))
+                  .filter((p) => p !== pageNumber && p !== pageNumber + 1)
+                  .slice(0, 4)
+                  .map((p) => (
                     <Page
-                      pageNumber={pageNumber}
+                      key={`preload-${p}`}
+                      pageNumber={p}
                       scale={scale}
                       renderTextLayer={false}
-                      renderAnnotationLayer={true}
-                      className={`shadow-2xl ${nightMode ? "invert" : ""} ${pageTransitioning ? 'page-transitioning' : ''} ${transitionDirection === 'left' ? 'slide-from-left' : transitionDirection === 'right' ? 'slide-from-right' : ''}`}
-                      onRenderSuccess={() => setIsRendering(false)}
-                      onRenderError={(error) => {
-                        console.error('Page render error:', error);
-                        setIsRendering(false);
-                      }}
-                      loading={<div className="animate-pulse bg-muted rounded" style={{width: '100%', height: '100%', minHeight: '400px'}} />}
-                      error={<div className="flex items-center justify-center text-destructive bg-destructive/10 rounded p-4">Failed to render page</div>}
+                      renderAnnotationLayer={false}
+                      className="preload-page"
                     />
-                  </div>
-                </div>
-              )}
-            </Document>
-          </div>
-
-          <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', top: 0, width: 0, height: 0, overflow: 'hidden' }}>
-            <Document file={normalizedPdfPath} options={optionsMemo}>
-              {Object.keys(cachedPages)
-                .map((p) => parseInt(p, 10))
-                .filter((p) => p !== pageNumber && p !== pageNumber + 1)
-                .slice(0, 4)
-                .map((p) => (
-                  <Page
-                    key={`preload-${p}`}
-                    pageNumber={p}
-                    scale={scale}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    className="preload-page"
-                  />
-                ))}
-            </Document>
-          </div>
-
-          {error && (
-            <div className="flex flex-col items-center justify-center p-12 gap-4 bg-red-50 border border-red-200 rounded-lg m-4">
-              <div className="text-red-600 text-lg font-semibold">⚠️ PDF Loading Error</div>
-              <p className="text-red-700 text-center max-w-md">{error}</p>
-              <Button onClick={() => window.location.reload()} variant="outline" className="border-red-300 text-red-700 hover:bg-red-50">
-                Retry
-              </Button>
+                  ))}
+              </Document>
             </div>
-          )}
+
+            {error && (
+              <div className="flex flex-col items-center justify-center p-12 gap-4 bg-red-50 border border-red-200 rounded-lg m-4">
+                <div className="text-red-600 text-lg font-semibold">⚠️ PDF Loading Error</div>
+                <p className="text-red-700 text-center max-w-md">{error}</p>
+                <Button onClick={() => window.location.reload()} variant="outline" className="border-red-300 text-red-700 hover:bg-red-50">
+                  Retry
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -980,42 +1071,7 @@ export const PDFReader = ({ pdfPath, title }: PDFReaderProps) => {
         }
         /* Smooth transitions for fullscreen mode */
         .fullscreen-pdf,
-        .fullscreen-pdf .pdf-page,
-        .fullscreen-pdf .pdf-page canvas {
-          transition: all 0.3s ease-in-out;
-          will-change: transform, opacity;
-        }
-        /* Enhanced page transition animations */
-        .page-transitioning {
-          opacity: 0.7;
-          transform: scale(0.98);
-        }
-        .slide-from-left {
-          animation: slideFromLeft 0.3s ease-out;
-        }
-        .slide-from-right {
-          animation: slideFromRight 0.3s ease-out;
-        }
-        @keyframes slideFromLeft {
-          from {
-            opacity: 0;
-            transform: translate3d(-30px, 0, 0);
-          }
-          to {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-          }
-        }
-        @keyframes slideFromRight {
-          from {
-            opacity: 0;
-            transform: translate3d(30px, 0, 0);
-          }
-          to {
-            opacity: 1;
-            transform: translate3d(0, 0, 0);
-          }
-        }
+        
         /* Mobile-first responsive controls */
         @media (max-width: 640px) {
           .pdf-controls {

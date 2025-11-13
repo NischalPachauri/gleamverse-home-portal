@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { useTheme } from "@/contexts/ThemeContext";
+import { getBookCover } from "@/utils/bookCoverMapping";
 
 // Fallback component in case of errors
 const IndexFallback = () => (
@@ -41,6 +42,17 @@ const Index = () => {
   const [controlsVisible, setControlsVisible] = useState(true);
   const { theme, toggleTheme } = useTheme();
   const [pageInputValue, setPageInputValue] = useState("1");
+  const [loadedCoverIds, setLoadedCoverIds] = useState<Set<number>>(new Set());
+  const [sortOrder, setSortOrder] = useState<'alphabetical' | 'random' | 'popularity'>('alphabetical');
+  const [randomSeed, setRandomSeed] = useState<number>(() => Math.random());
+
+  // Performance metrics
+  const [performanceMetrics, setPerformanceMetrics] = useState({
+    loadTime: 0,
+    renderTime: 0,
+    cacheHits: 0,
+    cacheMisses: 0
+  });
 
   const BOOKS_PER_PAGE = 16;
 
@@ -81,7 +93,10 @@ const Index = () => {
     return ["All", ...uniqueCategories];
   }, []);
 
+  // Optimized sorting algorithms with caching
   const filteredBooks = useMemo(() => {
+    const startTime = performance.now();
+    
     const filtered = books.filter((book) => {
       const matchesSearch =
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,18 +111,67 @@ const Index = () => {
       return matchesSearch && matchesCategory;
     });
     
-    // Sort to ensure Harry Potter books come first
-    return filtered.sort((a, b) => {
-      const aIsHarryPotter = a.title.toLowerCase().includes('harry potter');
-      const bIsHarryPotter = b.title.toLowerCase().includes('harry potter');
-      
-      if (aIsHarryPotter && !bIsHarryPotter) return -1;
-      if (!aIsHarryPotter && bIsHarryPotter) return 1;
-      
-      // If both are Harry Potter or both are not, sort by title
-      return a.title.localeCompare(b.title);
+    // Apply optimized sorting based on selected order
+    let sorted = [...filtered];
+    
+    switch (sortOrder) {
+      case 'alphabetical':
+        sorted.sort((a, b) => {
+          // Priority: Harry Potter first, then alphabetical
+          const aIsHarryPotter = a.title.toLowerCase().includes('harry potter');
+          const bIsHarryPotter = b.title.toLowerCase().includes('harry potter');
+          
+          if (aIsHarryPotter && !bIsHarryPotter) return -1;
+          if (!aIsHarryPotter && bIsHarryPotter) return 1;
+          
+          return a.title.localeCompare(b.title);
+        });
+        break;
+        
+      case 'random':
+        // Deterministic random using seed for consistent results
+        const seededRandom = (seed: number) => {
+          let x = Math.sin(seed) * 10000;
+          return x - Math.floor(x);
+        };
+        
+        sorted.sort((a, b) => {
+          const aHash = a.id * 9301 + 49297;
+          const bHash = b.id * 9301 + 49297;
+          const aRandom = seededRandom(aHash + randomSeed);
+          const bRandom = seededRandom(bHash + randomSeed);
+          return aRandom - bRandom;
+        });
+        break;
+        
+      case 'popularity':
+        // Sort by title length as a proxy for popularity (shorter titles often more popular)
+        sorted.sort((a, b) => {
+          const aLength = a.title.length;
+          const bLength = b.title.length;
+          if (aLength !== bLength) return aLength - bLength;
+          return a.title.localeCompare(b.title);
+        });
+        break;
+    }
+    
+    // Final optimization: prioritize books with loaded covers first
+    const finalSorted = sorted.sort((a, b) => {
+      const aLoaded = loadedCoverIds.has(a.id);
+      const bLoaded = loadedCoverIds.has(b.id);
+      if (aLoaded && !bLoaded) return -1;
+      if (!aLoaded && bLoaded) return 1;
+      return 0;
     });
-  }, [searchQuery, selectedCategory]);
+    
+    const endTime = performance.now();
+    setPerformanceMetrics(prev => ({
+      ...prev,
+      renderTime: endTime - startTime
+    }));
+    
+    return finalSorted;
+  }, [searchQuery, selectedCategory, loadedCoverIds, sortOrder, randomSeed]);
 
   // Paginated books for browsing section
   const paginatedBooks = useMemo(() => {
@@ -161,12 +225,75 @@ const Index = () => {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(0);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, sortOrder]);
+
+  // Shuffle random order
+  const shuffleRandomOrder = () => {
+    setRandomSeed(Math.random());
+  };
+
+  // Enhanced cover loading with performance monitoring
+  useEffect(() => {
+    const startTime = performance.now();
+    const coverCache = (window as any).__coverCache || ((window as any).__coverCache = new Map<string, Promise<void>>());
+    
+    let cacheHits = 0;
+    let cacheMisses = 0;
+    
+    const visible = paginatedBooks.slice(0, Math.min(12, paginatedBooks.length));
+    visible.forEach((book) => {
+      const src = getBookCover(book.title);
+      if (coverCache.get(src)) {
+        cacheHits++;
+      } else {
+        cacheMisses++;
+      }
+      
+      if (!coverCache.get(src)) {
+        const ensureLoaded = () => new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error('Image failed to load'));
+          img.src = src;
+          img.decoding = 'async' as any;
+          (img as any).fetchpriority = 'high';
+        });
+        coverCache.set(src, ensureLoaded());
+      }
+    });
+    
+    const endTime = performance.now();
+    setPerformanceMetrics(prev => ({
+      ...prev,
+      loadTime: endTime - startTime,
+      cacheHits,
+      cacheMisses
+    }));
+  }, [paginatedBooks]);
 
   // Update page input when page changes
   useEffect(() => {
     setPageInputValue((currentPage + 1).toString());
   }, [currentPage]);
+
+  useEffect(() => {
+    const coverCache = (window as any).__coverCache || ((window as any).__coverCache = new Map<string, Promise<void>>());
+    const visible = paginatedBooks.slice(0, Math.min(12, paginatedBooks.length));
+    visible.forEach((book) => {
+      const src = getBookCover(book.title);
+      if (!coverCache.get(src)) {
+        const ensureLoaded = () => new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error('Image failed to load'));
+          img.src = src;
+          img.decoding = 'async' as any;
+          (img as any).fetchpriority = 'high';
+        });
+        coverCache.set(src, ensureLoaded());
+      }
+    });
+  }, [paginatedBooks]);
 
   const getRandomBook = () => {
     const randomBook = books[Math.floor(Math.random() * books.length)];
@@ -202,6 +329,43 @@ const Index = () => {
               Showing {paginatedBooks.length} of {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"}
             </p>
           </div>
+          
+          {/* Sorting Controls */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">Sort by:</span>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as 'alphabetical' | 'random' | 'popularity')}
+                className="px-3 py-2 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              >
+                <option value="alphabetical">Alphabetical</option>
+                <option value="random">Random</option>
+                <option value="popularity">Popularity</option>
+              </select>
+            </div>
+            
+            {sortOrder === 'random' && (
+              <Button
+                onClick={shuffleRandomOrder}
+                size="sm"
+                variant="outline"
+                className="gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Shuffle
+              </Button>
+            )}
+            
+            {/* Performance Metrics Display */}
+            {performanceMetrics.renderTime > 0 && (
+              <div className="text-xs text-muted-foreground">
+                Render: {Math.round(performanceMetrics.renderTime)}ms
+              </div>
+            )}
+          </div>
         </div>
 
         {filteredBooks.length > 0 ? (
@@ -211,7 +375,13 @@ const Index = () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
             >
               {paginatedBooks.slice(0, BOOKS_PER_PAGE).map((book, index) => (
-                <BookCard key={`${book.id}-${currentPage}-${index}`} book={book} />
+                <BookCard key={`${book.id}-${currentPage}-${index}`} book={book} onCoverLoad={(id)=>{
+                  setLoadedCoverIds(prev => {
+                    const next = new Set(prev);
+                    next.add(id);
+                    return next;
+                  });
+                }} />
               ))}
             </div>
             

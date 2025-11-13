@@ -24,32 +24,14 @@ const BookDetail = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Library
-            </Button>
-          </Link>
-          <div className="flex items-center gap-4 flex-1">
-            <img
-              src={getBookCover(book.title) || '/placeholder.svg'}
-              alt={book.title}
-              className="h-16 w-auto rounded shadow-md"
-            />
-            <div>
-              <h1 className="text-xl font-bold text-foreground">{book.title}</h1>
-              <p className="text-sm text-muted-foreground">{book.author}</p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* PDF Reader */}
       <main className="flex-1 overflow-hidden">
-        <PDFReader pdfPath={book.pdfPath} title={book.title} bookId={book.id} />
+        <PDFReader 
+          pdfPath={book.pdfPath} 
+          title={book.title} 
+          author={book.author}
+          bookCoverSrc={getBookCover(book.title) || '/placeholder.svg'}
+          onBack={() => { /* preserve Link behavior */ window.location.assign('/'); }}
+        />
       </main>
     </div>
   );
