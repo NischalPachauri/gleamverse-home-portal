@@ -127,6 +127,7 @@ export const PDFReader = ({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
   const [magnifierActive, setMagnifierActive] = useState<boolean>(false);
   const [magnifierPosition, setMagnifierPosition] = useState({ x: 0, y: 0 });
   const [magnifierZoom, setMagnifierZoom] = useState<number>(2);
+  const [isRendering, setIsRendering] = useState<boolean>(false);
   const optionsMemo = useMemo(() => ({
     cMapUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
     cMapPacked: true,

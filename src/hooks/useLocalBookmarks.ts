@@ -78,7 +78,8 @@ const useLocalBookmarks = () => {
     let updatedBookmarks: string[] = [...bookmarkedBooks];
     let updatedStatuses = { ...bookmarkStatuses };
 
-    if (bookmarkedBooks.length >= MAX_LIBRARY_CAPACITY) {
+    // Removed 5-book limit to allow unlimited bookmarks
+    if (false && bookmarkedBooks.length >= MAX_LIBRARY_CAPACITY) {
       const removalPriority: BookmarkStatusType[] = ['Completed', 'On Hold', 'Planning to Read', 'Reading'];
       let bookToRemove: string | null = null;
 

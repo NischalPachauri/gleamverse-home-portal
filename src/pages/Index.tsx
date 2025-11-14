@@ -130,10 +130,6 @@ const Index = () => {
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
-      // Scroll to top of browse section
-      requestAnimationFrame(() => {
-        document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
     }
   };
   
@@ -148,10 +144,7 @@ const Index = () => {
       const pageNumber = parseInt(pageInputValue, 10);
       if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= totalPages) {
         setCurrentPage(pageNumber - 1);
-        // Scroll to top of browse section
-        requestAnimationFrame(() => {
-          document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+        setLoadedCoverIds(new Set());
       } else {
         setPageInputValue((currentPage + 1).toString());
       }
@@ -161,10 +154,6 @@ const Index = () => {
   const handlePrevPage = () => {
     if (currentPage > 0) {
       setCurrentPage(currentPage - 1);
-      // Scroll to top of browse section
-      requestAnimationFrame(() => {
-        document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
     }
   };
 

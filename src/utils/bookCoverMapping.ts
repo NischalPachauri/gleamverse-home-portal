@@ -283,6 +283,8 @@ export const bookCoverMapping: Record<string, string> = {
   "Fundamental Theories of Physics": "/BookCoversNew/Black Hole Physics.jpg",
   "Guide to Competetive Programming": "/BookCoversNew/Allen B Tucker Computer Science and Engineering Handbook.pdf",
   "Harry Potter and the Philosophers Stone": "/BookCoversNew/harry-potter-1-philosophers-stone.png",
+  "50 Stories in English": "/BookCoversNew/50 stories in easy english.png",
+  "100 years of the best American short stories": "/BookCoversNew/100 years of best American stories.png",
   "Harry Potter and the Order of the Phoenix": "/BookCoversNew/harry-potter-5-order-of-phoenix.png",
   "Harry Potter and the Cursed Child": "/BookCoversNew/harry-potter-8-cursed-child.png",
   "Healing Depression The Mind Body Way": "/BookCoversNew/healing depression the mind body way.jpg",
@@ -439,9 +441,18 @@ export const bookCoverMapping: Record<string, string> = {
 };
 
 export function getBookCover(title: string): string {
+  const DEFAULT = "/BookCoversNew/default-book-cover.png";
+  const sanitize = (path: string | undefined): string => {
+    if (!path || typeof path !== 'string') return DEFAULT;
+    const lower = path.toLowerCase();
+    const validExt = lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.png');
+    const inDir = lower.startsWith('/bookcoversnew/');
+    if (!validExt || !inDir) return DEFAULT;
+    return path;
+  };
   // Try exact match first
   if (bookCoverMapping[title]) {
-    return bookCoverMapping[title];
+    return sanitize(bookCoverMapping[title]);
   }
   
   // Try case-insensitive match
@@ -450,7 +461,7 @@ export function getBookCover(title: string): string {
     key => key.toLowerCase() === lowerTitle
   );
   if (caseInsensitiveMatch) {
-    return bookCoverMapping[caseInsensitiveMatch];
+    return sanitize(bookCoverMapping[caseInsensitiveMatch]);
   }
   
   // Try partial match (first 50 characters)
@@ -458,9 +469,9 @@ export function getBookCover(title: string): string {
     key => title.includes(key) || key.includes(title)
   );
   if (partialMatch) {
-    return bookCoverMapping[partialMatch];
+    return sanitize(bookCoverMapping[partialMatch]);
   }
   
   // Return default cover if no match found
-  return "/BookCoversNew/default-book-cover.png";
+  return DEFAULT;
 }
