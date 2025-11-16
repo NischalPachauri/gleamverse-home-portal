@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import supabase from '@/integrations/supabase/client';
-import { useReadingHistory } from './useReadingHistory';
+import { useUserHistory } from './useUserHistory';
 
 export interface StreakData {
   currentStreak: number;
@@ -17,7 +17,7 @@ export function useReadingStreak() {
   });
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { history } = useReadingHistory();
+  const { history } = useUserHistory();
 
   // Helper to check if two dates are the same day
   const isSameDay = useCallback((date1: Date, date2: Date): boolean => {

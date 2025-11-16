@@ -21,8 +21,8 @@ export function TrendingBooks() {
     bgColor: getGradientColor(index)
   }));
 
-  // Duplicate books for seamless infinite scroll
-  const duplicatedBooks = [...trendingBooks, ...trendingBooks];
+  // Duplicate books for seamless infinite scroll (tripled to remove any perceived gaps)
+  const duplicatedBooks = [...trendingBooks, ...trendingBooks, ...trendingBooks];
 
   function getGradientColor(index: number): string {
     const gradients = [
@@ -56,8 +56,8 @@ export function TrendingBooks() {
         🔥 Hot Reads Right Now
       </h2>
       
-      {/* Infinite Scroll Container with 15% margins */}
-      <div className="relative overflow-hidden mx-[10%] md:mx-[15%]">
+      {/* Infinite Scroll Container with adaptive margins */}
+      <div className="relative overflow-hidden mx-[8%] md:mx-[12%]">
         {/* Scrolling Books */}
         <div className="flex gap-4 md:gap-5 animate-scroll-seamless">
           {duplicatedBooks.map((book, index) => (
@@ -108,9 +108,11 @@ export function TrendingBooks() {
         }
 
         .animate-scroll-seamless {
-          animation: scroll-seamless 40s linear infinite;
-          width: calc(200% + 2.5rem);
+          animation: scroll-seamless 36s linear infinite;
+          display: inline-flex;
+          min-width: max-content;
           will-change: transform;
+          contain: content;
         }
 
         .animate-scroll-seamless:hover {
@@ -136,6 +138,8 @@ export function TrendingBooks() {
             border-radius: 0.5rem;
           }
         }
+        /* Error-safe image overlay */
+        .animate-scroll-seamless img { image-rendering: auto; }
       `}</style>
     </div>
   );

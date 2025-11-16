@@ -1,6 +1,6 @@
 import React from 'react';
 import { BookMarked, BookOpen, Clock, CheckCircle2 } from 'lucide-react';
-import { BookmarkStatusType } from '@/hooks/useLocalBookmarks';
+import { BookmarkStatusType } from '@/hooks/useBookmarks';
 
 interface ReadingStatusBadgeProps {
   status: BookmarkStatusType | undefined;

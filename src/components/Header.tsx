@@ -17,7 +17,7 @@ import { SearchBar } from '@/components/SearchBar';
 import { TestProfileIcon } from '@/components/TestProfileIcon';
 import { 
   User, LogOut, BookMarked, Settings, 
-  Moon, Sun, Menu, X, LogIn, UserPlus, History, Activity
+  Menu, X, LogIn, UserPlus, History, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AuthModal } from '@/components/auth/AuthModal';
@@ -25,7 +25,7 @@ import PerformanceDashboard from '@/components/PerformanceDashboard';
 
 export function Header() {
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const { user, signOut, isAuthenticated } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
@@ -185,20 +185,7 @@ export function Header() {
                 </Link>
               )}
               
-              {/* Theme Toggle */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="h-9 w-9 text-white hover:bg-white/20"
-              >
-                {theme === "light" ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
-                <span className="sr-only">Toggle theme</span>
-              </Button>
+              
               
               {/* Performance Dashboard Toggle */}
               <Button
@@ -297,28 +284,7 @@ export function Header() {
                 </>
               )}
               
-              <div className="pt-3 border-t">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start"
-                  onClick={() => {
-                    toggleTheme();
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  {theme === "light" ? (
-                    <>
-                      <Moon className="mr-2 h-4 w-4" />
-                      Dark mode
-                    </>
-                  ) : (
-                    <>
-                      <Sun className="mr-2 h-4 w-4" />
-                      Light mode
-                    </>
-                  )}
-                </Button>
-              </div>
+              
             </div>
           </div>
         )}

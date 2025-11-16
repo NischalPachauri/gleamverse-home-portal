@@ -210,9 +210,9 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     >
                       <div className="flex items-start gap-3">
                         <img
-                          src={getBookCover(b.title)}
+                          src={getBookCover(b.title) || `/book-covers/${b.pdfPath.split('/').pop()?.replace('.pdf', '.svg')}`}
                           alt={b.title}
-                          className="h-16 w-12 object-cover rounded shadow-md transition-transform duration-200 hover:scale-105"
+                          className="h-16 w-12 object-cover rounded shadow-md transition-transform duration-200 hover:scale-105 bg-white"
                           onError={(e) => {
                             e.currentTarget.src = '/placeholder.svg';
                           }}

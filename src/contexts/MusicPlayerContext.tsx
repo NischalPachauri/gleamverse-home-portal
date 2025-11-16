@@ -15,6 +15,7 @@ interface MusicPlayerContextValue {
   toggle: () => void;
   setVolume: (v: number) => void;
   setTrack: (index: number) => void;
+  playTrack: (index: number) => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextValue | null>(null);
@@ -121,6 +122,15 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setCurrentTrack(i);
   };
 
+  const playTrack = (index: number) => {
+    const i = Math.max(0, Math.min(tracks.length - 1, index));
+    setCurrentTrack(i);
+    if (!audioRef.current) return;
+    audioRef.current.src = tracks[i]?.url;
+    try { audioRef.current.load(); } catch {}
+    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+  };
+
   const value: MusicPlayerContextValue = {
     tracks,
     isPlaying,
@@ -131,6 +141,7 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     toggle,
     setVolume,
     setTrack,
+    playTrack,
   };
 
   return <MusicPlayerContext.Provider value={value}>{children}</MusicPlayerContext.Provider>;

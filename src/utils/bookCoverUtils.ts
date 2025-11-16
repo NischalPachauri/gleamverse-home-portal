@@ -13,38 +13,48 @@ const getAcronym = (str: string) =>
     .map(word => word[0])
     .join('');
 
-const jaccardSimilarity = (a: string, b: string) => {
-  const aTokens = new Set(a.split(' '));
-  const bTokens = new Set(b.split(' '));
+// Precompute tokens to avoid repeated splitting in hot paths
+const jaccardSimilarity = (aTokens: Set<string>, bTokens: Set<string>) => {
   const intersection = new Set([...aTokens].filter(token => bTokens.has(token)));
-  const union = new Set([...aTokens, ...bTokens]);
-  return intersection.size / union.size;
+  const unionSize = aTokens.size + bTokens.size - intersection.size;
+  return unionSize ? intersection.size / unionSize : 0;
 };
+
+type PreprocessedEntry = { key: string; normalized: string; acronym: string; tokens: Set<string>; cover: string };
+const preprocessed: PreprocessedEntry[] = Object.entries(bookCoverMapping).map(([key, cover]) => {
+  const normalized = normalize(key);
+  const tokens = new Set(normalized.split(' ').filter(Boolean));
+  const acronym = getAcronym(normalized);
+  return { key, normalized, tokens, acronym, cover };
+});
+const exactMap = new Map(preprocessed.map(e => [e.normalized, e.cover]));
 
 export const findBestMatch = (title: string) => {
   const normalizedTitle = normalize(title);
+  const titleTokens = new Set(normalizedTitle.split(' ').filter(Boolean));
   const titleAcronym = getAcronym(normalizedTitle);
 
   let bestMatch = { score: 0, cover: '' };
 
-  for (const [key, cover] of Object.entries(bookCoverMapping)) {
-    const normalizedKey = normalize(key);
-    const keyAcronym = getAcronym(normalizedKey);
+  // Prefer exact match first to avoid acronym collisions
+  const exact = exactMap.get(normalizedTitle);
+  if (exact) return exact;
+
+  for (const entry of preprocessed) {
 
     // Exact match
-    if (normalizedTitle === normalizedKey) {
-      return cover;
-    }
+    // Exact matched above using map
 
     // Acronym match
-    if (titleAcronym.length > 1 && titleAcronym === keyAcronym) {
-      return cover;
+    if (titleAcronym.length > 1 && titleAcronym === entry.acronym) {
+      bestMatch = { score: 1, cover: entry.cover };
+      continue;
     }
 
     // Jaccard similarity
-    const score = jaccardSimilarity(normalizedTitle, normalizedKey);
+    const score = jaccardSimilarity(titleTokens, entry.tokens);
     if (score > bestMatch.score) {
-      bestMatch = { score, cover };
+      bestMatch = { score, cover: entry.cover };
     }
   }
 

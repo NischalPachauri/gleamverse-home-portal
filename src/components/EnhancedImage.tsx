@@ -72,9 +72,17 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
   };
 
   const handleError = () => {
-    console.warn(`Image failed to load: ${imgSrc}. Using fallback image.`);
-    const fallback = '/BookCoversNew/default-book-cover.png';
-    if (imgSrc !== fallback) {
+    const fallback = '/placeholder.svg';
+    const maxRetries = 2;
+    const retries = (window as any).__imgRetries?.[imgSrc || ''] ?? 0;
+    if (imgSrc && retries < maxRetries) {
+      (window as any).__imgRetries = { ...(window as any).__imgRetries, [imgSrc]: retries + 1 };
+      setTimeout(() => {
+        setIsLoading(true);
+        setHasError(false);
+        setImgSrc(imgSrc);
+      }, 300 * Math.pow(2, retries));
+    } else if (imgSrc !== fallback) {
       setImgSrc(fallback);
     }
     setHasError(true);

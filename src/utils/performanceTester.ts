@@ -196,11 +196,14 @@ export class PerformanceTester {
         })
       );
 
-      const successfulRequests = networkResults.filter(r => r.status === 'fulfilled' && (r as any).value.success).length;
-      const failedRequests = networkResults.filter(r => r.status === 'rejected' || !(r as any).value.success).length;
-      const avgResponseTime = networkResults
-        .filter(r => r.status === 'fulfilled')
-        .reduce((acc, r) => acc + (r as any).value.duration, 0) / networkResults.length;
+      // Use only fulfilled requests to compute accurate average latency
+      const fulfilled = networkResults.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<any>[];
+      const successfulRequests = fulfilled.filter(r => (r as any).value.success).length;
+      const failedRequests = networkResults.filter(r => r.status === 'rejected' || (r as any).value?.success === false).length;
+      // Avoid dividing by total when some promises are rejected
+      const avgResponseTime = fulfilled.length
+        ? fulfilled.reduce((acc, r) => acc + (r as any).value.duration, 0) / fulfilled.length
+        : 0;
 
       if (failedRequests > 0) {
         throw new Error(`${failedRequests} network requests failed out of ${testUrls.length}`);
@@ -228,7 +231,8 @@ export class PerformanceTester {
     const total = this.results.length;
     const passed = this.results.filter(r => r.passed).length;
     const failed = this.results.filter(r => !r.passed).length;
-    const avgDuration = this.results.reduce((acc, r) => acc + r.duration, 0) / total;
+    // Guard against division by zero when no tests have run
+    const avgDuration = total ? this.results.reduce((acc, r) => acc + r.duration, 0) / total : 0;
 
     return { total, passed, failed, avgDuration: Math.round(avgDuration) };
   }

@@ -28,6 +28,7 @@ export const usePerformanceMonitor = (componentName: string) => {
   const renderStartTimeRef = useRef<number>(performance.now());
   const errorCountRef = useRef<number>(0);
   const networkCountRef = useRef<number>(0);
+  const fpsRef = useRef<number>(0);
 
   useEffect(() => {
     // Monitor component mount time
@@ -37,24 +38,27 @@ export const usePerformanceMonitor = (componentName: string) => {
     const memoryUsage = (performance as any).memory ? 
       Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024) : undefined;
 
-    // Monitor FPS
-    let fpsCount = 0;
-    let lastTime = performance.now();
-    const fpsInterval = setInterval(() => {
-      const currentTime = performance.now();
-      const deltaTime = currentTime - lastTime;
-      if (deltaTime > 0) {
-        fpsCount = Math.round(1000 / deltaTime);
+    // Optimize FPS measurement: use rAF to count frames per second
+    let frames = 0;
+    let lastTick = performance.now();
+    let rafId = 0;
+    const loop = (ts: number) => {
+      frames++;
+      if (ts - lastTick >= 1000) {
+        fpsRef.current = frames;
+        frames = 0;
+        lastTick = ts;
       }
-      lastTime = currentTime;
-    }, 1000);
+      rafId = requestAnimationFrame(loop);
+    };
+    rafId = requestAnimationFrame(loop);
 
     // Monitor network requests
     const originalFetch = window.fetch;
     window.fetch = async (...args) => {
-      networkCountRef.current++;
       try {
         const response = await originalFetch(...args);
+        networkCountRef.current++;
         return response;
       } catch (error) {
         errorCountRef.current++;
@@ -71,7 +75,7 @@ export const usePerformanceMonitor = (componentName: string) => {
     window.addEventListener('unhandledrejection', handleError);
 
     return () => {
-      clearInterval(fpsInterval);
+      cancelAnimationFrame(rafId);
       window.fetch = originalFetch;
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleError);
@@ -88,6 +92,7 @@ export const usePerformanceMonitor = (componentName: string) => {
       renderTime,
       memoryUsage: (performance as any).memory ? 
         Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024) : undefined,
+      fps: fpsRef.current || undefined,
       networkRequests: networkCountRef.current,
       errorCount: errorCountRef.current
     });

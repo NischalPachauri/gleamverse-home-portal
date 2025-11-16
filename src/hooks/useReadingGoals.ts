@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import supabase from '@/integrations/supabase/client';
-import { useLocalBookmarks } from './useLocalBookmarks';
+import { useBookmarks } from './useBookmarks';
 
 export interface ReadingGoal {
   id: string;
@@ -19,7 +19,7 @@ export function useReadingGoals() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { bookmarkStatuses } = useLocalBookmarks();
+  const { bookmarkStatuses } = useBookmarks();
 
   // Load reading goals from local storage or database
   const loadGoals = useCallback(async () => {
@@ -73,31 +73,37 @@ export function useReadingGoals() {
     if (!user) return false;
 
     try {
-      // Generate a UUID-like string for the ID if not provided
-      const newId = goal.id || (crypto.randomUUID ? crypto.randomUUID() : `goal-${Date.now()}`);
-      
-      const newGoal = {
-        ...goal,
-        id: newId,
+      if (!goal.title || goal.title.trim().length === 0) {
+        setError('Title is required');
+        return false;
+      }
+      if (goal.target_books !== undefined && Number(goal.target_books) < 1) {
+        setError('Target books must be at least 1');
+        return false;
+      }
+      const insertPayload = {
         user_id: user.id,
-        completed_books: goal.completed_books || 0,
-        book_ids: goal.book_ids || [], // Ensure book_ids is defined
-        created_at: goal.created_at || new Date().toISOString(),
+        title: goal.title,
+        description: goal.description ?? null,
+        target_books: Number(goal.target_books ?? 1),
+        completed_books: Number(goal.completed_books ?? 0),
+        book_ids: goal.book_ids ?? [],
+        deadline: goal.deadline ?? null,
       };
 
-      // Save to database
       const { data, error } = await supabase
         .from('reading_goals')
-        .insert([newGoal])
+        .insert([insertPayload])
         .select();
 
       if (error) {
         console.error('Supabase error creating goal:', error);
-        throw error;
+        setError(error.message || 'Failed to create goal');
+        return false;
       }
 
       // Use the returned data from Supabase if available
-      const savedGoal = data && data.length > 0 ? data[0] : newGoal;
+      const savedGoal = data && data.length > 0 ? data[0] : { ...insertPayload, id: goal.id || '', created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as any;
       
       // Update local state
       setGoals(prev => [savedGoal, ...prev]);
@@ -112,6 +118,7 @@ export function useReadingGoals() {
       return true;
     } catch (error) {
       console.error('Error creating reading goal:', error);
+      setError((error as Error).message || 'Failed to create goal');
       return false;
     }
   };

@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { books as bookList } from '@/data/books';
 import { PDFReader } from '@/components/PDFReader';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { getBookCover } from '@/utils/bookCoverMapping';
 
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const book = bookList.find((b) => b.id === id);
 
   if (!book) {
@@ -30,7 +31,7 @@ const BookDetail = () => {
           title={book.title} 
           author={book.author}
           bookCoverSrc={getBookCover(book.title) || '/placeholder.svg'}
-          onBack={() => { /* preserve Link behavior */ window.location.assign('/'); }}
+          onBack={() => { navigate('/'); }}
         />
       </main>
     </div>

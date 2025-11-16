@@ -1,57 +1,16 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { createClient } from '@supabase/supabase-js';
 import { User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
-// Primary API configuration
-const primarySupabaseUrl = 'https://elddklyslvhrgmrasuay.supabase.co';
-const primarySupabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsZGRrbHlzbHZocmdtcmFzdWF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEzMjQ1NzksImV4cCI6MjA3NjkwMDU3OX0.03Bn1B5U4k7EMvMU22wzanAZ4j3S3kW3Xn47vNIlM1Y';
-
-// Fallback API configuration for key rotation scenarios
-const fallbackSupabaseKey = localStorage.getItem('supabase_fallback_key') || primarySupabaseKey;
-
-// Function to handle key rotation
-const rotateApiKey = (newKey: string) => {
-  try {
-    localStorage.setItem('supabase_fallback_key', newKey);
-    console.log('API key rotated successfully');
-    return true;
-  } catch (error) {
-    console.error('Failed to rotate API key:', error);
-    return false;
-  }
-};
-
-// Validate API key format before initialization
-if (!primarySupabaseKey || primarySupabaseKey.trim() === '') {
-  console.error('Supabase API key is missing or invalid');
-}
-
-// Create Supabase client with enhanced configuration
-const supabase = createClient(primarySupabaseUrl, primarySupabaseKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'x-client-info': 'gleamverse-home-portal'
-    }
-  }
-});
+// Use centralized Supabase client configured via environment variables
 
 interface SupabaseError extends Error {
   error_description?: string;
   status?: number;
 }
 
-// Export key rotation function for use in error recovery
-export const refreshApiKey = () => {
-  // In a real implementation, this would fetch a new key from a secure source
-  // For this demo, we'll just use the fallback key
-  return rotateApiKey(fallbackSupabaseKey);
-};
+// Key rotation is not managed client-side; use environment config
 
 interface AuthContextType {
   user: User | null;
@@ -107,9 +66,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, fullName: string) => {
     setLoading(true);
     try {
-      // Log authentication attempt for debugging
-      console.log(`Attempting sign up for email: ${email} with API key present: ${!!primarySupabaseKey}`);
-      
       // Validate inputs before submission
       if (!email || !password) {
         throw new Error('Email and password are required');

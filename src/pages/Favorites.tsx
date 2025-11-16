@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { books } from '@/data/books';
@@ -12,6 +12,7 @@ export default function Favorites() {
   const { isAuthenticated, user } = useAuth();
   const [favoriteBooks, setFavoriteBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
+  const [forcedVisible, setForcedVisible] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     // Load favorites from localStorage
@@ -70,7 +71,6 @@ export default function Favorites() {
             </Button>
           </Link>
           <div className="flex items-center gap-3">
-            <Heart className="w-6 h-6 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">Favorites</h1>
           </div>
         </div>
@@ -93,7 +93,42 @@ export default function Favorites() {
           ) : favoriteBooks.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {favoriteBooks.map(book => (
-                <BookCard key={book.id} book={book} />
+                <div
+                  key={book.id}
+                  className="relative group"
+                  onPointerDown={() => {
+                    const id = book.id.toString();
+                    const timer = setTimeout(() => {
+                      setForcedVisible(prev => ({ ...prev, [id]: true }));
+                    }, 500);
+                    (window as any).__favLP = { ...(window as any).__favLP, [id]: timer };
+                  }}
+                  onPointerUp={() => {
+                    const id = book.id.toString();
+                    const t = (window as any).__favLP?.[id];
+                    if (t) clearTimeout(t);
+                  }}
+                  onPointerCancel={() => {
+                    const id = book.id.toString();
+                    const t = (window as any).__favLP?.[id];
+                    if (t) clearTimeout(t);
+                  }}
+                >
+                  <BookCard book={book} hideFavoriteOverlay={true} />
+                  <button
+                    className={`absolute top-2 right-2 z-10 h-7 w-7 rounded-full bg-red-600/80 text-white text-sm leading-none flex items-center justify-center ${forcedVisible[book.id.toString()] ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-300 shadow hover:bg-red-600`}
+                    aria-label="Remove favorite"
+                    onClick={() => {
+                      const favIds = JSON.parse(localStorage.getItem('gleamverse_favorites') || '[]');
+                      const updated = favIds.filter((id: string) => id !== book.id.toString());
+                      localStorage.setItem('gleamverse_favorites', JSON.stringify(updated));
+                      setFavoriteBooks(prev => prev.filter(b => b.id !== book.id));
+                      setForcedVisible(prev => ({ ...prev, [book.id.toString()]: false }));
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
             </div>
           ) : (

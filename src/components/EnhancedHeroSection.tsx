@@ -234,8 +234,8 @@ export function EnhancedHeroSection({
                     >
                       <Avatar className="h-full w-full">
                         <AvatarImage 
-                          src={user?.user_metadata?.avatar_url || user?.photoURL || ""} 
-                          alt={user?.user_metadata?.full_name || user?.displayName || "User"} 
+                          src={user?.user_metadata?.avatar_url || ""} 
+                          alt={user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"} 
                           onError={(e) => console.log("Avatar image failed to load:", e)}
                         />
                         <AvatarFallback className={`text-lg font-medium ${theme === 'dark' ? 'bg-cyan-700 text-white' : 'bg-blue-100 text-blue-800'}`}>
@@ -248,11 +248,11 @@ export function EnhancedHeroSection({
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className={`w-56 ${theme === 'dark' ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'}`}>
+                  <DropdownMenuContent className={`w-[268px] ${theme === 'dark' ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'}`}> 
                     <div className={`p-2 ${theme === 'dark' ? 'bg-gradient-to-r from-cyan-900/50 to-blue-900/50' : 'bg-gradient-to-r from-cyan-100 to-blue-100'} rounded-t-md`}>
                       <div className="flex items-center gap-2 p-2">
                         <Avatar className="h-10 w-10 border border-white/50">
-                          <AvatarImage src={user?.user_metadata?.avatar_url || user?.photoURL || ""} alt={user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"} />
+                          <AvatarImage src={user?.user_metadata?.avatar_url || ""} alt={user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User"} />
                           <AvatarFallback className={`text-sm font-medium ${theme === 'dark' ? 'bg-cyan-700 text-white' : 'bg-blue-100 text-blue-800'}`}>
                             {user?.user_metadata?.full_name 
                               ? user.user_metadata.full_name.charAt(0).toUpperCase() 
@@ -295,7 +295,7 @@ export function EnhancedHeroSection({
                     
                     <DropdownMenuSeparator />
                     
-                    <div className="p-2 flex justify-between items-center">
+                    <div className="p-2 flex justify-end items-center">
                       <Button 
                         variant="destructive" 
                         onClick={() => signOut()}
@@ -304,15 +304,6 @@ export function EnhancedHeroSection({
                       >
                         <LogOut className="mr-2 h-3 w-3" />
                         <span>Sign out</span>
-                      </Button>
-                      
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={toggleTheme}
-                        className="rounded-full h-8 w-8"
-                      >
-                        {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
                       </Button>
                     </div>
                   </DropdownMenuContent>

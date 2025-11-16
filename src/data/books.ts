@@ -4,6 +4,8 @@ export interface Book {
   title: string;
   author: string;
   genre: string;
+  genres?: string[];
+  genreDescriptions?: Record<string, string>;
   description: string;
   coverImage?: string;
   pdfPath: string;

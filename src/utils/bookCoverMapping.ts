@@ -441,7 +441,7 @@ export const bookCoverMapping: Record<string, string> = {
 };
 
 export function getBookCover(title: string): string {
-  const DEFAULT = "/BookCoversNew/default-book-cover.png";
+  const DEFAULT = "/placeholder.svg";
   const sanitize = (path: string | undefined): string => {
     if (!path || typeof path !== 'string') return DEFAULT;
     const lower = path.toLowerCase();

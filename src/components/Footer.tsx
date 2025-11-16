@@ -6,9 +6,9 @@ export const Footer = () => {
   const { ref: footerRef, isVisible } = useScrollReveal({ threshold: 0.1 });
   
   return (
-    <footer ref={footerRef} className="border-t border-border bg-gradient-to-br from-card via-card to-primary/5 mt-24">
-      <div className={`container mx-auto px-4 py-16 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+    <footer ref={footerRef} className="border-t border-border bg-gradient-to-br from-card via-card to-primary/5 mt-16">
+      <div className={`container mx-auto px-4 py-10 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About Us */}
           <div className={`space-y-4 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <h3 className="text-2xl font-bold text-primary mb-4 flex items-center gap-2">
@@ -38,12 +38,6 @@ export const Footer = () => {
           <div className={`space-y-4 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <h3 className="text-2xl font-bold text-primary mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              <li>
-                <Link to="/" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
-                  <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  Home
-                </Link>
-              </li>
               <li>
                 <a href="#categories" onClick={(e) => { e.preventDefault(); document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
                   <Library className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -75,12 +69,7 @@ export const Footer = () => {
                   Search Bar
                 </a>
               </li>
-              <li>
-                <a href="#library" onClick={(e) => { e.preventDefault(); document.getElementById('library')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
-                  <Library className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                  Your Library
-                </a>
-              </li>
+              
               <li>
                 <Link to="/bookmarks" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors duration-300 group">
                   <Bookmark className="w-4 h-4 group-hover:scale-110 transition-transform" />

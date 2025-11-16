@@ -1,11 +1,13 @@
 import { Book } from "@/data/books";
 import { BookCard } from "@/components/BookCard";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, LucideIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, LucideIcon, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImageWithFallback } from "./ImageWithFallback";
 import { getBookCover } from "@/utils/bookCoverMapping";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface BookmarkGridProps {
   books: Book[];
@@ -32,6 +34,7 @@ export const BookmarkGrid = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageInputValue, setPageInputValue] = useState("1");
+  const { removeBookmark, updateBookmarkStatus, addBookmark, bookmarks, bookmarkStatuses } = useBookmarks();
   
   // Calculate total pages
   const totalPages = Math.max(1, Math.ceil(books.length / BOOKS_PER_PAGE));
@@ -41,6 +44,27 @@ export const BookmarkGrid = ({
     currentPage * BOOKS_PER_PAGE, 
     (currentPage + 1) * BOOKS_PER_PAGE
   );
+  const [forcedVisible, setForcedVisible] = useState<Record<string, boolean>>({});
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('gleamverse_favorites') || '[]'); } catch { return []; }
+  });
+  const toggleFavorite = (id: string) => {
+    const sid = id.toString();
+    const next = favorites.includes(sid) ? favorites.filter(x => x !== sid) : [...favorites, sid];
+    setFavorites(next);
+    try { localStorage.setItem('gleamverse_favorites', JSON.stringify(next)); } catch {}
+  };
+  const longPressTimers = useRef<Record<string, any>>({});
+
+  const handlePointerDown = (id: string) => {
+    clearTimeout(longPressTimers.current[id]);
+    longPressTimers.current[id] = setTimeout(() => {
+      setForcedVisible(prev => ({ ...prev, [id]: true }));
+    }, 500);
+  };
+  const handlePointerUp = (id: string) => {
+    clearTimeout(longPressTimers.current[id]);
+  };
 
   // Add focus when section becomes active
   useEffect(() => {
@@ -81,7 +105,7 @@ export const BookmarkGrid = ({
     <div 
       id={id} 
       ref={gridRef}
-      className={`pt-6 pb-12 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-80'}`}
+      className={`pt-2 pb-4 transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-80'}`}
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -99,7 +123,7 @@ export const BookmarkGrid = ({
       </div>
       
       {/* Books grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 px-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 px-2">
         {loading ? (
           // Loading skeletons
           Array.from({ length: 4 }).map((_, i) => (
@@ -111,8 +135,14 @@ export const BookmarkGrid = ({
         ) : currentBooks.length > 0 ? (
           // Book cards
           currentBooks.map(book => (
-            <div key={book.id} className="relative group">
-              <div className="aspect-[2/3] overflow-hidden rounded-lg shadow-lg transition-all duration-300 group-hover:shadow-xl">
+            <div
+              key={book.id}
+              className={`relative group ${forcedVisible[book.id] ? 'hover:opacity-100' : ''}`}
+              onPointerDown={() => handlePointerDown(book.id)}
+              onPointerUp={() => handlePointerUp(book.id)}
+              onPointerCancel={() => handlePointerUp(book.id)}
+            >
+              <div className="aspect-[2/3] overflow-hidden rounded-lg shadow-lg transition-all duration-300 group-hover:shadow-xl scale-90">
                 <ImageWithFallback
                   src={getBookCover(book.title) || `/book-covers/${book.pdfPath.split('/').pop()?.replace('.pdf', '.svg')}` || '/placeholder.svg'}
                   alt={`Cover of ${book.title}`}
@@ -120,12 +150,50 @@ export const BookmarkGrid = ({
                   height={300}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                   fallbackSrc="/placeholder.svg"
-                  priority={false}
+                  priority={true}
                   sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
                 />
+                {/* No progress bar in bookmarks section */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-label="Bookmark options"
+                      className={`absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-slate-900/70 text-white flex items-center justify-center transition-all duration-200 ${forcedVisible[book.id] ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:scale-110`}
+                    >
+                      <Bookmark className="h-4 w-4" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="min-w-[200px]">
+                    {(['Planning to Read','Reading','On Hold','Completed'] as const).map((status) => (
+                      <DropdownMenuItem
+                        key={status}
+                        onClick={async () => {
+                          const current = bookmarkStatuses[book.id];
+                          if (!bookmarks.includes(book.id)) {
+                            await addBookmark(book.id, status);
+                          } else if (current === status) {
+                            await removeBookmark(book.id);
+                          } else {
+                            await updateBookmarkStatus(book.id, status as any);
+                          }
+                        }}
+                        className="justify-between"
+                      >
+                        <span>{status}</span>
+                        {bookmarkStatuses[book.id] === status && <span className="text-xs opacity-60">Selected</span>}
+                      </DropdownMenuItem>
+                    ))}
+                    <div className="h-px bg-border my-1" />
+                    <DropdownMenuItem onClick={() => toggleFavorite(book.id)} className="justify-between">
+                      <span>Favorite</span>
+                      {favorites.includes(book.id.toString()) && <span className="text-xs opacity-60">Added</span>}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <div className="mt-2 text-sm font-medium truncate">{book.title}</div>
-              <div className="text-xs text-slate-400 truncate">{book.author}</div>
+              <div className="mt-1 text-sm font-medium truncate dark:text-white text-slate-900">{book.title}</div>
+              <div className="text-xs truncate dark:text-slate-400 text-slate-600">{book.author}</div>
+              <div className="text-[11px] mt-1 text-slate-500 dark:text-slate-400">{book.pages || '—'} pages</div>
             </div>
           ))
         ) : (

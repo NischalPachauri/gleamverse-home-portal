@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/button';
 import { BookMarked, BookOpen, Clock, CheckCircle2, Loader2, ArrowLeft, Filter, SortAsc, Calendar, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useLocalBookmarks } from '@/hooks/useLocalBookmarks';
+import { useBookmarks } from '@/hooks/useBookmarks';
 import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
 import { Grid, List, Plus } from 'lucide-react';
 import { Book } from '@/types/book';
 import { books } from '@/data/books';
 import { toast } from 'sonner';
 import BookmarkGrid from '@/components/BookmarkGrid';
+import { getBookCover } from '@/utils/bookCoverMapping';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useTheme } from '@/contexts/ThemeContext';
 import {
   Tooltip,
   TooltipContent,
@@ -24,15 +26,17 @@ type BookmarkSection = 'planning' | 'reading' | 'on-hold' | 'completed';
 
 export default function Bookmarks() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const { 
-    bookmarkedBooks, 
+    bookmarks: bookmarkedBooks, 
     bookmarkStatuses, 
     removeBookmark, 
     updateBookmarkStatus,
     clearAllBookmarks,
-    syncing, 
+    operationState,
     loading: bookmarksLoading 
-  } = useLocalBookmarks();
+  } = useBookmarks();
+  const syncing = operationState.status === 'loading';
   const [countLoading, setCountLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<BookmarkSection>('planning');
   
@@ -110,6 +114,20 @@ export default function Bookmarks() {
     setProcessedBooks(books);
     setCountLoading(false);
   }, [bookmarkedBooks]);
+
+  // Prefetch covers so they appear instantly when bookmarks change
+  useEffect(() => {
+    const coverLoaded: Set<string> = (window as any).__coverLoaded || ((window as any).__coverLoaded = new Set<string>());
+    processedBooks.forEach(b => {
+      const src = getBookCover(b.title);
+      if (src && !coverLoaded.has(src)) {
+        const img = new Image();
+        img.onload = () => coverLoaded.add(src);
+        img.src = src;
+        (img as any).decoding = 'async';
+      }
+    });
+  }, [processedBooks]);
   
   // Apply filtering and sorting
   useEffect(() => {
@@ -199,7 +217,7 @@ export default function Bookmarks() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 text-white">
+    <div className={`${theme === 'dark' ? 'min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 text-white' : 'min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-amber-50 text-slate-900'}`}>
       {/* Animated background gradients */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-violet-500/10 rounded-full blur-3xl animate-pulse" />
@@ -209,7 +227,7 @@ export default function Bookmarks() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header - Aligned to left */}
         <div className="-mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8">
-          <Link to="/" className="flex items-center gap-2 text-slate-300 hover:text-white transition-colors group">
+          <Link to="/" className={`flex items-center gap-2 ${theme === 'dark' ? 'text-slate-300 hover:text-white' : 'text-slate-700 hover:text-slate-900'} transition-colors group`}>
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span>Back to Library</span>
           </Link>
@@ -218,24 +236,22 @@ export default function Bookmarks() {
         {/* Title Section - Larger */}
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-3">
-            <div className="p-3 bg-gradient-to-br from-violet-500/30 to-purple-600/20 border border-violet-400/40 rounded-xl backdrop-blur-sm shadow-lg shadow-violet-500/20">
-              <BookMarked className="w-9 h-9 text-violet-300" />
+            <div className={`${theme === 'dark' ? 'p-3 bg-gradient-to-br from-violet-500/30 to-purple-600/20 border border-violet-400/40 rounded-xl backdrop-blur-sm shadow-lg shadow-violet-500/20' : 'p-3 bg-gradient-to-br from-violet-200 to-purple-200 border border-violet-300 rounded-xl backdrop-blur-sm shadow-md'}`}>
+              <BookMarked className={`w-9 h-9 ${theme === 'dark' ? 'text-violet-300' : 'text-violet-700'}`} />
             </div>
             <div className="flex-1">
-              <h1 className="text-4xl bg-gradient-to-r from-white via-violet-200 to-blue-200 bg-clip-text text-transparent mb-1">
-                Your Bookmarks
-              </h1>
-              <p className="text-slate-300">Track and organize your reading journey</p>
+              <h1 className={`text-4xl ${theme === 'dark' ? 'text-white' : 'text-slate-900'} mb-1`}>Your Bookmarks</h1>
+              <p className={`${theme === 'dark' ? 'text-slate-300' : 'text-slate-600'}`}>Track and organize your reading journey</p>
             </div>
-            
-            {/* Clear All Button */}
+          
+          {/* Clear All Button */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-10 w-10 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 hover:text-red-200 transition-all duration-300"
+                    className={`${theme === 'dark' ? 'h-10 w-10 rounded-full bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-300 hover:text-red-200' : 'h-10 w-10 rounded-full bg-red-100 hover:bg-red-200 border border-red-200 text-red-700 hover:text-red-800'} transition-all duration-300`}
                     onClick={() => {
                       if (confirm('Are you sure you want to clear all bookmarks? This action cannot be undone.')) {
                         clearAllBookmarks();
@@ -255,7 +271,7 @@ export default function Bookmarks() {
           
           {/* Syncing indicator */}
           {syncing && (
-            <div className="flex items-center gap-2 text-sm text-slate-400 mt-2">
+            <div className={`flex items-center gap-2 text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'} mt-2`}>
               <Loader2 className="w-3 h-3 animate-spin" />
               <span>Syncing your bookmarks...</span>
             </div>
@@ -265,7 +281,7 @@ export default function Bookmarks() {
         {/* Filter and sort section removed as requested */}
 
         {/* Stats Grid - Smaller boxes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
           <div 
             className={`group relative bg-gradient-to-br from-blue-500/30 to-blue-600/20 backdrop-blur-sm border border-blue-400/40 rounded-xl p-4 hover:scale-105 transition-all duration-300 hover:shadow-xl shadow-blue-500/20 cursor-pointer ${activeSection === 'planning' ? 'ring-2 ring-blue-400' : ''}`}
             onClick={() => {
@@ -281,8 +297,8 @@ export default function Bookmarks() {
                 <BookOpen className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-2xl mb-0.5 text-white">{renderBookCount(planningBooks.length)}</div>
-                <div className="text-slate-300 text-xs">Planning to read</div>
+                <div className={`text-2xl mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{renderBookCount(planningBooks.length)}</div>
+                <div className={`${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'} text-xs`}>Planning to read</div>
               </div>
             </div>
           </div>
@@ -302,8 +318,8 @@ export default function Bookmarks() {
                 <BookMarked className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-2xl mb-0.5 text-white">{renderBookCount(readingBooks.length)}</div>
-                <div className="text-slate-300 text-xs">Currently reading</div>
+                <div className={`text-2xl mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{renderBookCount(readingBooks.length)}</div>
+                <div className={`${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'} text-xs`}>Currently reading</div>
               </div>
             </div>
           </div>
@@ -323,8 +339,8 @@ export default function Bookmarks() {
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-2xl mb-0.5 text-white">{renderBookCount(onHoldBooks.length)}</div>
-                <div className="text-slate-300 text-xs">On hold</div>
+                <div className={`text-2xl mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{renderBookCount(onHoldBooks.length)}</div>
+                <div className={`${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'} text-xs`}>On hold</div>
               </div>
             </div>
           </div>
@@ -344,14 +360,14 @@ export default function Bookmarks() {
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-2xl mb-0.5 text-white">{renderBookCount(completedBooks.length)}</div>
-                <div className="text-slate-300 text-xs">Completed</div>
+                <div className={`text-2xl mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{renderBookCount(completedBooks.length)}</div>
+                <div className={`${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'} text-xs`}>Completed</div>
               </div>
             </div>
           </div>
         </div>
       
-        <div className="bookmark-sections space-y-16">
+        <div className="bookmark-sections space-y-6">
           {/* Planning to Read Section */}
           <div 
             ref={planningRef} 

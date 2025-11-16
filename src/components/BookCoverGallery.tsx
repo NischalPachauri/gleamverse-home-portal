@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Grid, List } from 'lucide-react';
+import { books } from '@/data/books';
+import { getBookCover } from '@/utils/bookCoverMapping';
+import ImageWithFallback from './ImageWithFallback';
 
 interface BookCoverGalleryProps {
   itemsPerPage?: number;
@@ -20,6 +23,12 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialViewMode);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<string>>(new Set());
+  // Build gallery from actual books for accurate covers
+  useEffect(() => {
+    const covers: Array<[string, string]> = books.map(b => [b.title, getBookCover(b.title) || '/placeholder.svg']);
+    setBookCovers(covers);
+    setFilteredCovers(covers);
+  }, []);
   
   useEffect(() => {
     // Create placeholder book covers since bookCoverMapping was removed
@@ -204,12 +213,10 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
                         </p>
                       </div>
                     ) : (
-                      <img
-                        src={path}
+                      <ImageWithFallback
+                        src={getBookCover(title) || path || '/placeholder.svg'}
                         alt={`Cover of ${title}`}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        onError={() => handleImageError(title)}
-                        loading="lazy"
                       />
                     )}
                   </div>
@@ -226,12 +233,10 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
                         <span className="text-gray-500 text-2xl">📚</span>
                       </div>
                     ) : (
-                      <img
-                        src={path}
+                      <ImageWithFallback
+                        src={getBookCover(title) || path || '/placeholder.svg'}
                         alt={`Cover of ${title}`}
                         className="w-full h-full object-cover"
-                        onError={() => handleImageError(title)}
-                        loading="lazy"
                       />
                     )}
                   </div>

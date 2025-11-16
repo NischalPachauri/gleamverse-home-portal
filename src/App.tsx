@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { MusicPlayerProvider } from "@/contexts/MusicPlayerContext";
-import { MusicPlayerBar } from "@/components/MusicPlayerBar";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import BookDetail from "./pages/BookDetail";
@@ -15,11 +14,9 @@ import { ProfileWindow } from "@/components/ProfileWindow";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import TestApp from "./TestApp";
-import { PDFTest } from "@/components/PDFTest";
 import ErrorBoundary from "./components/ErrorBoundary";
 import DonatePage from "./pages/Donate";
 import HelpPage from "./pages/Help";
-import CoverTest from "./pages/CoverTest";
 
 const queryClient = new QueryClient();
 
@@ -32,9 +29,7 @@ const TestComponent = () => (
 );
 
 const RouteAwareMusicBar = () => {
-  const location = useLocation();
-  const show = location.pathname.startsWith('/book/');
-  return show ? <MusicPlayerBar /> : null;
+  return null;
 };
 
 const App = () => {
@@ -58,8 +53,7 @@ const App = () => {
                           </ErrorBoundary>
                         } />
                         <Route path="/test" element={<TestApp />} />
-                        <Route path="/pdf-test" element={<PDFTest />} />
-                        <Route path="/cover-test" element={<CoverTest />} />
+                        
                         <Route path="/book/:id" element={<BookDetail />} />
                         <Route path="/bookmarks" element={<Bookmarks />} />
                         <Route path="/favorites" element={
@@ -67,6 +61,7 @@ const App = () => {
                             <Favorites />
                           </ErrorBoundary>
                         } />
+                        
                         <Route path="/profile" element={
                           <ErrorBoundary name="ProfilePage">
                             <ProfileWindow />

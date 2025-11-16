@@ -1,11 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { BookCard } from "@/components/BookCard";
-import { CategoryCard } from "@/components/CategoryCard";
+// Replaced native category section by enhanced design components
+import BrowseCategories from "../../Enhance Browsing Section Design/src/components/BrowseCategories";
+import ContinueReadingDesign, { ContinueReadingProps } from "../../Enhance Browsing Section Design/src/components/ContinueReading";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { TrendingBooks } from "@/components/TrendingBooks";
-import { ReadingList } from "@/components/ReadingList";
-import { HeroSection } from "@/components/HeroSection";
+import { useUserHistory } from "@/hooks/useUserHistory";
 import { EnhancedHeroSection } from "@/components/EnhancedHeroSection";
 import { books } from "@/data/books";
 import { 
@@ -43,8 +44,10 @@ const Index = () => {
   const { theme, toggleTheme } = useTheme();
   const [pageInputValue, setPageInputValue] = useState("1");
   const [loadedCoverIds, setLoadedCoverIds] = useState<Set<number>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState(false);
+  const { history, removeFromHistory } = useUserHistory();
 
-  const BOOKS_PER_PAGE = 16;
+  const BOOKS_PER_PAGE = 20;
 
   // Keep controls always visible (removed fade on scroll)
   useEffect(() => {
@@ -69,6 +72,24 @@ const Index = () => {
     { name: "Adventure", icon: TreePine },
   ];
 
+  const gradients: Record<string, string> = {
+    "All": "from-indigo-500 via-purple-500 to-pink-500",
+    "Fantasy": "from-fuchsia-500 via-purple-500 to-pink-500",
+    "Romance": "from-rose-500 via-pink-500 to-red-400",
+    "Fiction": "from-blue-500 via-indigo-500 to-purple-500",
+    "Mystery": "from-cyan-500 via-blue-500 to-indigo-500",
+    "Biography": "from-teal-500 via-cyan-500 to-blue-500",
+    "Philosophy": "from-violet-500 via-purple-500 to-indigo-500",
+    "Non-Fiction": "from-emerald-500 via-green-500 to-teal-500",
+    "Children's": "from-lime-500 via-green-500 to-emerald-500",
+    "Science": "from-sky-500 via-blue-500 to-indigo-500",
+    "History": "from-amber-500 via-yellow-500 to-orange-500",
+    "Thriller": "from-slate-500 via-gray-500 to-zinc-500",
+    "Educational": "from-green-500 via-emerald-500 to-teal-500",
+    "Business": "from-slate-500 via-gray-500 to-zinc-500",
+    "Adventure": "from-orange-500 via-amber-500 to-yellow-500",
+  };
+
   const categories = useMemo(() => {
     const allGenres = new Set<string>();
     books.forEach(book => {
@@ -84,6 +105,7 @@ const Index = () => {
   }, []);
 
   const filteredBooks = useMemo(() => {
+    const seen = new Set<number>();
     const filtered = books.filter((book) => {
       const matchesSearch =
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +117,11 @@ const Index = () => {
         book.genre === selectedCategory || 
         (book.genres && book.genres.includes(selectedCategory));
       
-      return matchesSearch && matchesCategory;
+      const ok = matchesSearch && matchesCategory;
+      if (!ok) return false;
+      if (seen.has(book.id)) return false;
+      seen.add(book.id);
+      return true;
     });
     
     // Sort to ensure Harry Potter books come first
@@ -216,20 +242,19 @@ const Index = () => {
             <h2 className="text-3xl font-bold text-foreground mb-2">
               {searchQuery ? "Search Results" : "Browse Collection"}
             </h2>
-            <p className="text-muted-foreground">
-              Showing {paginatedBooks.length} of {filteredBooks.length} {filteredBooks.length === 1 ? "book" : "books"}
-            </p>
+            <p className="sr-only">Browse available books</p>
           </div>
+          <div className="flex gap-2" />
         </div>
 
         {filteredBooks.length > 0 ? (
           <>
             <div 
               key={`page-${currentPage}`}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+              className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6"
             >
               {paginatedBooks.slice(0, BOOKS_PER_PAGE).map((book, index) => (
-                <BookCard key={`${book.id}-${currentPage}-${index}`} book={book} onCoverLoad={(id)=>{
+                <BookCard key={`${book.id}-${currentPage}-${index}`} book={book} compact onCoverLoad={(id)=>{
                   setLoadedCoverIds(prev => {
                     const next = new Set(prev);
                     next.add(id);
@@ -302,9 +327,8 @@ const Index = () => {
         )}
       </main>
 
-      {/* Browse Categories Section */}
+      {/* Enhanced Browsing Section (Design Components) */}
       <section ref={categoriesRef} id="categories" className="container mx-auto px-4 py-16 relative">
-        {/* Scroll Up Button */}
         <button 
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className={`absolute right-8 -top-6 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10 ${
@@ -318,46 +342,39 @@ const Index = () => {
             <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
-        
-        <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-          <h2 className="text-5xl font-bold text-center mb-4 text-primary">
-            Browse Categories
-          </h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-primary to-secondary mx-auto mb-12 rounded-full"></div>
-          
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-            {categoryData.map((cat, idx) => (
-              <div
-                key={cat.name}
-                className="transition-all duration-700"
-                style={{ 
-                  transitionDelay: `${idx * 50}ms`,
-                  opacity: isVisible ? 1 : 0,
-                  transform: isVisible ? 'translateY(0)' : 'translateY(20px)'
-                }}
-              >
-                <CategoryCard
-                  icon={cat.icon}
-                  title={cat.name}
-                  onClick={() => {
-                    setSelectedCategory(cat.name);
-                    // Scroll to browse section when category is selected
-                    setTimeout(() => {
-                      document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 100);
-                  }}
-                  isActive={selectedCategory === cat.name}
-                />
-              </div>
-            ))}
-          </div>
+
+        <BrowseCategories
+          onSelect={(id) => {
+            setSelectedCategory(id);
+            setTimeout(() => {
+              document.getElementById('browse')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+          }}
+          activeId={selectedCategory}
+        />
+
+        <div className="mt-16">
+          <ContinueReadingDesign
+            books={(history || [])
+              .filter(h => (h.last_read_page || 0) > 1)
+              .sort((a: any, b: any) => new Date(b.last_read_at).getTime() - new Date(a.last_read_at).getTime())
+              .slice(0, 5)
+              .map((h: any) => {
+                const b = books.find(bb => bb.id.toString() === h.book_id);
+                return {
+                  id: h.book_id,
+                  title: b?.title || 'Untitled',
+                  author: b?.author || 'Unknown Author',
+                  coverImage: getBookCover(b?.title || '') || '/placeholder.svg',
+                  gradient: 'from-indigo-500 via-purple-500 to-pink-500',
+                };
+              })}
+            onRemove={(id) => removeFromHistory(id)}
+          />
         </div>
       </section>
 
-      {/* Your Library Section */}
-      <div id="library">
-        <ReadingList />
-      </div>
+      
 
       <Footer />
     </div>

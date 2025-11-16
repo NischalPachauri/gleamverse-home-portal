@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { BookOpen, Heart, Settings, Award, Target, Calendar, MapPin, Mail, Phone, DollarSign, User, Moon, Sun, LogOut, Plus, Clock, CheckCircle2, BookPlus, Trash, MoreHorizontal, Flame, ChevronLeft, HelpCircle, FileText } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { useReadingHistory } from "../hooks/useReadingHistory";
+import { useUserHistory } from "../hooks/useUserHistory";
 import { useBookmarks } from "../hooks/useBookmarks";
 import { useReadingStreak } from "../hooks/useReadingStreak";
 import { useReadingGoals } from "../hooks/useReadingGoals";
@@ -58,7 +58,7 @@ interface ReadingGoal {
 export function ProfileWindow() {
   const { user, signOut } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const readingHistoryData = useReadingHistory();
+  const readingHistoryData = useUserHistory();
   const bookmarksData = useBookmarks();
   const streakData = useReadingStreak();
   const goalsData = useReadingGoals();
@@ -278,19 +278,17 @@ export function ProfileWindow() {
     
     setIsCreatingGoal(true);
     
-    const newGoal: ReadingGoal = {
-      id: Date.now().toString(),
+    const newGoalData = {
       title: newGoalTitle,
       target_books: newGoalTarget,
       completed_books: 0,
       book_ids: [],
       deadline: newGoalDeadline || undefined,
       description: newGoalDescription || undefined,
-      created_at: new Date().toISOString(),
     };
     
     try {
-      const success = await createGoal(newGoal);
+      const success = await createGoal(newGoalData as any);
       
       if (success) {
         // Force refresh the goals list immediately and after a delay to ensure UI updates
@@ -471,6 +469,21 @@ export function ProfileWindow() {
                     <LogOut className="h-4 w-4 mr-2" />
                     Sign Out
                   </Button>
+
+                  <Separator className={`my-6 ${theme === 'dark' ? 'bg-slate-800' : 'bg-slate-200'}`} />
+                  <div className="w-full text-left">
+                    <h3 className={`mb-3 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Reading Statistics</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className={`p-3 rounded-lg border ${theme === 'dark' ? 'border-blue-900/30 bg-slate-800/30' : 'border-blue-300/30 bg-slate-100/30'}`}>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Books Read</p>
+                        <p className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{readingHistory.length}</p>
+                      </div>
+                      <div className={`p-3 rounded-lg border ${theme === 'dark' ? 'border-purple-800/30 bg-slate-800/30' : 'border-purple-300/30 bg-slate-100/30'}`}>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Reading Time (approx)</p>
+                        <p className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{Math.floor(readingHistory.length * 1.5)}h</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -583,7 +596,7 @@ export function ProfileWindow() {
                       
                       {/* Reading Stats */}
                       <div>
-                        <h3 className={`mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Reading Statistics</h3>
+                        <h3 className={`mb-4 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Overview</h3>
                         
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className={`p-4 rounded-lg border ${theme === 'dark' 
@@ -647,7 +660,7 @@ export function ProfileWindow() {
                         {favoriteBooks.slice(0, 6).map((book) => (
                           <div 
                             key={book.id} 
-                            className={`flex items-center gap-3 p-3 rounded-lg ${theme === 'dark' 
+                            className={`group flex items-center gap-3 p-3 rounded-lg ${theme === 'dark' 
                               ? 'bg-slate-800/50 hover:bg-slate-800/80' 
                               : 'bg-slate-100/50 hover:bg-slate-100/80'} transition-colors`}
                           >
@@ -672,16 +685,36 @@ export function ProfileWindow() {
                               </p>
                             </div>
                             
-                            <Button 
-                              size="icon" 
-                              variant="ghost" 
-                              className={`h-8 w-8 ${theme === 'dark' 
-                                ? 'text-red-400 hover:text-red-300 hover:bg-red-950/30' 
-                                : 'text-red-600 hover:text-red-500 hover:bg-red-100/50'}`}
-                              onClick={() => toggleFavorite(book.id)}
-                            >
-                              <Heart className="h-4 w-4 fill-current" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <Button 
+                                size="icon" 
+                                variant="ghost" 
+                                className={`opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-8 w-8 ${theme === 'dark' 
+                                  ? 'text-red-400 hover:text-red-300 hover:bg-red-950/30' 
+                                  : 'text-red-600 hover:text-red-500 hover:bg-red-100/50'}`}
+                                onClick={() => toggleFavorite(book.id)}
+                                title="Unfavorite"
+                              >
+                                <Heart className="h-4 w-4 fill-current" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className={`opacity-0 group-hover:opacity-100 transition-opacity duration-300 h-8 w-8 ${theme === 'dark' ? 'text-red-400 hover:text-red-300 hover:bg-red-950/30' : 'text-red-600 hover:text-red-500 hover:bg-red-100/50'}`}
+                                onClick={() => {
+                                  const updated = favoriteBookIds.filter(id => id !== book.id);
+                                  localStorage.setItem('gleamverse_favorites', JSON.stringify(updated));
+                                  const favBooks = updated
+                                    .map(id => books.find(b => b.id === id))
+                                    .filter((x): x is Book => x !== undefined);
+                                  setFavoriteBooks(favBooks);
+                                  toast.success('Deleted from favorites');
+                                }}
+                                title="Delete"
+                              >
+                                ×
+                              </Button>
+                            </div>
                           </div>
                         ))}
                       </div>

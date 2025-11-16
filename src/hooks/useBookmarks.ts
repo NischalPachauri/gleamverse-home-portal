@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import supabase from '@/integrations/supabase/client';
+import { books } from '@/data/books';
+import { getBookCover } from '@/utils/bookCoverMapping';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
@@ -8,18 +10,23 @@ export interface BookmarkOperation {
   error: string | null;
 }
 
+export type BookmarkStatusType = 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed';
+
 export function useBookmarks() {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
+  const [bookmarkStatuses, setBookmarkStatuses] = useState<Record<string, BookmarkStatusType>>({});
   const [loading, setLoading] = useState(true);
   const [operationState, setOperationState] = useState<BookmarkOperation>({
     status: 'idle',
     error: null
   });
   const { user } = useAuth();
+  const [remoteEnabled, setRemoteEnabled] = useState(true);
 
   const loadBookmarks = useCallback(async () => {
     if (!user) {
       setBookmarks([]);
+      setBookmarkStatuses({});
       setLoading(false);
       return;
     }
@@ -28,111 +35,126 @@ export function useBookmarks() {
     setOperationState({ status: 'loading', error: null });
     
     try {
-      // First try to load from Supabase
       const { data, error } = await supabase
         .from('user_library')
-        .select('book_id')
-        .eq('user_id', user.id);
+        .select('metadata, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Fallback when bookmarks table is not present (PGRST205)
+        const code = (error as any)?.code;
+        if (code === 'PGRST205') {
+          setRemoteEnabled(false);
+          const { data: libData, error: libErr } = await supabase
+            .from('user_library')
+            .select('book_id')
+            .eq('user_id', user.id);
+          if (libErr) throw libErr;
+          const ids = (libData || []).map((row: any) => row.book_id);
+          setBookmarks(ids);
+          setBookmarkStatuses({});
+          setOperationState({ status: 'success', error: null });
+          return;
+        }
+        throw error;
+      }
 
-      setBookmarks(data?.map(item => item.book_id) || []);
+      const ids = (data || []).map((row: any) => row.metadata?.book_id).filter(Boolean) || [];
+      const statuses: Record<string, BookmarkStatusType> = {};
+      (data || []).forEach((row: any) => {
+        const id = row.metadata?.book_id;
+        const st = row.metadata?.status as BookmarkStatusType | undefined;
+        if (id) statuses[id] = st || 'Planning to Read';
+      });
+      setBookmarks(ids);
+      setBookmarkStatuses(statuses);
       setOperationState({ status: 'success', error: null });
+
+      // Metrics
+      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      bm.loads++;
+
+      // Skip migrations for performance
     } catch (error: unknown) {
       console.error('Error loading bookmarks from Supabase:', error);
-      
-      // Fallback to local storage if Supabase fails
-      try {
-        const localBookmarks = JSON.parse(localStorage.getItem('gleamverse_bookmarks') || '[]');
-        setBookmarks(localBookmarks);
-        setOperationState({ status: 'success', error: null });
-        
-        // Silently sync local bookmarks to Supabase in background
-        if (user && localBookmarks.length > 0) {
-          localBookmarks.forEach(async (bookId: string) => {
-            try {
-              await supabase
-                .from('user_library')
-                .upsert({
-                  user_id: user.id,
-                  book_id: bookId,
-                  current_page: 0,
-                  last_read_at: new Date().toISOString(),
-                });
-            } catch (syncError) {
-              console.error('Error syncing bookmark to Supabase:', syncError);
-            }
-          });
-        }
-      } catch (localError) {
-        console.error('Error loading bookmarks from localStorage:', localError);
-        setBookmarks([]);
-        setOperationState({ 
-          status: 'error', 
-          error: (error as Error).message || 'Failed to load your bookmarks' 
-        });
-        
-        // More user-friendly error message with retry option
-        toast.error('Failed to load your bookmarks', {
-          description: 'Please check your connection and try again',
-          action: {
-            label: 'Retry',
-            onClick: () => loadBookmarks()
-          }
-        });
-      }
+      setBookmarks([]);
+      setBookmarkStatuses({});
+      setOperationState({ 
+        status: 'error', 
+        error: (error as Error).message || 'Failed to load your bookmarks' 
+      });
+      toast.error('Failed to load your bookmarks');
     } finally {
       setLoading(false);
     }
   }, [user]);
 
-  // Set up real-time subscription for bookmark changes
+  // Light-weight real-time updates (optional)
   useEffect(() => {
     if (!user) return;
+    const table = 'user_library';
     const subscription = supabase
-      .channel('user_library_changes')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'user_library',
-        filter: `user_id=eq.${user.id}`,
-      }, (payload) => {
-        console.log('Real-time update received:', payload);
-        loadBookmarks();
-      })
+      .channel(`${table}_changes_min`)
+      .on('postgres_changes', { event: 'insert', schema: 'public', table, filter: `user_id=eq.${user.id}` }, () => loadBookmarks())
       .subscribe();
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => { subscription.unsubscribe(); };
   }, [user, loadBookmarks]);
 
-  const addBookmark = async (bookId: string) => {
+  const addBookmark = async (bookId: string, status: BookmarkStatusType = 'Planning to Read') => {
     if (!user) return false;
 
     setOperationState({ status: 'loading', error: null });
     
+    // Prefetch cover before UI updates for instant appearance
+    try {
+      const b = books.find(b => b.id === bookId);
+      const src = b ? getBookCover(b.title) : '';
+      if (src) {
+        const coverLoaded: Set<string> = (window as any).__coverLoaded || ((window as any).__coverLoaded = new Set<string>());
+        if (!coverLoaded.has(src)) {
+          const img = new Image();
+          img.onload = () => coverLoaded.add(src);
+          img.src = src;
+          (img as any).decoding = 'async';
+        }
+      }
+    } catch {}
+
     // Optimistically update UI
     setBookmarks(prev => [...prev, bookId]);
+    setBookmarkStatuses(prev => ({ ...prev, [bookId]: status }));
     
     try {
+      const t0 = performance.now();
+      const b = books.find(b => b.id === bookId);
       const { error } = await supabase
         .from('user_library')
         .insert({
           user_id: user.id,
-          book_id: bookId,
-          current_page: 0,
-          last_read_at: new Date().toISOString(),
+          url: b?.pdfPath || `/books/${bookId}.pdf`,
+          title: b?.title || bookId,
+          metadata: { book_id: bookId, status },
         });
+      // Skip queue enforcement for speed; optional async task can be added later
 
       if (error) throw error;
 
       setOperationState({ status: 'success', error: null });
+      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      bm.adds++;
+      bm.durations.push(performance.now() - t0);
       toast.success('Book added to your bookmarks');
       return true;
     } catch (error: unknown) {
       console.error('Error adding bookmark:', error);
       // Revert optimistic update
       setBookmarks(prev => prev.filter(id => id !== bookId));
+      setBookmarkStatuses(prev => {
+        const next = { ...prev };
+        delete next[bookId];
+        return next;
+      });
       setOperationState({ 
         status: 'error', 
         error: (error as Error).message || 'Failed to add bookmark' 
@@ -150,23 +172,34 @@ export function useBookmarks() {
     // Optimistically update UI
     const previousBookmarks = [...bookmarks];
     setBookmarks(prev => prev.filter(id => id !== bookId));
+    const previousStatuses = { ...bookmarkStatuses };
+    setBookmarkStatuses(prev => {
+      const next = { ...prev };
+      delete next[bookId];
+      return next;
+    });
     
     try {
+      const t0 = performance.now();
       const { error } = await supabase
         .from('user_library')
         .delete()
         .eq('user_id', user.id)
-        .eq('book_id', bookId);
+        .contains('metadata', { book_id: bookId });
 
       if (error) throw error;
 
       setOperationState({ status: 'success', error: null });
+      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      bm.removes++;
+      bm.durations.push(performance.now() - t0);
       toast.success('Book removed from your bookmarks');
       return true;
     } catch (error: unknown) {
       console.error('Error removing bookmark:', error);
       // Revert optimistic update
       setBookmarks(previousBookmarks);
+      setBookmarkStatuses(previousStatuses);
       setOperationState({ 
         status: 'error', 
         error: (error as Error).message || 'Failed to remove bookmark' 
@@ -184,17 +217,89 @@ export function useBookmarks() {
     }
   };
 
+  const updateBookmarkStatus = async (bookId: string, status: BookmarkStatusType) => {
+    if (!user) return false;
+    setOperationState({ status: 'loading', error: null });
+
+    // Optimistic update
+    const previousStatuses = { ...bookmarkStatuses };
+    setBookmarkStatuses(prev => ({ ...prev, [bookId]: status }));
+
+    try {
+      const t0 = performance.now();
+      const { error } = await supabase
+        .from('user_library')
+        .update({ metadata: { book_id: bookId, status } })
+        .eq('user_id', user.id)
+        .contains('metadata', { book_id: bookId });
+      // Skip queue enforcement for speed
+
+      if (error) throw error;
+      setOperationState({ status: 'success', error: null });
+      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      bm.updates++;
+      bm.durations.push(performance.now() - t0);
+      return true;
+    } catch (error: unknown) {
+      console.error('Error updating bookmark status:', error);
+      setBookmarkStatuses(previousStatuses);
+      setOperationState({ 
+        status: 'error', 
+        error: (error as Error).message || 'Failed to update bookmark status' 
+      });
+      toast.error('Failed to update bookmark status. Please try again.');
+      return false;
+    }
+  };
+
   useEffect(() => {
     loadBookmarks();
   }, [loadBookmarks]);
 
   return {
     bookmarks,
+    bookmarkStatuses,
     loading,
     operationState,
+    validatePlacements: () => {
+      const issues: string[] = [];
+      bookmarks.forEach(id => {
+        const st = bookmarkStatuses[id] || 'Planning to Read';
+        if (!['Planning to Read','Reading','On Hold','Completed'].includes(st)) {
+          issues.push(`Invalid status for ${id}: ${st}`);
+        }
+      });
+      if (issues.length) console.warn('[Validation]', issues);
+      return issues.length === 0;
+    },
     addBookmark,
     removeBookmark,
     toggleBookmark,
+    updateBookmarkStatus,
+    clearAllBookmarks: async () => {
+      if (!user) return false;
+      setOperationState({ status: 'loading', error: null });
+      try {
+        const { error } = await supabase
+          .from('user_library')
+          .delete()
+          .eq('user_id', user.id);
+        if (error) throw error;
+        setBookmarks([]);
+        setBookmarkStatuses({});
+        setOperationState({ status: 'success', error: null });
+        toast.success('All bookmarks have been cleared');
+        return true;
+      } catch (error: unknown) {
+        console.error('Error clearing bookmarks:', error);
+        setOperationState({ 
+          status: 'error', 
+          error: (error as Error).message || 'Failed to clear bookmarks' 
+        });
+        toast.error('Failed to clear bookmarks. Please try again.');
+        return false;
+      }
+    },
     refreshBookmarks: loadBookmarks,
   };
 }
