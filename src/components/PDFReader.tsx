@@ -1,17 +1,16 @@
 import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-const workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
-try {
-  (pdfjs as any).GlobalWorkerOptions.workerSrc = workerSrc as unknown as string;
-} catch {}
-try {
-  const wk = new Worker(new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url), { type: 'module' });
-  (pdfjs as any).GlobalWorkerOptions.workerPort = wk;
-} catch {}
+import { TurnFlipReader } from '@/components/reader/turn_flip_reader';
+import { useUserHistory } from '@/hooks/useUserHistory';
+
 import BookHeader from '@/components/reader/BookHeader';
 import ChapterMenu from '@/components/reader/ChapterMenu';
+
+try {
+  (pdfjs as unknown as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
+} catch { /* noop */ }
 
 interface BookContentProps {
   magnification: number;
@@ -22,11 +21,13 @@ interface BookContentProps {
   theme: 'light' | 'sepia' | 'dark';
   isChapterMenuOpen: boolean;
   pdfPath: string;
-  onDocumentLoadSuccess: (pdf: any) => void;
+  onDocumentLoadSuccess: (pdf: unknown) => void;
   onDocumentLoadError: (error: Error) => void;
   isFullscreen?: boolean;
   isPanMode: boolean;
   onToggleChapters: () => void;
+  fitToPage: boolean;
+  headerHeight: number;
 }
 
 export function BookContent({
@@ -43,6 +44,8 @@ export function BookContent({
   isFullscreen,
   isPanMode,
   onToggleChapters,
+  fitToPage,
+  headerHeight,
 }: BookContentProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageWidth, setPageWidth] = useState<number>(700);
@@ -55,15 +58,15 @@ export function BookContent({
   const [pageRatio, setPageRatio] = useState<number>(1.414);
 
   const pageBackground = { 
-    light: 'bg-[#fafaf7]', 
-    sepia: 'bg-[#f7f1e0]', 
-    dark: 'bg-[#12161a]' 
+    light: 'bg-white', 
+    sepia: 'bg-amber-50', 
+    dark: 'bg-slate-900' 
   } as const;
 
   const containerBg = { 
-    light: 'bg-white', 
-    sepia: 'bg-amber-50', 
-    dark: 'bg-slate-950' 
+    light: 'bg-gradient-to-b from-blue-50 to-indigo-50', 
+    sepia: 'bg-gradient-to-b from-amber-50 to-yellow-50', 
+    dark: 'bg-gradient-to-b from-slate-900 to-slate-950' 
   } as const;
 
   const textColor = {
@@ -72,34 +75,23 @@ export function BookContent({
     dark: 'text-gray-100'
   } as const;
 
-  // Calculate page width based on fit-to-screen
+  // Calculate page width: fit-to-page initially; magnification when disabled
   useEffect(() => {
-    const calculatePageSize = () => {
-      if (!containerRef.current) return;
-      const containerWidth = containerRef.current.clientWidth;
-      const containerHeight = containerRef.current.clientHeight;
-      let targetHeight = containerHeight;
-      if (pageMode === 'double') {
-        const maxHeightByWidth = (containerWidth / 2) * pageRatio;
-        targetHeight = Math.min(targetHeight, maxHeightByWidth);
-      } else {
-        const maxHeightByWidth = containerWidth * pageRatio;
-        targetHeight = Math.min(targetHeight, maxHeightByWidth);
-      }
-      const widthFromHeight = Math.max(300, Math.floor(targetHeight / pageRatio));
+    const base = 700;
+    if (fitToPage) {
+      const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
+      const containerHeight = containerRef.current?.clientHeight || window.innerHeight;
+      const height = Math.max(300, containerHeight - Math.max(0, headerHeight));
+      const widthFromHeight = Math.max(300, Math.floor(height / pageRatio));
       const cappedWidth = Math.min(widthFromHeight, pageMode === 'double' ? Math.floor(containerWidth / 2) : containerWidth);
       setPageWidth(cappedWidth);
-      setShowArrows(true);
-    };
-    calculatePageSize();
-    const resizeObserver = new ResizeObserver(calculatePageSize);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-    window.addEventListener('resize', calculatePageSize);
-    return () => {
-      window.removeEventListener('resize', calculatePageSize);
-      resizeObserver.disconnect();
-    };
-  }, [pageMode, magnification, isFullscreen, pageRatio]);
+    } else {
+      const width = Math.max(300, Math.round(base * (magnification / 100)));
+      setPageWidth(width);
+    }
+    setShowArrows(true);
+    console.debug('BookContent sizing', { fitToPage, magnification, pageMode, headerHeight, pageWidthCandidate: pageMode === 'double' ? Math.floor((containerRef.current?.clientWidth || window.innerWidth) / 2) : (containerRef.current?.clientWidth || window.innerWidth) });
+  }, [fitToPage, magnification, pageMode, pageRatio, headerHeight]);
 
   const nextPage = () => {
     const increment = pageMode === 'double' ? 2 : 1;
@@ -117,20 +109,7 @@ export function BookContent({
 
   // Enhanced pan/drag functionality
   // Fresh hand tool implementation using pointer events
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isPanMode || !containerRef.current) return;
-    e.preventDefault();
-    pointerIdRef.current = e.pointerId;
-    containerRef.current.setPointerCapture(e.pointerId);
-    isDraggingRef.current = true;
-    dragStartRef.current = {
-      x: e.clientX,
-      y: e.clientY,
-      scrollX: containerRef.current.scrollLeft,
-      scrollY: containerRef.current.scrollTop,
-    };
-    containerRef.current.style.cursor = 'grabbing';
-  };
+  const onPointerDown = (_e: React.PointerEvent<HTMLDivElement>) => {};
 
   const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDraggingRef.current || !containerRef.current || !dragStartRef.current) return;
@@ -161,43 +140,33 @@ export function BookContent({
     if (containerRef.current) {
       containerRef.current.style.cursor = '';
       if (pointerIdRef.current != null) {
-        try { containerRef.current.releasePointerCapture(pointerIdRef.current); } catch {}
+        try { containerRef.current.releasePointerCapture(pointerIdRef.current); } catch (e) { console.warn('Release pointer capture failed', e); }
       }
     }
     pointerIdRef.current = null;
   };
 
-  const onWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (!isPanMode || !containerRef.current) return;
-    // Smooth wheel panning in both axes
-    containerRef.current.scrollLeft += e.deltaX;
-    containerRef.current.scrollTop += e.deltaY;
-  };
+  const onWheel = (_e: React.WheelEvent<HTMLDivElement>) => {};
 
   return (
     <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${containerBg[theme]} overflow-hidden`} role="main" aria-label="Book content">
       <div
         ref={containerRef}
-        className={`relative w-full ${
-          isFullscreen ? 'h-[100vh]' : 'h-[calc(100vh-120px)] md:h-[calc(100vh-110px)]'
-        } flex items-center justify-center overflow-auto ${
-          isPanMode ? (isDraggingRef.current ? 'cursor-grabbing' : 'cursor-grab') : ''
-        }`}
+        className={`reader-fixed-area flex items-center justify-center no-scrollbar`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerLeave={endDrag}
         onWheel={onWheel}
-        style={{ 
-          scrollBehavior: isDraggingRef.current ? 'auto' : 'smooth',
-          userSelect: isPanMode ? 'none' : 'auto',
-          touchAction: isPanMode ? 'none' : 'auto'
-        }}
+        style={(() => {
+          const v = `${isFullscreen ? 0 : Math.max(0, headerHeight)}px`
+          return { ['--reader-header' as unknown as string]: v } as React.CSSProperties
+        })()}
       >
         {!isFullscreen && (
           <button
             onClick={onToggleChapters}
-            className={`absolute left-4 top-4 z-20 size-10 rounded-full border-2 shadow-md flex items-center justify-center transition-all ${
+            className={`absolute left-4 top-4 z-20 size-10 rounded-full border-2 flex items-center justify-center transition-all ${
               theme === 'light' ? 'bg-white/95 text-gray-900 border-blue-300 hover:bg-blue-100' :
               theme === 'sepia' ? 'bg-amber-100/95 text-amber-900 border-amber-400 hover:bg-amber-100' :
               'bg-slate-800/95 text-gray-100 border-slate-600 hover:bg-slate-700'
@@ -218,15 +187,13 @@ export function BookContent({
               size="lg" 
               onClick={prevPage} 
               disabled={currentPage === 1} 
-              className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 size-12 p-0 rounded-full transition-all ${
-                currentPage === 1 ? 'opacity-0 pointer-events-none' : 'opacity-80 hover:opacity-100 hover:scale-110'
-              } ${
-                theme === 'light' ? 'bg-white/95 text-gray-900 shadow-lg hover:shadow-xl' : 
-                theme === 'sepia' ? 'bg-amber-100/95 text-amber-900 shadow-lg hover:shadow-xl' : 
-                'bg-slate-800/95 text-gray-100 shadow-lg hover:shadow-xl'
-              }`}
+              className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 size-14 p-0 rounded-full transition-all opacity-95 ${
+                theme === 'light' ? 'bg-blue-600 text-white ring-2 ring-white/70 hover:bg-blue-700' : 
+                theme === 'sepia' ? 'bg-amber-700 text-amber-50 ring-2 ring-amber-200 hover:bg-amber-800' : 
+                'bg-indigo-600 text-white ring-2 ring-slate-200/50 hover:bg-indigo-700'
+              } disabled:opacity-50`}
             >
-              <ChevronLeft className="size-6" />
+              <ChevronLeft className="size-7" />
             </Button>
 
             <Button 
@@ -235,69 +202,35 @@ export function BookContent({
               size="lg" 
               onClick={nextPage} 
               disabled={currentPage >= totalPages} 
-              className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 size-12 p-0 rounded-full transition-all ${
-                currentPage >= totalPages ? 'opacity-0 pointer-events-none' : 'opacity-80 hover:opacity-100 hover:scale-110'
-              } ${
-                theme === 'light' ? 'bg-white/95 text-gray-900 shadow-lg hover:shadow-xl' : 
-                theme === 'sepia' ? 'bg-amber-100/95 text-amber-900 shadow-lg hover:shadow-xl' : 
-                'bg-slate-800/95 text-gray-100 shadow-lg hover:shadow-xl'
-              }`}
+              className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 size-14 p-0 rounded-full transition-all opacity-95 ${
+                theme === 'light' ? 'bg-blue-600 text-white ring-2 ring-white/70 hover:bg-blue-700' : 
+                theme === 'sepia' ? 'bg-amber-700 text-amber-50 ring-2 ring-amber-200 hover:bg-amber-800' : 
+                'bg-indigo-600 text-white ring-2 ring-slate-200/50 hover:bg-indigo-700'
+              } disabled:opacity-50`}
             >
-              <ChevronRight className="size-6" />
+              <ChevronRight className="size-7" />
             </Button>
           </>
         )}
 
         {/* Book Pages Container */}
-        <div className={`${isFullscreen ? 'gap-0 py-0 px-0' : 'gap-6 py-0 px-0'} flex ${isFullscreen ? 'items-stretch justify-between' : 'items-center justify-center'}`}>
+        <div className={`gap-0 py-0 px-0 flex ${isFullscreen ? 'items-stretch justify-between' : 'items-center justify-center'}`}>
           {pageMode === 'double' ? (
-            <>
-              {/* Left Page */}
-              <div 
-                className={`${pageBackground[theme]} ${isFullscreen ? 'rounded-none' : 'rounded-lg'} ${isFullscreen ? 'p-0' : 'p-6'} transition-all duration-300`}
-                style={{ 
-                  width: `${pageWidth}px`,
-                }}
-              >
-                <Document 
-                  file={pdfPath} 
-                  onLoadSuccess={onDocumentLoadSuccess} 
-                  onLoadError={onDocumentLoadError}
-                >
-                  <Page 
-                    pageNumber={currentPage} 
-                    width={pageWidth}
-                    onLoadSuccess={(p: any) => { try { const vp = p.getViewport({ scale: 1 }); setPageRatio(vp.height / vp.width); } catch {} }}
-                    renderTextLayer={false} 
-                    renderAnnotationLayer={false}
-                  />
-                </Document>
-              </div>
-
-              {/* Right Page */}
-              {currentPage < totalPages && (
-                <div 
-                  className={`${pageBackground[theme]} ${isFullscreen ? 'rounded-none' : 'rounded-lg'} ${isFullscreen ? 'p-0' : 'p-6'} transition-all duration-300`}
-                  style={{ 
-                    width: `${pageWidth}px`,
-                  }}
-                >
-                  <Document file={pdfPath}>
-                    <Page 
-                      pageNumber={currentPage + 1} 
-                      width={pageWidth}
-                      onLoadSuccess={(p: any) => { try { const vp = p.getViewport({ scale: 1 }); setPageRatio(vp.height / vp.width); } catch {} }}
-                      renderTextLayer={false} 
-                      renderAnnotationLayer={false}
-                    />
-                  </Document>
-                </div>
-              )}
-            </>
+            <TurnFlipReader
+              pdfPath={pdfPath}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageWidth={pageWidth}
+              theme={theme}
+              onPageChange={onPageChange}
+              isFullscreen={isFullscreen}
+              onDocumentLoadSuccess={onDocumentLoadSuccess}
+              onDocumentLoadError={onDocumentLoadError}
+            />
           ) : (
             /* Single Page */
             <div 
-              className={`${pageBackground[theme]} ${isFullscreen ? 'rounded-none' : 'rounded-lg'} ${isFullscreen ? 'p-0' : 'p-6'} transition-all duration-300`}
+              className={`${pageBackground[theme]} rounded-none p-0 transition-all duration-300`}
               style={{ 
                 width: `${pageWidth}px`,
               }}
@@ -310,7 +243,7 @@ export function BookContent({
                 <Page 
                   pageNumber={currentPage} 
                   width={pageWidth}
-                  onLoadSuccess={(p: any) => { try { const vp = p.getViewport({ scale: 1 }); setPageRatio(vp.height / vp.width); } catch {} }}
+                  onLoadSuccess={(p: { getViewport: (opts: { scale: number }) => { width: number; height: number } }) => { try { const vp = p.getViewport({ scale: 1 }); setPageRatio(vp.height / vp.width); } catch (e) { console.warn('Viewport calc failed', e); } }}
                   renderTextLayer={false} 
                   renderAnnotationLayer={false}
                 />
@@ -319,16 +252,12 @@ export function BookContent({
           )}
         </div>
 
-        {/* Pan Mode Indicator */}
-        {isPanMode && (
-          <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full ${
-            theme === 'light' ? 'bg-blue-600 text-white' :
-            theme === 'sepia' ? 'bg-amber-600 text-white' :
-            'bg-indigo-600 text-white'
-          } text-sm font-medium shadow-lg z-30 pointer-events-none`}>
-            🖐️ Pan Mode Active - Drag to move
-          </div>
-        )}
+        {/* Preload adjacent pages to warm cache and reduce transition delay */}
+        <div className="sr-only select-none" aria-hidden="true">
+          <Document file={pdfPath}><Page pageNumber={Math.max(1, currentPage - 1)} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} /></Document>
+          <Document file={pdfPath}><Page pageNumber={Math.min(totalPages, (pageMode === 'double' ? currentPage + 2 : currentPage + 1))} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} /></Document>
+        </div>
+
       </div>
     </div>
   );
@@ -342,11 +271,20 @@ interface PDFReaderProps {
   author?: string;
   bookCoverSrc?: string;
   onBack?: () => void;
+  bookId?: string;
 }
 
-export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFReaderProps) {
+type PdfDoc = {
+  _pdfInfo?: { numPages?: number };
+  numPages?: number;
+  getOutline?: () => Promise<unknown[]>;
+  getPageIndex?: (ref: unknown) => Promise<number>;
+  getDestination?: (s: string) => Promise<unknown>;
+};
+
+export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId }: PDFReaderProps) {
   const [magnification, setMagnification] = useState<number>(80);
-  const [pageMode, setPageMode] = useState<'single' | 'double'>('double');
+  const [pageMode, setPageMode] = useState<'single' | 'double'>(('' + (typeof localStorage !== 'undefined' ? localStorage.getItem('readerPageMode') : '')) === 'single' ? 'single' : 'double');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light');
@@ -356,9 +294,35 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
   const [currentChapter, setCurrentChapter] = useState<number>(0);
   const [chapters, setChapters] = useState<{ id: number; title: string; page: number }[]>([]);
   const [backgroundMusic, setBackgroundMusic] = useState<string>('none');
+  const [fitToPage, setFitToPage] = useState<boolean>(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const headerWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const { updateProgress, getProgress, history } = useUserHistory();
+  const progressDebounceRef = useRef<number | null>(null);
+  
+  const setPageSafely = useCallback((page: number) => {
+    const total = totalPages || 0;
+    let target = Math.max(1, Math.min(total || page, page));
+    if (pageMode === 'double' && target % 2 === 0) target = target - 1;
+    setCurrentPage(target);
+  }, [totalPages, pageMode]);
 
-  const onDocumentLoadSuccess = useCallback((pdf: any) => {
+  useEffect(() => {
+    try { localStorage.setItem('readerPageMode', pageMode) } catch { /* noop */ }
+  }, [pageMode])
+
+  const onPageModeChange = useCallback((mode: 'single' | 'double') => {
+    setPageMode(mode)
+    setCurrentPage(prev => {
+      const total = totalPages || 0
+      let target = Math.max(1, Math.min(total || prev, prev))
+      if (mode === 'double' && target % 2 === 0) target = target - 1
+      return target
+    })
+  }, [totalPages])
+
+  const onDocumentLoadSuccess = useCallback((pdf: PdfDoc) => {
     const n = pdf?._pdfInfo?.numPages || pdf?.numPages || 0;
     setTotalPages(n);
     setCurrentPage((prev) => (pageMode === 'double' && prev % 2 === 0 ? prev - 1 : prev));
@@ -367,35 +331,37 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
         const outline = await pdf.getOutline?.();
         const collected: { id: number; title: string; page: number }[] = [];
         let id = 1;
-        const pushItem = async (item: any) => {
-          const title = item?.title || `Chapter ${id}`;
+        const pushItem = async (item: Record<string, unknown>) => {
+          const title = (item?.title as string) || `Chapter ${id}`;
           let pageNum: number | null = null;
-          const dest = item?.dest || item?.destRef || item?.url || null;
+          const src = (item as Record<string, unknown>);
+          const dest = src.dest || src.destRef || src.url || null;
           try {
             if (Array.isArray(dest) && dest[0]) {
-              const pageIndex = await pdf.getPageIndex(dest[0]);
+              const pageIndex = await pdf.getPageIndex?.(dest[0] as unknown) as number;
               pageNum = pageIndex + 1;
             } else if (typeof dest === 'string' && pdf.getDestination) {
               const d = await pdf.getDestination(dest);
               if (Array.isArray(d) && d[0]) {
-                const pageIndex = await pdf.getPageIndex(d[0]);
+                const pageIndex = await pdf.getPageIndex?.(d[0] as unknown) as number;
                 pageNum = pageIndex + 1;
               }
             }
-          } catch {}
+          } catch (e) { console.warn('Outline item resolution failed', e); }
           if (pageNum) {
             collected.push({ id, title, page: pageNum });
             id++;
           }
-          if (Array.isArray(item?.items)) {
-            for (const child of item.items) {
-              await pushItem(child);
+          const children = src.items as unknown[] | undefined;
+          if (Array.isArray(children)) {
+            for (const child of children) {
+              await pushItem(child as Record<string, unknown>);
             }
           }
         };
         if (Array.isArray(outline) && outline.length) {
           for (const item of outline) {
-            await pushItem(item);
+            await pushItem(item as Record<string, unknown>);
           }
         }
         if (collected.length) {
@@ -433,14 +399,15 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
 
   const toggleFullscreen = async () => {
     try {
-      const elem: any = document.documentElement;
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      const elem = document.documentElement as Element & { webkitRequestFullscreen?: () => Promise<void> };
+      const doc = document as Document & { webkitFullscreenElement?: Element; webkitExitFullscreen?: () => Promise<void> };
+      if (!document.fullscreenElement && !doc.webkitFullscreenElement) {
         if (elem.requestFullscreen) await elem.requestFullscreen();
         else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
         setIsFullscreen(true);
       } else {
         if (document.exitFullscreen) await document.exitFullscreen();
-        else if ((document as any).webkitExitFullscreen) await (document as any).webkitExitFullscreen();
+        else if (doc.webkitExitFullscreen) await doc.webkitExitFullscreen();
         setIsFullscreen(false);
       }
     } catch (e) {
@@ -450,14 +417,29 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
 
   useEffect(() => {
     const onFsChange = () => {
-      const active = !!(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      const d = document as Document & { webkitFullscreenElement?: Element };
+      const active = !!(document.fullscreenElement || d.webkitFullscreenElement);
       setIsFullscreen(active);
     };
     document.addEventListener('fullscreenchange', onFsChange);
-    document.addEventListener('webkitfullscreenchange', onFsChange as any);
+    document.addEventListener('webkitfullscreenchange', onFsChange as EventListener);
     return () => {
       document.removeEventListener('fullscreenchange', onFsChange);
-      document.removeEventListener('webkitfullscreenchange', onFsChange as any);
+      document.removeEventListener('webkitfullscreenchange', onFsChange as EventListener);
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const h = headerWrapperRef.current?.offsetHeight || 72;
+      setHeaderHeight(h);
+      console.debug('Reader header measured height:', h);
+    };
+    measure();
+    const onResize = () => measure();
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
@@ -479,11 +461,16 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
     audio.play().catch(() => {});
   }, [backgroundMusic]);
 
+  useEffect(() => {
+    const shouldPan = !fitToPage && magnification >= 130;
+    setIsPanMode(shouldPan);
+  }, [magnification, fitToPage]);
+
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') setCurrentPage(p => Math.min(totalPages || p + 1, pageMode === 'double' ? p + 2 : p + 1));
-      if (e.key === 'ArrowLeft') setCurrentPage(p => Math.max(1, pageMode === 'double' ? p - 2 : p - 1));
+      if (e.key === 'ArrowRight') setPageSafely(pageMode === 'double' ? currentPage + 2 : currentPage + 1);
+      if (e.key === 'ArrowLeft') setPageSafely(pageMode === 'double' ? currentPage - 2 : currentPage - 1);
       if (e.key.toLowerCase() === 'f') toggleFullscreen();
       if (e.key.toLowerCase() === 'd') setPageMode(m => (m === 'single' ? 'double' : 'single'));
       if (e.key.toLowerCase() === 'h') setIsPanMode(v => !v);
@@ -492,7 +479,34 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [totalPages, pageMode]);
+  }, [totalPages, pageMode, currentPage, setPageSafely]);
+
+  useEffect(() => {
+    if (!bookId) return;
+    if (totalPages > 0 && currentPage >= 1) {
+      if (progressDebounceRef.current) window.clearTimeout(progressDebounceRef.current);
+      progressDebounceRef.current = window.setTimeout(() => {
+        updateProgress(bookId, currentPage, totalPages);
+      }, 400);
+    }
+    return () => {
+      if (progressDebounceRef.current) {
+        window.clearTimeout(progressDebounceRef.current);
+        progressDebounceRef.current = null;
+      }
+    };
+  }, [bookId, currentPage, totalPages, updateProgress]);
+
+  // Initialize current page from Supabase/user history
+  useEffect(() => {
+    if (!bookId) return;
+    const progress = getProgress(bookId);
+    const cp = progress.currentPage || 0;
+    if (cp > 0) {
+      const normalized = pageMode === 'double' && cp % 2 === 0 ? cp - 1 : cp;
+      setCurrentPage(normalized);
+    }
+  }, [bookId, pageMode, history, getProgress]);
 
   useEffect(() => {
     if (!chapters.length) return;
@@ -511,17 +525,19 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="fixed inset-0 flex flex-col overflow-hidden">
       {!isFullscreen && (
-        <BookHeader
+        <div
+          ref={headerWrapperRef}
+          className="sticky top-0 z-30"
+        >
+          <BookHeader
           bookInfo={{ title, author: author || '' }}
           bookCoverSrc={bookCoverSrc}
-          magnification={magnification}
-          onMagnificationChange={setMagnification}
           theme={theme}
           onThemeChange={setTheme}
           pageMode={pageMode}
-          onPageModeChange={setPageMode}
+          onPageModeChange={onPageModeChange}
           currentPage={currentPage}
           totalPages={totalPages}
           backgroundMusic={backgroundMusic}
@@ -536,7 +552,7 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
           ]}
         isFullscreen={false}
           onToggleFullscreen={toggleFullscreen}
-          onPageJump={setCurrentPage}
+          onPageJump={setPageSafely}
           onBack={onBack}
           onDownload={() => {
             const link = document.createElement('a');
@@ -548,7 +564,8 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
           }}
           isPanMode={isPanMode}
           onTogglePanMode={() => setIsPanMode(v => !v)}
-        />
+          />
+        </div>
       )}
       {!isFullscreen && (
         <ChapterMenu
@@ -558,27 +575,34 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack }: PDFR
           onToggle={() => setIsChapterMenuOpen(v => !v)}
           onChapterSelect={onChapterSelect}
           theme={theme}
-          magnification={magnification}
+          magnification={100}
           variant="overlay"
           showOverlayToggle={false}
         />
       )}
       <audio hidden ref={audioRef} />
-      <BookContent
-        magnification={magnification}
-        pageMode={pageMode}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-        totalPages={totalPages}
-        theme={theme}
-        isChapterMenuOpen={isChapterMenuOpen}
-        pdfPath={pdfPath}
-        onDocumentLoadSuccess={onDocumentLoadSuccess}
-        onDocumentLoadError={onDocumentLoadError}
-        isFullscreen={isFullscreen}
-        isPanMode={isPanMode}
-        onToggleChapters={() => setIsChapterMenuOpen(v => !v)}
-      />
+      <div className="reader-fixed-area" style={(() => {
+        const v = `${isFullscreen ? 0 : Math.max(0, headerHeight)}px`
+        return { ['--reader-header' as unknown as string]: v } as React.CSSProperties
+      })()}>
+        <BookContent
+          magnification={magnification}
+          pageMode={pageMode}
+          currentPage={currentPage}
+          onPageChange={setPageSafely}
+          totalPages={totalPages}
+          theme={theme}
+          isChapterMenuOpen={isChapterMenuOpen}
+          pdfPath={pdfPath}
+          onDocumentLoadSuccess={onDocumentLoadSuccess}
+          onDocumentLoadError={onDocumentLoadError}
+          isFullscreen={isFullscreen}
+          isPanMode={isPanMode}
+          onToggleChapters={() => setIsChapterMenuOpen(v => !v)}
+          fitToPage={fitToPage}
+          headerHeight={headerHeight}
+        />
+      </div>
     </div>
   );
 }

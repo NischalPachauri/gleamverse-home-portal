@@ -29,6 +29,7 @@ export const useMusicPlayer = () => {
 export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const tracks: Track[] = useMemo(
     () => [
+      { name: "No Music", url: "" },
       { name: "Track 1", url: "/music/track1.mp3" },
       { name: "Track 2", url: "/music/track2.mp3" },
       { name: "Track 3", url: "/music/track3.mp3" },
@@ -47,7 +48,7 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       try {
         const parsed = JSON.parse(saved);
         return typeof parsed.currentTrack === "number" ? parsed.currentTrack : 0;
-      } catch {}
+      } catch (e) { console.warn('Music state parse failed', e); }
     }
     return 0;
   });
@@ -57,7 +58,7 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       try {
         const parsed = JSON.parse(saved);
         return typeof parsed.volume === "number" ? parsed.volume : 0.6;
-      } catch {}
+      } catch (e) { console.warn('Music state parse failed', e); }
     }
     return 0.6;
   });
@@ -65,11 +66,11 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
   useEffect(() => {
     const audio = new Audio();
     audio.loop = true;
-    audio.preload = "auto";
+    audio.preload = "none";
     audio.crossOrigin = "anonymous";
     audioRef.current = audio;
     audio.volume = volume;
-    audio.src = tracks[currentTrack]?.url;
+    audio.src = tracks[currentTrack]?.url || "";
     return () => {
       audio.pause();
       audioRef.current = null;
@@ -85,8 +86,8 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   useEffect(() => {
     if (!audioRef.current) return;
-    audioRef.current.src = tracks[currentTrack]?.url;
-    if (isPlaying) {
+    audioRef.current.src = tracks[currentTrack]?.url || "";
+    if (isPlaying && audioRef.current.src) {
       audioRef.current.play().catch(() => setIsPlaying(false));
     }
   }, [currentTrack]);
@@ -98,6 +99,7 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const play = () => {
     if (!audioRef.current) return;
+    if (!audioRef.current.src) { setIsPlaying(false); return; }
     audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
   };
 
@@ -126,8 +128,9 @@ export const MusicPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     const i = Math.max(0, Math.min(tracks.length - 1, index));
     setCurrentTrack(i);
     if (!audioRef.current) return;
-    audioRef.current.src = tracks[i]?.url;
-    try { audioRef.current.load(); } catch {}
+    audioRef.current.src = tracks[i]?.url || "";
+    try { audioRef.current.load(); } catch (e) { console.warn('Audio load failed', e); }
+    if (!audioRef.current.src) { setIsPlaying(false); return; }
     audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
   };
 

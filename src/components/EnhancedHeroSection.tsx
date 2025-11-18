@@ -17,6 +17,7 @@ import {
   DialogDescription,
 } from "./ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import EnhancedImage from '@/components/EnhancedImage';
 import { Separator } from "./ui/separator";
 import {
   DropdownMenu,
@@ -448,16 +449,13 @@ export function EnhancedHeroSection({
                         }}
                       >
                         <div className="flex items-start gap-4">
-                          <img 
-                            src={book.coverImage || getBookCover(b.title)} 
-                            alt={b.title}
-                            className="h-20 w-14 object-cover rounded shadow-md flex-shrink-0 transition-transform duration-200 hover:scale-105"
-                            onError={(e) => {
-                              e.currentTarget.src = '/placeholder.svg';
-                            }}
-                            loading="lazy"
-                            decoding="async"
-                          />
+                          <div className="h-20 w-14 rounded shadow-md flex-shrink-0 overflow-hidden">
+                            <EnhancedImage
+                              bookTitle={b.title}
+                              alt={b.title}
+                              className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+                            />
+                          </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="text-white font-medium group-hover:text-blue-400 transition-colors text-lg truncate">{b.title}</h4>
                             <p className="text-sm text-slate-300 mt-2 truncate">

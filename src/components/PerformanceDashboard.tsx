@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { usePerformanceMonitor, analyzePerformance } from '@/hooks/usePerformanceMonitor';
+import { usePerformanceMonitor, analyzePerformance, type PerformanceMetrics } from '@/hooks/usePerformanceMonitor';
+import type { PerformanceTestResult } from '@/utils/performanceTester';
 import { performanceTester } from '@/utils/performanceTester';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,8 +26,8 @@ interface PerformanceDashboardProps {
 
 export default function PerformanceDashboard({ isVisible = true, onClose }: PerformanceDashboardProps) {
   const [isRunning, setIsRunning] = useState(false);
-  const [testResults, setTestResults] = useState<any[]>([]);
-  const [currentMetrics, setCurrentMetrics] = useState<any>(null);
+  const [testResults, setTestResults] = useState<PerformanceTestResult[]>([]);
+  const [currentMetrics, setCurrentMetrics] = useState<PerformanceMetrics | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'tests' | 'metrics'>('overview');
 
   const { metrics, logPerformance } = usePerformanceMonitor('PerformanceDashboard');

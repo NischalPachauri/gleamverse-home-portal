@@ -281,14 +281,13 @@ export function ProfileWindow() {
     const newGoalData = {
       title: newGoalTitle,
       target_books: newGoalTarget,
-      completed_books: 0,
       book_ids: [],
       deadline: newGoalDeadline || undefined,
       description: newGoalDescription || undefined,
     };
     
     try {
-      const success = await createGoal(newGoalData as any);
+      const success = await createGoal(newGoalData);
       
       if (success) {
         // Force refresh the goals list immediately and after a delay to ensure UI updates

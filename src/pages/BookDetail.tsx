@@ -32,6 +32,7 @@ const BookDetail = () => {
           author={book.author}
           bookCoverSrc={getBookCover(book.title) || '/placeholder.svg'}
           onBack={() => { navigate('/'); }}
+          bookId={book.id}
         />
       </main>
     </div>

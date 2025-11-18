@@ -2,19 +2,19 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 // Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
+const localStorageMock: Storage = {
+  getItem: vi.fn((key: string) => null),
+  setItem: vi.fn((key: string, value: string) => { }),
+  removeItem: vi.fn((key: string) => { }),
+  clear: vi.fn(() => { }),
   length: 0,
-  key: vi.fn(),
+  key: vi.fn((index: number) => null),
 };
 
-global.localStorage = localStorageMock as any;
+Object.defineProperty(global, 'localStorage', { value: localStorageMock });
 
 // Mock sessionStorage
-global.sessionStorage = localStorageMock as any;
+Object.defineProperty(global, 'sessionStorage', { value: localStorageMock });
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
@@ -51,22 +51,24 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Mock performance APIs
-global.performance = {
-  now: vi.fn(() => Date.now()),
-  mark: vi.fn(),
-  measure: vi.fn(),
-  clearMarks: vi.fn(),
-  clearMeasures: vi.fn(),
-  getEntriesByType: vi.fn(() => []),
-  getEntriesByName: vi.fn(() => []),
-} as any;
+Object.defineProperty(global, 'performance', {
+  value: {
+    now: vi.fn(() => Date.now()),
+    mark: vi.fn(),
+    measure: vi.fn(),
+    clearMarks: vi.fn(),
+    clearMeasures: vi.fn(),
+    getEntriesByType: vi.fn(() => []),
+    getEntriesByName: vi.fn(() => []),
+  } as Performance,
+});
 
 // Mock PerformanceObserver
 global.PerformanceObserver = class PerformanceObserver {
-  constructor(callback: Function) {
+  private callback: (list: PerformanceObserverEntryList, observer: PerformanceObserver) => void;
+  constructor(callback: (list: PerformanceObserverEntryList, observer: PerformanceObserver) => void) {
     this.callback = callback;
   }
-  private callback: Function;
   observe() {}
   disconnect() {}
 };

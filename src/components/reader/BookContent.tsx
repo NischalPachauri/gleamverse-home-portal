@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect, useRef } from 'react';
 import { Document, Page } from 'react-pdf';
+import { TurnFlipReader } from './turn_flip_reader';
 
 interface BookContentProps {
   fontSize: number;
@@ -13,7 +14,7 @@ interface BookContentProps {
   isChapterMenuOpen: boolean;
   pdfPath: string;
   scale: number;
-  onDocumentLoadSuccess: (pdf: any) => void;
+  onDocumentLoadSuccess: (pdf: unknown) => void;
   onDocumentLoadError: (error: Error) => void;
   isFullscreen?: boolean;
 }
@@ -30,7 +31,6 @@ export function BookContent({
   scale,
   onDocumentLoadSuccess,
   onDocumentLoadError,
-  // options removed
   isFullscreen,
 }: BookContentProps) {
   const [isFlipping, setIsFlipping] = useState(false);
@@ -108,6 +108,7 @@ export function BookContent({
       window.removeEventListener('mouseup', onMouseUp);
     };
   }, []);
+
   return (
     <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${containerBg[theme]} ${isChapterMenuOpen ? 'ml-0' : 'ml-0'} overflow-hidden`}>
       <style>{`.no-scrollbar::-webkit-scrollbar{display:none;} .no-scrollbar{scrollbar-width:none;}`}</style>
@@ -115,6 +116,8 @@ export function BookContent({
         ref={containerRef}
         className={`relative w-full ${isFullscreen ? 'h-[100vh]' : 'h-[calc(100vh-120px)] md:h-[calc(100vh-110px)]'} flex items-stretch justify-center px-4 overflow-auto`}
         onMouseDown={(e) => {
+          // Disable drag when in double page mode with flipbook
+          if (pageMode === 'double') return;
           if (!containerRef.current) return;
           draggingRef.current = true;
           dragStartRef.current = { x: e.clientX, y: e.clientY, sx: containerRef.current.scrollLeft, sy: containerRef.current.scrollTop };
@@ -122,42 +125,77 @@ export function BookContent({
           e.preventDefault();
         }}
       >
-        <Button aria-label="Previous page" variant="ghost" size="lg" onClick={prevPage} disabled={currentPage === 1 || isFlipping} className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 size-14 p-0 rounded-full shadow-xl ${theme === 'light' ? 'bg-white/90 text-gray-900' : theme === 'sepia' ? 'bg-amber-100 text-amber-900' : 'bg-slate-800 text-gray-100'}`}>
-          <ChevronLeft className="size-7" />
-        </Button>
+        {/* Only show navigation arrows in single page mode */}
+        {pageMode === 'single' && (
+          <>
+            <Button 
+              aria-label="Previous page" 
+              variant="ghost" 
+              size="lg" 
+              onClick={prevPage} 
+              disabled={currentPage === 1 || isFlipping} 
+              className={`absolute left-4 top-1/2 -translate-y-1/2 z-10 size-14 p-0 rounded-full shadow-xl ${
+                theme === 'light' ? 'bg-white/90 text-gray-900' : 
+                theme === 'sepia' ? 'bg-amber-100 text-amber-900' : 
+                'bg-slate-800 text-gray-100'
+              }`}
+            >
+              <ChevronLeft className="size-7" />
+            </Button>
+            <Button 
+              aria-label="Next page" 
+              variant="ghost" 
+              size="lg" 
+              onClick={nextPage} 
+              disabled={currentPage >= totalPages || isFlipping} 
+              className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 size-14 p-0 rounded-full shadow-xl ${
+                theme === 'light' ? 'bg-white/90 text-gray-900' : 
+                theme === 'sepia' ? 'bg-amber-100 text-amber-900' : 
+                'bg-slate-800 text-gray-100'
+              }`}
+            >
+              <ChevronRight className="size-7" />
+            </Button>
+          </>
+        )}
+
         <div className="flex gap-4 items-stretch justify-center h-full max-w-[2000px]">
           {pageMode === 'double' ? (
-            <>
-              <div className={`relative h-full p-6 ${pageBackground[theme]} rounded-l-lg shadow-2xl flex flex-col transition-all duration-300 cursor-grab`} style={{ ...pageStyleCommon }}>
-                <div className="flex-1 overflow-hidden">
-                  <Document file={pdfPath} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError}>
-                    <Page pageNumber={displayPage} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl" />
-                  </Document>
-                </div>
-              </div>
-              {currentPage < totalPages && (
-                <div className={`relative h-full p-6 ${pageBackground[theme]} rounded-r-lg shadow-2xl flex flex-col transition-all duration-300 cursor-grab`} style={{ ...pageStyleCommon }}>
-                  <div className="flex-1 overflow-hidden">
-                    <Document file={pdfPath}>
-                      <Page pageNumber={displayPage + 1} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl" />
-                    </Document>
-                  </div>
-                </div>
-              )}
-            </>
+            <TurnFlipReader
+              pdfPath={pdfPath}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageWidth={pageWidth}
+              theme={theme}
+              onPageChange={onPageChange}
+              isFullscreen={isFullscreen}
+              onDocumentLoadSuccess={onDocumentLoadSuccess}
+              onDocumentLoadError={onDocumentLoadError}
+            />
           ) : (
-            <div className={`relative h-full p-6 ${pageBackground[theme]} rounded-lg shadow-2xl flex flex-col transition-all duration-300 cursor-grab`} style={pageStyleCommon}>
+            /* Keep original single page rendering */
+            <div 
+              className={`relative h-full p-6 ${pageBackground[theme]} rounded-lg shadow-2xl flex flex-col transition-all duration-300 cursor-grab`} 
+              style={pageStyleCommon}
+            >
               <div className="flex-1 overflow-hidden">
-                <Document file={pdfPath} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError}>
-                  <Page pageNumber={currentPage} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl" />
+                <Document 
+                  file={pdfPath} 
+                  onLoadSuccess={onDocumentLoadSuccess} 
+                  onLoadError={onDocumentLoadError}
+                >
+                  <Page 
+                    pageNumber={currentPage} 
+                    width={pageWidth} 
+                    renderTextLayer={false} 
+                    renderAnnotationLayer={false} 
+                    className="shadow-2xl" 
+                  />
                 </Document>
               </div>
             </div>
           )}
         </div>
-        <Button aria-label="Next page" variant="ghost" size="lg" onClick={nextPage} disabled={currentPage >= totalPages || isFlipping} className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 size-14 p-0 rounded-full shadow-xl ${theme === 'light' ? 'bg-white/90 text-gray-900' : theme === 'sepia' ? 'bg-amber-100 text-amber-900' : 'bg-slate-800 text-gray-100'}`}>
-          <ChevronRight className="size-7" />
-        </Button>
       </div>
     </div>
   );

@@ -24,7 +24,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.add('light');
       document.body.classList.add('light');
-      document.body.style.backgroundColor = '#f0f8ff';
+      document.body.style.transition = 'background-color 250ms ease';
+      document.body.style.backgroundColor = '#F8F9FA';
     }
   }, []);
 
@@ -36,13 +37,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.body.classList.add('dark');
       document.body.classList.remove('light');
       document.body.style.backgroundColor = '';
+      document.body.style.backgroundImage = 'linear-gradient(135deg, #1e1b4b 0%, #3b0764 50%, #0f172a 100%)';
+      document.body.style.backgroundAttachment = 'fixed';
     } else {
       document.documentElement.classList.remove('dark');
       document.documentElement.classList.add('light');
       document.body.classList.remove('dark');
       document.body.classList.add('light');
-      // Set Alice Blue background for light theme
-      document.body.style.backgroundColor = '#f0f8ff';
+      document.body.style.transition = 'background-color 250ms ease';
+      document.body.style.backgroundColor = '#F8F9FA';
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundAttachment = '';
     }
   }, [theme]);
 

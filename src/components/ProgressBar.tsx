@@ -11,7 +11,7 @@ export default function ProgressBar({ value, height = 8, className = '' }: Progr
   return (
     <div
       className={`w-full rounded-full bg-slate-800/60 ${className}`}
-      style={{ height }}
+      style={{ height, width: `${pct}%` }}
       role="progressbar"
       aria-valuenow={pct}
       aria-valuemin={0}
@@ -20,7 +20,7 @@ export default function ProgressBar({ value, height = 8, className = '' }: Progr
     >
       <div
         className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-500 to-cyan-400 transition-[width] duration-300"
-        style={{ width: `${pct}%` }}
+        style={{ width: '100%' }}
       />
     </div>
   );

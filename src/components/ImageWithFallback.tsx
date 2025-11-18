@@ -33,9 +33,9 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [imgSrc, setImgSrc] = useState<string>(src);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
-  const imageMetrics = (window as any).__imageMetrics || ((window as any).__imageMetrics = { success: 0, failure: 0 });
-  const coverCache = (window as any).__coverCache || ((window as any).__coverCache = new Map<string, Promise<void>>());
-  const coverLoaded: Set<string> = (window as any).__coverLoaded || ((window as any).__coverLoaded = new Set<string>());
+  const imageMetrics = window.__imageMetrics || (window.__imageMetrics = { success: 0, failure: 0 });
+  const coverCache = window.__coverCache || (window.__coverCache = new Map<string, Promise<void>>());
+  const coverLoaded: Set<string> = window.__coverLoaded || (window.__coverLoaded = new Set<string>());
 
   useEffect(() => {
     setImgSrc(src);
@@ -47,7 +47,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
         img.onload = () => { coverLoaded.add(src); resolve(); };
         img.onerror = () => reject(new Error('Image failed to load'));
         img.src = src;
-        img.decoding = 'async' as any;
+        img.decoding = 'async';
       });
       if (!coverCache.get(src)) {
         coverCache.set(src, ensureLoaded());
@@ -57,10 +57,10 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 
   const handleError = () => {
     const maxRetries = 2;
-    const retryCount = (window as any).__imgRetries?.[imgSrc] ?? 0;
+    const retryCount = window.__imgRetries?.[imgSrc] ?? 0;
     if (imgSrc !== fallbackSrc) {
       if (retryCount < maxRetries) {
-        (window as any).__imgRetries = { ...(window as any).__imgRetries, [imgSrc]: retryCount + 1 };
+        window.__imgRetries = { ...(window.__imgRetries || {}), [imgSrc]: retryCount + 1 };
         setTimeout(() => {
           setIsLoading(true);
           setHasError(false);
@@ -76,7 +76,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
       }
     } else {
       // If even the fallback fails, use inline SVG as final fallback
-      console.error(`Critical: Both image and fallback failed to load: ${src}`);
+        console.error(`Critical: Both image and fallback failed to load: ${src}`);
       setIsLoading(false);
     }
     coverLoaded.add(fallbackSrc);
@@ -108,7 +108,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
         onLoad={handleLoad}
         data-original-url={hasError ? src : undefined}
         loading={priority ? 'eager' : 'lazy'}
-        decoding={priority ? 'sync' as any : 'async'}
+        decoding={priority ? 'sync' : 'async'}
         // use lower-case attribute to avoid TS/DOM prop issues
         {...(priority ? { fetchpriority: 'high' } : {})}
         {...rest}
@@ -118,3 +118,11 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 }
 
 export default ImageWithFallback;
+declare global {
+  interface Window {
+    __imageMetrics?: { success: number; failure: number };
+    __coverCache?: Map<string, Promise<void>>;
+    __coverLoaded?: Set<string>;
+    __imgRetries?: Record<string, number>;
+  }
+}

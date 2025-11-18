@@ -160,6 +160,29 @@ All colors MUST be HSL.
   }
 }
 
+/* Utility: hide native scrollbars while preserving scroll behavior */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Fixed reading area: fits viewport minus header, no scroll */
+.reader-fixed-area {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100vw;
+  overflow: hidden;
+  height: calc(var(--reader-viewport, 100vh) - var(--reader-header, 0px));
+  top: var(--reader-header, 0px);
+}
+@supports (height: 100dvh) {
+  :root { --reader-viewport: 100dvh; }
+}
+
 /* Section backgrounds for enhanced UI - More Visible Gradients */
 
 /* Light theme - Vibrant purple to blue gradients matching hero */

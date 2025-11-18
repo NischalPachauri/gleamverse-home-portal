@@ -35,8 +35,8 @@ export const usePerformanceMonitor = (componentName: string) => {
     const loadTime = performance.now() - startTimeRef.current;
     
     // Monitor memory usage if available
-    const memoryUsage = (performance as any).memory ? 
-      Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024) : undefined;
+    const mem0 = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+    const memoryUsage = mem0 ? Math.round(mem0.usedJSHeapSize / 1024 / 1024) : undefined;
 
     // Optimize FPS measurement: use rAF to count frames per second
     let frames = 0;
@@ -87,16 +87,16 @@ export const usePerformanceMonitor = (componentName: string) => {
     const renderTime = performance.now() - renderStartTimeRef.current;
     renderStartTimeRef.current = performance.now();
 
+    const mem = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
     setMetrics({
       loadTime: performance.now() - startTimeRef.current,
       renderTime,
-      memoryUsage: (performance as any).memory ? 
-        Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024) : undefined,
+      memoryUsage: mem ? Math.round(mem.usedJSHeapSize / 1024 / 1024) : undefined,
       fps: fpsRef.current || undefined,
       networkRequests: networkCountRef.current,
       errorCount: errorCountRef.current
     });
-  });
+  }, []);
 
   const generateReport = (): PerformanceReport => {
     return {

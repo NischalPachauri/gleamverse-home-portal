@@ -101,16 +101,16 @@ export default function Favorites() {
                     const timer = setTimeout(() => {
                       setForcedVisible(prev => ({ ...prev, [id]: true }));
                     }, 500);
-                    (window as any).__favLP = { ...(window as any).__favLP, [id]: timer };
+                    window.__favLP = { ...(window.__favLP || {}), [id]: timer };
                   }}
                   onPointerUp={() => {
                     const id = book.id.toString();
-                    const t = (window as any).__favLP?.[id];
+                    const t = window.__favLP?.[id];
                     if (t) clearTimeout(t);
                   }}
                   onPointerCancel={() => {
                     const id = book.id.toString();
-                    const t = (window as any).__favLP?.[id];
+                    const t = window.__favLP?.[id];
                     if (t) clearTimeout(t);
                   }}
                 >
@@ -146,4 +146,9 @@ export default function Favorites() {
       </main>
     </div>
   );
+}
+declare global {
+  interface Window {
+    __favLP?: Record<string, number>;
+  }
 }

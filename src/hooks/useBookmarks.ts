@@ -4,13 +4,21 @@ import { books } from '@/data/books';
 import { getBookCover } from '@/utils/bookCoverMapping';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useRef } from 'react';
 
 export interface BookmarkOperation {
   status: 'idle' | 'loading' | 'success' | 'error';
   error: string | null;
 }
 
-export type BookmarkStatusType = 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed';
+export type BookmarkStatusType = 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed' | 'Favorites';
+
+declare global {
+  interface Window {
+    __coverLoaded?: Set<string>;
+    __bookmarkMetrics?: { loads: number; adds: number; removes: number; updates: number; durations: number[] };
+  }
+}
 
 export function useBookmarks() {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
@@ -22,6 +30,7 @@ export function useBookmarks() {
   });
   const { user } = useAuth();
   const [remoteEnabled, setRemoteEnabled] = useState(true);
+  const debounceRef = useRef<number | null>(null);
 
   const loadBookmarks = useCallback(async () => {
     if (!user) {
@@ -43,7 +52,7 @@ export function useBookmarks() {
 
       if (error) {
         // Fallback when bookmarks table is not present (PGRST205)
-        const code = (error as any)?.code;
+        const code = (error as { code?: string })?.code;
         if (code === 'PGRST205') {
           setRemoteEnabled(false);
           const { data: libData, error: libErr } = await supabase
@@ -51,7 +60,7 @@ export function useBookmarks() {
             .select('book_id')
             .eq('user_id', user.id);
           if (libErr) throw libErr;
-          const ids = (libData || []).map((row: any) => row.book_id);
+          const ids = (libData || []).map((row: { book_id: string }) => row.book_id);
           setBookmarks(ids);
           setBookmarkStatuses({});
           setOperationState({ status: 'success', error: null });
@@ -60,19 +69,21 @@ export function useBookmarks() {
         throw error;
       }
 
-      const ids = (data || []).map((row: any) => row.metadata?.book_id).filter(Boolean) || [];
+      type Row = { metadata?: { book_id?: string; status?: BookmarkStatusType } };
+      const ids = (data || []).map((row: Row) => row.metadata?.book_id).filter(Boolean) as string[];
       const statuses: Record<string, BookmarkStatusType> = {};
-      (data || []).forEach((row: any) => {
+      (data || []).forEach((row: Row) => {
         const id = row.metadata?.book_id;
         const st = row.metadata?.status as BookmarkStatusType | undefined;
         if (id) statuses[id] = st || 'Planning to Read';
       });
       setBookmarks(ids);
       setBookmarkStatuses(statuses);
+      try { localStorage.setItem('bookmark_cache', JSON.stringify({ ids, statuses })); } catch (e) { console.warn('Cache write failed', e); }
       setOperationState({ status: 'success', error: null });
 
       // Metrics
-      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      const bm = window.__bookmarkMetrics || (window.__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
       bm.loads++;
 
       // Skip migrations for performance
@@ -96,7 +107,10 @@ export function useBookmarks() {
     const table = 'user_library';
     const subscription = supabase
       .channel(`${table}_changes_min`)
-      .on('postgres_changes', { event: 'insert', schema: 'public', table, filter: `user_id=eq.${user.id}` }, () => loadBookmarks())
+      .on('postgres_changes', { event: '*', schema: 'public', table, filter: `user_id=eq.${user.id}` }, () => {
+        if (debounceRef.current) window.clearTimeout(debounceRef.current);
+        debounceRef.current = window.setTimeout(() => { loadBookmarks(); }, 500);
+      })
       .subscribe();
     return () => { subscription.unsubscribe(); };
   }, [user, loadBookmarks]);
@@ -111,15 +125,15 @@ export function useBookmarks() {
       const b = books.find(b => b.id === bookId);
       const src = b ? getBookCover(b.title) : '';
       if (src) {
-        const coverLoaded: Set<string> = (window as any).__coverLoaded || ((window as any).__coverLoaded = new Set<string>());
+        const coverLoaded: Set<string> = window.__coverLoaded || (window.__coverLoaded = new Set<string>());
         if (!coverLoaded.has(src)) {
           const img = new Image();
           img.onload = () => coverLoaded.add(src);
           img.src = src;
-          (img as any).decoding = 'async';
+          img.decoding = 'async';
         }
       }
-    } catch {}
+    } catch (e) { console.warn('Cover prefetch failed', e); }
 
     // Optimistically update UI
     setBookmarks(prev => [...prev, bookId]);
@@ -141,7 +155,7 @@ export function useBookmarks() {
       if (error) throw error;
 
       setOperationState({ status: 'success', error: null });
-      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      const bm = window.__bookmarkMetrics || (window.__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
       bm.adds++;
       bm.durations.push(performance.now() - t0);
       toast.success('Book added to your bookmarks');
@@ -190,7 +204,7 @@ export function useBookmarks() {
       if (error) throw error;
 
       setOperationState({ status: 'success', error: null });
-      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      const bm = window.__bookmarkMetrics || (window.__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
       bm.removes++;
       bm.durations.push(performance.now() - t0);
       toast.success('Book removed from your bookmarks');
@@ -236,7 +250,7 @@ export function useBookmarks() {
 
       if (error) throw error;
       setOperationState({ status: 'success', error: null });
-      const bm = (window as any).__bookmarkMetrics || ((window as any).__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
+      const bm = window.__bookmarkMetrics || (window.__bookmarkMetrics = { loads: 0, adds: 0, removes: 0, updates: 0, durations: [] });
       bm.updates++;
       bm.durations.push(performance.now() - t0);
       return true;
@@ -253,8 +267,18 @@ export function useBookmarks() {
   };
 
   useEffect(() => {
+    try {
+      if (user) {
+        const cached = JSON.parse(localStorage.getItem('bookmark_cache') || 'null');
+        if (cached && cached.ids && cached.statuses) {
+          setBookmarks(cached.ids as string[]);
+          setBookmarkStatuses(cached.statuses as Record<string, BookmarkStatusType>);
+          setLoading(false);
+        }
+      }
+    } catch (e) { console.warn('Cache read failed', e); }
     loadBookmarks();
-  }, [loadBookmarks]);
+  }, [loadBookmarks, user]);
 
   return {
     bookmarks,
@@ -265,7 +289,7 @@ export function useBookmarks() {
       const issues: string[] = [];
       bookmarks.forEach(id => {
         const st = bookmarkStatuses[id] || 'Planning to Read';
-        if (!['Planning to Read','Reading','On Hold','Completed'].includes(st)) {
+        if (!['Planning to Read','Reading','On Hold','Completed','Favorites'].includes(st)) {
           issues.push(`Invalid status for ${id}: ${st}`);
         }
       });

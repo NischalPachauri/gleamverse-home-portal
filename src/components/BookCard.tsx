@@ -3,7 +3,7 @@ import {
   Download, Check, Sparkles, Heart, BookMarked, Baby, 
   Landmark, FlaskConical, Globe, Scroll, Swords, Brain, Users, GraduationCap,
   Castle, Fingerprint, Scale, Briefcase, Rocket, TreePine, Palette, Music,
-  Clock, CheckCircle2
+  Clock, CheckCircle2, BookOpen, X
 } from "lucide-react";
 import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,18 @@ import { Card } from "@/components/ui/card";
 import { Book } from "@/data/books";
 import { applyMetadata } from "@/utils/bookMetadataRegistry";
 import { useState, useEffect, useRef } from "react";
-import { useBookmarks } from "@/hooks/useBookmarks";
+import type { MouseEvent as ReactMouseEvent } from "react";
+import { useBookmarks, type BookmarkStatusType } from "@/hooks/useBookmarks";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserHistory } from "@/hooks/useUserHistory";
 import { toast } from "sonner";
 import EnhancedImage from "./EnhancedImage";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   const g = genre.toLowerCase();
   const t = title.toLowerCase();
-  const cls = "w-10 h-10 md:w-12 md:h-12 text-primary";
+  const cls = "w-10 h-10 md:w-12 md:h-12 text-white";
   
   // Specific book/series icons
   if (t.includes('harry potter')) return <Sparkles className={cls} />;
@@ -51,9 +53,7 @@ const GenreIcon = ({ genre, title }: { genre: string; title: string }) => {
   return <BookOpen className={cls} />;
 };
 
-import { BookOpen } from 'lucide-react';
-
-export function BookCard({ book, onCoverLoad, hideFavoriteOverlay = false, compact = false }: { book: Book; onCoverLoad?: (id: number) => void; hideFavoriteOverlay?: boolean; compact?: boolean }) {
+export function BookCard({ book, onCoverLoad, hideFavoriteOverlay = false, compact = false, selectable = false, selected = false, onSelect }: { book: Book; onCoverLoad?: (id: string) => void; hideFavoriteOverlay?: boolean; compact?: boolean; selectable?: boolean; selected?: boolean; onSelect?: (id: string)=>void }) {
   const b = applyMetadata(book);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -100,7 +100,7 @@ export function BookCard({ book, onCoverLoad, hideFavoriteOverlay = false, compa
   }, [menuOpen]);
 
   const { isAuthenticated } = useAuth();
-  const setBookStatus = async (newStatus: string) => {
+  const setBookStatus = async (newStatus: BookmarkStatusType) => {
     try {
       if (!isAuthenticated) {
         toast.error('Please sign in to add or update bookmarks');
@@ -108,13 +108,13 @@ export function BookCard({ book, onCoverLoad, hideFavoriteOverlay = false, compa
         return;
       }
       if (!isBookmarked) {
-        await addBookmark(book.id, newStatus as any);
+        await addBookmark(book.id, newStatus);
         toast.success(`Added to ${newStatus}`);
       } else if (bookStatus === newStatus) {
         await removeBookmark(book.id);
         toast.success('Removed bookmark');
       } else {
-        await updateBookmarkStatus(book.id, newStatus as 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed');
+        await updateBookmarkStatus(book.id, newStatus);
         toast.success(`Updated to ${newStatus}`);
       }
       setMenuOpen(false);
@@ -124,14 +124,14 @@ export function BookCard({ book, onCoverLoad, hideFavoriteOverlay = false, compa
     }
   };
 
-  const handleMenuToggle = (e: React.MouseEvent) => {
+  const handleMenuToggle = (e: ReactMouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     window.dispatchEvent(new CustomEvent('bookMenuOpen'));
     setMenuOpen((v) => !v);
   };
 
-  const handleDownload = (e: React.MouseEvent) => {
+  const handleDownload = (e: ReactMouseEvent) => {
     e.preventDefault();
     const link = document.createElement('a');
     link.href = book.pdfPath;
@@ -142,168 +142,158 @@ export function BookCard({ book, onCoverLoad, hideFavoriteOverlay = false, compa
     document.body.removeChild(link);
   };
 
+  const handleRemoveBookmark = async (e: ReactMouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      if (isAuthenticated && isBookmarked) {
+        await removeBookmark(book.id);
+        toast.success('Removed from bookmarks');
+      }
+    } catch (error) {
+      console.error("Failed to remove bookmark:", error);
+      toast.error("Could not remove bookmark. Please try again.");
+    }
+  };
+
   return (
-    <Card className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:border-primary/30 hover:-translate-y-1">
-      <Link to={`/book/${b.id}`} className="block">
-        <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-gradient-to-br from-primary/5 to-secondary/5">
+    <Card className={`group relative overflow-hidden rounded-2xl ${selected ? 'ring-2 ring-purple-400' : ''} bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-slate-700/50 transition-all duration-300 hover:border-transparent hover:shadow-2xl hover:shadow-purple-500/20`}>
+      <div className="block" onClick={(e)=>{
+        if (compact && selectable) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onSelect) onSelect(b.id);
+        }
+      }}>
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-violet-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        
+        <div className="relative overflow-hidden aspect-[2/3] md:aspect-[2/3] bg-slate-800/50">
           <EnhancedImage
             bookTitle={b.title}
             alt={`Cover of ${b.title} by ${b.author}`}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             style={{ objectFit: 'cover' }}
             onLoad={() => {
                 if (onCoverLoad) onCoverLoad(b.id);
             }}
-            onError={() => {
-              console.error(`❌ Image failed to load: ${b.title}`);
-            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
-          {/* Section indicator icon - top left corner */}
+          {/* Status indicator icon - top left corner */}
           {bookStatus && (
-            <div className="absolute top-2 left-2 z-10 p-1.5 rounded-full bg-background/80 backdrop-blur-sm shadow-md border border-primary/20">
+            <div className="absolute top-3 left-3 z-10 p-2 rounded-xl bg-slate-900/80 backdrop-blur-sm shadow-xl border border-slate-700/50">
               {bookStatus === 'Planning to Read' && (
-                <BookOpen className="w-4 h-4 text-blue-500" />
+                <BookOpen className="w-4 h-4 text-blue-400" />
               )}
               {bookStatus === 'Reading' && (
-                <BookMarked className="w-4 h-4 text-green-500" />
+                <BookMarked className="w-4 h-4 text-green-400" />
               )}
               {bookStatus === 'On Hold' && (
-                <Clock className="w-4 h-4 text-amber-500" />
+                <Clock className="w-4 h-4 text-amber-400" />
               )}
               {bookStatus === 'Completed' && (
-                <CheckCircle2 className="w-4 h-4 text-purple-500" />
+                <CheckCircle2 className="w-4 h-4 text-purple-400" />
               )}
             </div>
           )}
-          {progress && typeof progress.percentage === 'number' && (
-            <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
-              <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400" style={{ width: `${Math.max(0, Math.min(100, progress.percentage))}%` }} />
-            </div>
-          )}
-          
-          {/* Unified browsing bar */}
-          <div
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 z-30 px-2 py-1 rounded-full bg-background/80 backdrop-blur-sm border border-border/60 shadow flex items-center gap-2"
-            role="toolbar"
-            aria-label="Browsing options"
-          >
-            <button
-              className="h-8 w-8 rounded-full flex items-center justify-center hover:bg-accent/40 transition-colors"
-              onClick={(e)=>{ e.preventDefault(); e.stopPropagation(); handleMenuToggle(e as any); }}
-              aria-label="Bookmark options"
-              aria-pressed={isBookmarked}
-              title="Bookmark options"
-            >
-              <Bookmark className="w-4 h-4" />
-            </button>
-            <div className="h-6 w-px bg-border/70" aria-hidden="true" />
-            {['Reading','Planning to Read','On Hold','Completed'].map(opt => (
+
+          {/* Bookmark dropdown overlay - top right */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button
-                key={opt}
-                onClick={async (e)=>{ e.preventDefault(); e.stopPropagation(); await setBookStatus(opt); }}
-                className={`px-2 py-1 rounded-full text-xs font-medium transition-colors ${bookStatus===opt ? 'bg-primary/20 text-primary' : 'hover:bg-accent/40'}`}
-                aria-pressed={bookStatus===opt}
-                title={opt}
+                aria-label="Bookmark options"
+                className={`absolute top-3 right-3 z-20 h-9 w-9 rounded-full bg-slate-900/80 text-white flex items-center justify-center transition-all duration-200 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 hover:scale-110`}
               >
-                {opt}
+                <Bookmark className="h-5 w-5" />
               </button>
-            ))}
-            <div className="h-6 w-px bg-border/70" aria-hidden="true" />
-            <button
-              className="h-8 w-8 rounded-full flex items-center justify-center text-red-500 hover:text-red-600 hover:bg-red-100/40 transition-colors"
-              aria-label="Favorite"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const bookId = book.id.toString();
-                let favs: string[] = [];
-                try { favs = JSON.parse(localStorage.getItem('gleamverse_favorites') || '[]'); } catch {}
-                if (favs.includes(bookId)) {
-                  favs = favs.filter(id => id !== bookId);
-                  toast.success('Removed from favorites');
-                } else {
-                  favs.push(bookId);
-                  toast.success('Added to favorites');
-                }
-                try { localStorage.setItem('gleamverse_favorites', JSON.stringify(favs)); } catch {}
-              }}
-              title="Favorite"
-            >
-              <svg viewBox="0 0 24 24" className="w-4 h-4"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6 4 4 6.5 4c1.74 0 3.41.81 4.5 2.09C12.09 4.81 13.76 4 15.5 4 18 4 20 6 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-            </button>
-            {menuOpen && (
-              <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 w-56 rounded-md border bg-card shadow-xl">
-                {['Planning to Read','Reading','On Hold','Completed'].map(opt => (
-                  <button
-                    key={opt}
-                    onClick={async (e)=>{ e.preventDefault(); await setBookStatus(opt); }}
-                    className="w-full text-left px-3 py-2 hover:bg-accent flex items-center gap-2"
-                  >
-                    {bookStatus===opt && <Check className="w-4 h-4" />}<span>{opt}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[154px] -translate-y-[10px] transition-transform">
+              {(['Planning to Read','Reading','On Hold','Completed','Favorites'] as const).map((status) => (
+                <DropdownMenuItem
+                  key={status}
+                  onClick={async () => {
+                    const current = bookmarkStatuses[book.id];
+                    if (!isBookmarked) {
+                      await addBookmark(book.id, status);
+                    } else if (current === status) {
+                      await removeBookmark(book.id);
+                    } else {
+                      await updateBookmarkStatus(book.id, status);
+                    }
+                  }}
+                  className="justify-between"
+                >
+                  <span>{status}</span>
+                  {bookmarkStatuses[book.id] === status && <Check className="w-3.5 h-3.5 opacity-80" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           
-          {/* Hover overlay with actions */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
-          <div className="flex items-center justify-center gap-3">
-              <Button 
-                size="sm" 
-                className="bg-primary/90 hover:bg-primary text-primary-foreground backdrop-blur-sm scale-75 h-8 px-2 text-xs"
-                aria-label="Read"
-              >
-                <BookOpen className="w-3 h-3 mr-1" />
-                Read
-              </Button>
+          {/* Read / Download actions - centered */}
+          <div className="absolute inset-0 m-[15px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="flex items-center gap-2">
+              <Link to={`/book/${b.id}`} className="inline-flex">
+                <Button 
+                  size="sm" 
+                  className="h-7 px-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 active:scale-[0.98] text-white backdrop-blur-sm shadow-lg"
+                  aria-label="Read"
+                >
+                  <BookOpen className="w-3.5 h-3.5 mr-2" />
+                  Read
+                </Button>
+              </Link>
               <Button 
                 size="sm" 
                 variant="secondary"
                 onClick={handleDownload}
-                className="backdrop-blur-sm scale-75 h-8 px-2 text-xs"
+                className="h-7 px-3 backdrop-blur-sm bg-slate-700/70 hover:bg-slate-700 active:scale-[0.98] border border-slate-600/60 shadow-lg text-white"
                 aria-label="Download"
               >
-                <Download className="w-3 h-3 mr-1" />
+                <Download className="w-3.5 h-3.5 mr-2" />
                 Download
               </Button>
-              {/* Favorites moved to unified bar */}
+            </div>
           </div>
-            
-            {/* Favorite overlay removed; handled via bookmark menu */}
-          </div>
+          
+          {/* Progress bar (overlay bottom) */}
+          {progress && typeof progress.percentage === 'number' && (
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-900/50">
+              <div className="h-full bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500" style={{ width: `${Math.max(0, Math.min(100, progress.percentage))}%` }} />
+            </div>
+          )}
+          
+          {/* Hover overlay baseline */}
+          <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          {/* Shine effect on hover */}
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none" />
         </div>
         
-        <div className={compact ? "p-3" : "p-4 space-y-2"}>
-          <h3 className={compact ? "font-semibold text-sm leading-tight line-clamp-1 text-foreground whitespace-normal" : "font-semibold text-lg leading-tight line-clamp-1 text-foreground group-hover:text-primary transition-colors whitespace-normal"}>
+        
+        <div className={compact ? "p-3 relative z-10" : "p-4 space-y-2 relative z-10"}>
+          <h3 className={compact ? "font-semibold text-sm leading-tight line-clamp-1 text-foreground whitespace-normal" : "font-semibold text-lg leading-tight line-clamp-2 text-foreground group-hover:text-purple-400 transition-colors whitespace-normal"}>
             {b.title}
           </h3>
           {!compact && (
             <>
               <p className="text-sm text-muted-foreground">{b.author === 'Unknown Author' ? '' : b.author}</p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span>{b.year}</span>
+                <span>{b.publishYear}</span>
                 <span>•</span>
                 <span>{b.pages ? `${b.pages} pages` : ''}</span>
                 <span>•</span>
-                <span>{b.genre === 'General' ? '' : b.genre}</span>
+                <span className="text-purple-400">{b.genre === 'General' ? '' : b.genre}</span>
               </div>
               {bookStatus && (
-                <div className="text-xs font-medium inline-flex items-center gap-2 rounded-full px-2 py-1 bg-primary/10 text-primary">
+                <div className="text-xs font-medium inline-flex items-center gap-2 rounded-full px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-300 border border-purple-500/30">
                   Status: {bookStatus}
                 </div>
               )}
             </>
           )}
-          {!compact && (
-            <div className="text-xs text-muted-foreground">
-              { (b.pages || progress?.totalPages) ? `${(b.pages || progress.totalPages)} pages` : '' }
-            </div>
-          )}
         </div>
-      </Link>
+      </div>
     </Card>
   );
 }

@@ -3,7 +3,7 @@ import { performanceBenchmarks, analyzePerformance } from '@/hooks/usePerformanc
 export interface PerformanceTestResult {
   testName: string;
   passed: boolean;
-  metrics: any;
+  metrics: unknown;
   message: string;
   duration: number;
 }
@@ -11,7 +11,7 @@ export interface PerformanceTestResult {
 export class PerformanceTester {
   private results: PerformanceTestResult[] = [];
 
-  async runTest(testName: string, testFn: () => Promise<any> | any): Promise<PerformanceTestResult> {
+  async runTest(testName: string, testFn: () => Promise<unknown> | unknown): Promise<PerformanceTestResult> {
     const startTime = performance.now();
     
     try {
@@ -46,7 +46,7 @@ export class PerformanceTester {
 
   async runMemoryTest(): Promise<PerformanceTestResult> {
     return this.runTest('Memory Usage Test', () => {
-      const memory = (performance as any).memory;
+      const memory = (performance as Performance & { memory?: { usedJSHeapSize: number; totalJSHeapSize: number } }).memory;
       if (!memory) {
         throw new Error('Memory API not available');
       }
@@ -91,7 +91,7 @@ export class PerformanceTester {
         const frameStart = performance.now();
         
         // Force a layout/reflow
-        document.body.offsetHeight;
+        void document.body.offsetHeight;
         
         const frameEnd = performance.now();
         frameTimes.push(frameEnd - frameStart);
@@ -121,7 +121,7 @@ export class PerformanceTester {
     return this.runTest('Image Loading Test', async () => {
       const images = Array.from(document.querySelectorAll('img'));
       const loadPromises = images.map(img => {
-        return new Promise((resolve, reject) => {
+        return new Promise<{ src: string; loaded: boolean; time: number }>((resolve, reject) => {
           if (img.complete) {
             resolve({ src: img.src, loaded: true, time: 0 });
           } else {
@@ -145,8 +145,8 @@ export class PerformanceTester {
       }
 
       const loadTimes = results
-        .filter(r => r.status === 'fulfilled')
-        .map(r => (r as any).value.time);
+        .filter((r): r is PromiseFulfilledResult<{ src: string; loaded: boolean; time: number }> => r.status === 'fulfilled')
+        .map(r => r.value.time);
       const avgLoadTime = loadTimes.reduce((a, b) => a + b, 0) / loadTimes.length;
 
       if (avgLoadTime > 1000) { // 1 second threshold
@@ -171,7 +171,9 @@ export class PerformanceTester {
         '/assets/images/book-covers/' // Book covers
       ];
 
-      const networkResults = await Promise.allSettled(
+      const networkResults = await Promise.allSettled<{
+        url: string; status: number; duration: number; success: boolean; error?: string
+      }>(
         testUrls.map(async (url) => {
           const startTime = performance.now();
           try {
@@ -197,12 +199,13 @@ export class PerformanceTester {
       );
 
       // Use only fulfilled requests to compute accurate average latency
-      const fulfilled = networkResults.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<any>[];
-      const successfulRequests = fulfilled.filter(r => (r as any).value.success).length;
-      const failedRequests = networkResults.filter(r => r.status === 'rejected' || (r as any).value?.success === false).length;
+      const fulfilled = networkResults.filter((r): r is PromiseFulfilledResult<{ url: string; status: number; duration: number; success: boolean; error?: string }>
+        => r.status === 'fulfilled');
+      const successfulRequests = fulfilled.filter(r => r.value.success).length;
+      const failedRequests = networkResults.filter(r => r.status === 'rejected').length + fulfilled.filter(r => !r.value.success).length;
       // Avoid dividing by total when some promises are rejected
       const avgResponseTime = fulfilled.length
-        ? fulfilled.reduce((acc, r) => acc + (r as any).value.duration, 0) / fulfilled.length
+        ? fulfilled.reduce((acc, r) => acc + r.value.duration, 0) / fulfilled.length
         : 0;
 
       if (failedRequests > 0) {
@@ -218,7 +221,7 @@ export class PerformanceTester {
         successfulRequests,
         failedRequests,
         avgResponseTime: Math.round(avgResponseTime),
-        results: networkResults.map(r => (r as any).value)
+        results: fulfilled.map(r => r.value)
       };
     });
   }

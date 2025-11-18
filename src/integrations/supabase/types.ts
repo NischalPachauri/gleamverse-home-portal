@@ -55,7 +55,7 @@ export interface Database {
           user_id: string;
           url: string;
           title: string;
-          metadata: Record<string, any>;
+          metadata: { book_id: string; status: 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed' | 'Favorites' };
           created_at: string;
         };
         Insert: {
@@ -63,7 +63,7 @@ export interface Database {
           user_id: string;
           url: string;
           title: string;
-          metadata?: Record<string, any>;
+          metadata?: { book_id: string; status: 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed' | 'Favorites' };
           created_at?: string;
         };
         Update: {
@@ -71,7 +71,7 @@ export interface Database {
           user_id?: string;
           url?: string;
           title?: string;
-          metadata?: Record<string, any>;
+          metadata?: { book_id: string; status: 'Planning to Read' | 'Reading' | 'On Hold' | 'Completed' | 'Favorites' };
           created_at?: string;
         };
       };

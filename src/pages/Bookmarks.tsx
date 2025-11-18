@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { books as bookList } from '@/data/books';
 import { Button } from '@/components/ui/button';
-import { BookMarked, BookOpen, Clock, CheckCircle2, Loader2, ArrowLeft, Filter, SortAsc, Calendar, Trash2 } from 'lucide-react';
+import { BookMarked, BookOpen, Clock, CheckCircle2, Loader2, ArrowLeft, Filter, SortAsc, Calendar, Trash2, Bookmark } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { usePerformanceMonitor } from '@/hooks/usePerformanceMonitor';
 import { Grid, List, Plus } from 'lucide-react';
-import { Book } from '@/types/book';
+import { Book } from '@/data/books';
 import { books } from '@/data/books';
 import { toast } from 'sonner';
 import BookmarkGrid from '@/components/BookmarkGrid';
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/tooltip";
 
 // Define section types for navigation
-type BookmarkSection = 'planning' | 'reading' | 'on-hold' | 'completed';
+type BookmarkSection = 'planning' | 'reading' | 'on-hold' | 'completed' | 'favorites';
 
 export default function Bookmarks() {
   const { user } = useAuth();
@@ -45,6 +45,7 @@ export default function Bookmarks() {
   const readingRef = useRef<HTMLDivElement>(null);
   const onHoldRef = useRef<HTMLDivElement>(null);
   const completedRef = useRef<HTMLDivElement>(null);
+  const favoritesRef = useRef<HTMLDivElement>(null);
 
   // Debounce function for scroll events
   const debounce = <T extends (...args: unknown[]) => void>(fn: T, ms = 300) => {
@@ -88,23 +89,28 @@ export default function Bookmarks() {
   
   // Save new bookmark dates when bookmarks change
   useEffect(() => {
-    const updatedDates = {...bookAddDates};
-    bookmarkedBooks.forEach(id => {
-      if (!updatedDates[id]) {
-        updatedDates[id] = Date.now();
+    setBookAddDates(prev => {
+      const next = { ...prev };
+      bookmarkedBooks.forEach(id => {
+        if (!next[id]) {
+          next[id] = Date.now();
+        }
+      });
+      Object.keys(next).forEach(id => {
+        if (!bookmarkedBooks.includes(id)) {
+          delete next[id];
+        }
+      });
+      const prevKeys = Object.keys(prev);
+      const nextKeys = Object.keys(next);
+      const changed = prevKeys.length !== nextKeys.length || nextKeys.some(k => prev[k] !== next[k]);
+      if (changed) {
+        localStorage.setItem('bookmark_add_dates', JSON.stringify(next));
+        return next;
       }
+      return prev;
     });
-    
-    // Remove dates for books no longer bookmarked
-    Object.keys(updatedDates).forEach(id => {
-      if (!bookmarkedBooks.includes(id)) {
-        delete updatedDates[id];
-      }
-    });
-    
-    localStorage.setItem('bookmark_add_dates', JSON.stringify(updatedDates));
-    setBookAddDates(updatedDates);
-  }, [bookmarkedBooks, bookAddDates]);
+  }, [bookmarkedBooks]);
   
   useEffect(() => {
     setCountLoading(true);
@@ -117,14 +123,14 @@ export default function Bookmarks() {
 
   // Prefetch covers so they appear instantly when bookmarks change
   useEffect(() => {
-    const coverLoaded: Set<string> = (window as any).__coverLoaded || ((window as any).__coverLoaded = new Set<string>());
+    const coverLoaded: Set<string> = window.__coverLoaded || (window.__coverLoaded = new Set<string>());
     processedBooks.forEach(b => {
       const src = getBookCover(b.title);
       if (src && !coverLoaded.has(src)) {
         const img = new Image();
         img.onload = () => coverLoaded.add(src);
         img.src = src;
-        (img as any).decoding = 'async';
+        img.decoding = 'async';
       }
     });
   }, [processedBooks]);
@@ -166,6 +172,10 @@ export default function Bookmarks() {
     filteredBooks.filter(book => bookmarkStatuses[book.id] === 'Completed'),
     [filteredBooks, bookmarkStatuses]
   );
+  const favoritesBooks = useMemo(() => 
+    filteredBooks.filter(book => bookmarkStatuses[book.id] === 'Favorites'),
+    [filteredBooks, bookmarkStatuses]
+  );
   
   // Function to scroll to a specific section
   const scrollToSection = useCallback((section: BookmarkSection) => {
@@ -173,7 +183,8 @@ export default function Bookmarks() {
       'planning': planningRef,
       'reading': readingRef,
       'on-hold': onHoldRef,
-      'completed': completedRef
+      'completed': completedRef,
+      'favorites': favoritesRef
     };
     
     const ref = refs[section];
@@ -190,6 +201,7 @@ export default function Bookmarks() {
       case 'reading': return readingBooks;
       case 'on-hold': return onHoldBooks;
       case 'completed': return completedBooks;
+      case 'favorites': return favoritesBooks;
       default: return planningBooks;
     }
   };
@@ -278,10 +290,10 @@ export default function Bookmarks() {
           )}
         </div>
         
-        {/* Filter and sort section removed as requested */}
+        
 
         {/* Stats Grid - Smaller boxes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-10">
           <div 
             className={`group relative bg-gradient-to-br from-blue-500/30 to-blue-600/20 backdrop-blur-sm border border-blue-400/40 rounded-xl p-4 hover:scale-105 transition-all duration-300 hover:shadow-xl shadow-blue-500/20 cursor-pointer ${activeSection === 'planning' ? 'ring-2 ring-blue-400' : ''}`}
             onClick={() => {
@@ -365,10 +377,29 @@ export default function Bookmarks() {
               </div>
             </div>
           </div>
+
+          <div 
+            className={`group relative bg-gradient-to-br from-pink-500/30 to-rose-600/20 backdrop-blur-sm border border-pink-400/40 rounded-xl p-4 hover:scale-105 transition-all duration-300 hover:shadow-xl shadow-pink-500/20 cursor-pointer ${activeSection === 'favorites' ? 'ring-2 ring-pink-400' : ''}`}
+            onClick={() => {
+              setActiveSection('favorites');
+              scrollToSection('favorites');
+            }}
+            aria-label="View favorite books"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-pink-500/30 to-rose-600/20 rounded-xl opacity-0 group-hover:opacity-100 blur-lg transition-opacity duration-300" />
+            <div className="relative flex items-center gap-3">
+              <div className="p-2 bg-slate-900/60 rounded-lg text-pink-300 group-hover:scale-110 transition-transform duration-300">
+                <Bookmark className="w-5 h-5" />
+              </div>
+              <div>
+                <div className={`text-2xl mb-0.5 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{renderBookCount(favoritesBooks.length)}</div>
+                <div className={`${theme === 'dark' ? 'text-slate-300' : 'text-slate-700'} text-xs`}>Favorites</div>
+              </div>
+            </div>
+          </div>
         </div>
       
         <div className="bookmark-sections space-y-6">
-          {/* Planning to Read Section */}
           <div 
             ref={planningRef} 
             id="planning-section"
@@ -384,7 +415,6 @@ export default function Bookmarks() {
             />
           </div>
           
-          {/* Currently Reading Section */}
           <div 
             ref={readingRef} 
             id="reading-section"
@@ -400,7 +430,6 @@ export default function Bookmarks() {
             />
           </div>
           
-          {/* On Hold Section */}
           <div 
             ref={onHoldRef} 
             id="on-hold-section"
@@ -416,7 +445,6 @@ export default function Bookmarks() {
             />
           </div>
           
-          {/* Completed Section */}
           <div 
             ref={completedRef} 
             id="completed-section"
@@ -431,8 +459,28 @@ export default function Bookmarks() {
               loading={bookmarksLoading || countLoading}
             />
           </div>
+
+          <div 
+            ref={favoritesRef} 
+            id="favorites-section"
+            className={`section-container ${activeSection === 'favorites' ? 'opacity-100' : 'opacity-70'} transition-opacity duration-300`}
+          >
+            <BookmarkGrid
+              books={favoritesBooks}
+              title="Favorites"
+              icon={Bookmark}
+              id="favorites"
+              isActive={activeSection === 'favorites'}
+              loading={bookmarksLoading || countLoading}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
+}
+declare global {
+  interface Window {
+    __coverLoaded?: Set<string>;
+  }
 }

@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getBookCover } from '../utils/bookCoverMapping';
+declare global {
+  interface Window {
+    __coverCache?: Map<string, Promise<void>>;
+    __imageMetrics?: { success: number; failure: number; records: { title: string; src: string | null; success: boolean; duration: number; ts: number }[] };
+    __imgRetries?: Record<string, number>;
+  }
+}
 
 const ERROR_IMG_SRC = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODgiIGhlaWdodD0iODgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBvcGFjaXR5PSIuMyIgZmlsbD0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIzLjciPjxyZWN0IHg9IjE2IiB5PSIxNiIgd2lkdGg9IjU2IiBoZWlnaHQ9IjU2IiByeD0iNiIvPjxwYXRoIGQ9Im0xNiA1OCAxNi0xOCAzMiAzMiIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iMzUiIHI9IjciLz48L3N2Zz4KCg==';
 
@@ -28,8 +35,12 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
-  const coverCache = (window as any).__coverCache || ((window as any).__coverCache = new Map<string, Promise<void>>());
-  const imageMetrics = (window as any).__imageMetrics || ((window as any).__imageMetrics = { success: 0, failure: 0, records: [] as any[] });
+  const coverCache = React.useMemo(() => window.__coverCache ?? (window.__coverCache = new Map<string, Promise<void>>()), []);
+  const imageMetrics = React.useMemo(() => {
+    const m = window.__imageMetrics ?? (window.__imageMetrics = { success: 0, failure: 0, records: [] })
+    if (!Array.isArray(m.records)) m.records = []
+    return m
+  }, []);
   const startRef = useRef<number>(performance.now());
 
   useEffect(() => {
@@ -39,29 +50,30 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
       const coverSrc = getBookCover(bookTitle) || '/BookCoversNew/default-book-cover.png';
       setImgSrc(coverSrc);
       if (coverSrc && !coverCache.get(coverSrc)) {
-        const preload = new Promise<void>((resolve, reject) => {
+        const preload = new Promise<void>((resolve) => {
           const img = new Image();
           img.onload = () => resolve();
-          img.onerror = () => reject(new Error('Image failed to load'));
+          img.onerror = () => resolve();
           img.src = coverSrc;
-          img.decoding = 'async' as any;
+          img.decoding = 'async';
         });
+        preload.catch(() => {});
         coverCache.set(coverSrc, preload);
       }
     } catch (error) {
-      console.error(`Error fetching book cover for "${bookTitle}":`, error);
+      console.debug(`Cover mapping failed for "${bookTitle}"`, error);
       setImgSrc('/BookCoversNew/default-book-cover.png');
       setHasError(true);
       imageMetrics.failure++;
       if (onError) onError();
     }
-  }, [bookTitle, onError]);
+  }, [bookTitle, onError, coverCache, imageMetrics]);
 
   const handleLoad = () => {
     setIsLoading(false);
     const duration = performance.now() - (startRef.current || performance.now());
     imageMetrics.success++;
-    imageMetrics.records.push({
+    if (Array.isArray(imageMetrics.records)) imageMetrics.records.push({
       title: bookTitle,
       src: imgSrc,
       success: true,
@@ -74,9 +86,9 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
   const handleError = () => {
     const fallback = '/placeholder.svg';
     const maxRetries = 2;
-    const retries = (window as any).__imgRetries?.[imgSrc || ''] ?? 0;
+    const retries = window.__imgRetries?.[imgSrc || ''] ?? 0;
     if (imgSrc && retries < maxRetries) {
-      (window as any).__imgRetries = { ...(window as any).__imgRetries, [imgSrc]: retries + 1 };
+      window.__imgRetries = { ...(window.__imgRetries || {}), [imgSrc]: retries + 1 };
       setTimeout(() => {
         setIsLoading(true);
         setHasError(false);
@@ -89,7 +101,7 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
     setIsLoading(false);
     const duration = performance.now() - (startRef.current || performance.now());
     imageMetrics.failure++;
-    imageMetrics.records.push({
+    if (Array.isArray(imageMetrics.records)) imageMetrics.records.push({
       title: bookTitle,
       src: imgSrc,
       success: false,
@@ -113,7 +125,7 @@ const EnhancedImage: React.FC<EnhancedImageProps> = ({
           onError={handleError}
           data-original-title={bookTitle}
           loading="lazy"
-          fetchpriority="high"
+          fetchPriority="high"
           {...rest}
         />
       )}

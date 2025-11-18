@@ -31,22 +31,22 @@ function inferGenresFromTitle(title: string): string[] {
   return inferred.length ? inferred : ['General'];
 }
 
-export const applyMetadata = <T extends { id: string; author: string; genre: string; pages?: number; title?: string }>(book: T): T & { genres?: string[] } => {
+export const applyMetadata = <T extends { id: string; author: string; genre: string; pages?: number; title?: string; description?: string; tags?: string[] }>(book: T): T & { genres?: string[]; genreDescriptions?: Record<string, string>; description?: string } => {
   const o = overrides[book.id];
-  const inferred = classifyGenres({ title: (book as any).title ?? '', author: (book as any).author ?? '', description: (book as any).description ?? '', tags: (book as any).tags ?? [] });
+  const inferred = classifyGenres({ title: book.title ?? '', author: book.author ?? '', description: book.description ?? '', tags: book.tags ?? [] });
   const primary = o?.genre ?? (book.genre === 'General' ? inferred[0] : book.genre);
   const limited = (o?.genres ?? inferred).slice(0, 5);
   if (limited.length === 0) limited.push('General');
-  const desc = ensureDescription((book as any).title ?? '', (o?.author ?? book.author) || '', primary, limited);
+  const desc = ensureDescription(book.title ?? '', (o?.author ?? book.author) || '', primary, limited);
   return {
     ...book,
     author: o?.author ?? book.author,
     genre: primary,
     genres: limited,
-    genreDescriptions: Object.fromEntries(limited.map(g => [g, genreDescription(g as any)])),
-    description: (book as any).description && (book as any).description.length > 120 ? (book as any).description : desc,
+    genreDescriptions: Object.fromEntries(limited.map(g => [g, genreDescription(g)])),
+    description: book.description && book.description.length > 120 ? book.description : desc,
     pages: o?.pages ?? book.pages,
-  } as T & { genres?: string[] };
+  } as T & { genres?: string[]; genreDescriptions?: Record<string, string>; description?: string };
 };
 
 function ensureDescription(title: string, author: string, primary: string, genres: string[]): string {

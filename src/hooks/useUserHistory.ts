@@ -22,11 +22,41 @@ export function useUserHistory() {
   const { user } = useAuth();
   const lastErrorAtRef = useRef<number>(0);
   const [remoteEnabled, setRemoteEnabled] = useState(true);
+  const debounceRef = useRef<number | null>(null);
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
-    if (!user || !isSupabaseConfigured) {
-      setHistory([]);
+    if (!user) {
+      try {
+        const cached = localStorage.getItem('guest_history');
+        if (cached) {
+          const parsed = JSON.parse(cached) as UserHistoryItem[];
+          setHistory(parsed);
+          console.debug('Loaded guest history from cache', parsed);
+        } else {
+          setHistory([]);
+        }
+      } catch (e) {
+        console.warn('Guest history cache parse failed', e);
+        setHistory([]);
+      }
+      setLoading(false);
+      return;
+    }
+    if (!isSupabaseConfigured) {
+      try {
+        const cached = localStorage.getItem(cacheKeyFor(user.id));
+        if (cached) {
+          const parsed = JSON.parse(cached) as UserHistoryItem[];
+          setHistory(parsed);
+          console.debug('Loaded user history from cache', parsed);
+        } else {
+          setHistory([]);
+        }
+      } catch (e) {
+        console.warn('User history cache parse failed', e);
+        setHistory([]);
+      }
       setLoading(false);
       return;
     }
@@ -37,7 +67,7 @@ export function useUserHistory() {
         try {
           const parsed = JSON.parse(cached) as UserHistoryItem[];
           setHistory(parsed);
-        } catch {}
+        } catch (e) { console.warn('History cache parse failed', e); }
       }
 
       const { data, error } = await supabase
@@ -47,13 +77,13 @@ export function useUserHistory() {
         .order('last_read_at', { ascending: false });
 
       if (error) {
-        if ((error as any).code === 'PGRST205') {
+        if ((error as { code?: string }).code === 'PGRST205') {
           setRemoteEnabled(false);
         }
         throw error;
       }
 
-      const enriched = (data || []).map((row: any) => {
+      const enriched = (data || []).map((row: { id?: string; user_id: string; book_id: string; last_read_page?: number; last_read_at?: string; created_at?: string }) => {
         const book = books.find(b => b.id === row.book_id);
         return {
           id: row.id || `${row.user_id}-${row.book_id}`,
@@ -67,7 +97,7 @@ export function useUserHistory() {
       });
 
       setHistory(enriched);
-      localStorage.setItem(cacheKeyFor(user.id), JSON.stringify(enriched));
+      try { localStorage.setItem(cacheKeyFor(user.id), JSON.stringify(enriched)); } catch (e) { console.warn('History cache write failed', e); }
     } catch (err) {
       console.error('Could not load reading history:', err);
       const now = Date.now();
@@ -81,7 +111,28 @@ export function useUserHistory() {
   }, [user]);
 
   const updateProgress = useCallback(async (bookId: string, currentPage: number, totalPages?: number) => {
-    if (!user) return false;
+    if (!user) {
+      try {
+        const record: UserHistoryItem = {
+          id: `guest-${bookId}`,
+          user_id: 'guest',
+          book_id: bookId,
+          last_read_page: currentPage,
+          last_read_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          total_pages: books.find(b => b.id === bookId)?.pages,
+        };
+        const next = [...history.filter(h => h.book_id !== bookId), record]
+          .sort((a,b) => new Date(b.last_read_at).getTime() - new Date(a.last_read_at).getTime())
+          .slice(0,5);
+        setHistory(next);
+        try { localStorage.setItem('guest_history', JSON.stringify(next)); } catch { void 0 }
+        console.debug('Updated guest reading progress', record);
+        return true;
+      } catch {
+        return false;
+      }
+    }
     try {
       if (!bookId || typeof bookId !== 'string') {
         toast.error('Invalid book reference');
@@ -103,7 +154,7 @@ export function useUserHistory() {
             .eq('id', bookId)
             .limit(1);
           if (!existsErr && (exists || []).length > 0) bookExists = true;
-        } catch {}
+        } catch (e) { console.warn('Book exists check failed', e); }
 
         if (!bookExists) {
           try {
@@ -112,7 +163,7 @@ export function useUserHistory() {
               .from('books')
               .insert({ id: bookId, title: book?.title || bookId, pdf_path: book?.pdfPath || `/books/${bookId}.pdf`, pages: book?.pages || null });
             if (!insertErr) bookExists = true;
-          } catch {}
+          } catch (e) { console.warn('Insert book failed', e); }
         }
 
         const { error } = await supabase
@@ -120,7 +171,7 @@ export function useUserHistory() {
           .upsert(record, { onConflict: 'user_id,book_id' });
 
         if (error) {
-          if ((error as any).code === 'PGRST205') {
+          if ((error as { code?: string }).code === 'PGRST205') {
             setRemoteEnabled(false);
           }
           console.error('Reading history upsert failed:', error);
@@ -143,15 +194,30 @@ export function useUserHistory() {
               total_pages: totalPages ?? books.find(b => b.id === bookId)?.pages,
             }];
         const sorted = [...next].sort((a,b) => new Date(b.last_read_at).getTime() - new Date(a.last_read_at).getTime());
+        // Enforce queue capacity: keep only top 5 newest items
+        const capped = sorted.slice(0, 5);
+        // Attempt to remove extras remotely (best-effort)
+        if (sorted.length > 5 && isSupabaseConfigured) {
+          const extras = sorted.slice(5);
+          extras.forEach(async (h) => {
+            try {
+              await supabase
+                .from('reading_history')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('book_id', h.book_id);
+            } catch (e) { console.warn('Remote history deletion failed', e); }
+          });
+        }
         try {
-          localStorage.setItem(cacheKeyFor(user.id), JSON.stringify(sorted));
-        } catch {}
-        return sorted;
+          localStorage.setItem(cacheKeyFor(user.id), JSON.stringify(capped));
+        } catch (e) { console.warn('History cache write failed', e); }
+        return capped;
       });
 
       return true;
     } catch (err) {
-      const message = (err as any)?.message || 'Failed to save progress';
+      const message = (err as Error)?.message || 'Failed to save progress';
       toast.error(message);
       return false;
     }
@@ -166,7 +232,14 @@ export function useUserHistory() {
   }, [history]);
 
   const removeFromHistory = useCallback(async (bookId: string) => {
-    if (!user) return false;
+    if (!user) {
+      setHistory(prev => {
+        const next = prev.filter(h => h.book_id !== bookId);
+        try { localStorage.setItem('guest_history', JSON.stringify(next)); } catch { void 0 }
+        return next;
+      });
+      return true;
+    }
     try {
       await supabase
         .from('reading_history')
@@ -177,7 +250,7 @@ export function useUserHistory() {
         const next = prev.filter(h => h.book_id !== bookId);
         try {
           localStorage.setItem(cacheKeyFor(user.id), JSON.stringify(next));
-        } catch {}
+        } catch (e) { console.warn('History cache write failed', e); }
         return next;
       });
       return true;
@@ -189,6 +262,19 @@ export function useUserHistory() {
   useEffect(() => {
     loadHistory();
   }, [loadHistory]);
+
+  // Realtime subscription for reading history changes
+  useEffect(() => {
+    if (!user || !isSupabaseConfigured) return;
+    const subscription = supabase
+      .channel('reading_history_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'reading_history', filter: `user_id=eq.${user.id}` }, () => {
+        if (debounceRef.current) window.clearTimeout(debounceRef.current);
+        debounceRef.current = window.setTimeout(() => loadHistory(), 400);
+      })
+      .subscribe();
+    return () => { subscription.unsubscribe(); };
+  }, [user, loadHistory]);
 
   return {
     history,

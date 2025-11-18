@@ -103,7 +103,7 @@ export function useReadingGoals() {
       }
 
       // Use the returned data from Supabase if available
-      const savedGoal = data && data.length > 0 ? data[0] : { ...insertPayload, id: goal.id || '', created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as any;
+      const savedGoal: ReadingGoal = data && data.length > 0 ? (data[0] as ReadingGoal) : { ...insertPayload, id: goal.id || '', created_at: new Date().toISOString() } as ReadingGoal;
       
       // Update local state
       setGoals(prev => [savedGoal, ...prev]);

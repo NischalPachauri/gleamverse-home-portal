@@ -1,7 +1,7 @@
 import { Book } from "@/data/books";
 import { BookCard } from "@/components/BookCard";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, LucideIcon, Bookmark } from "lucide-react";
+import { ChevronLeft, ChevronRight, LucideIcon, Bookmark, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ImageWithFallback } from "./ImageWithFallback";
@@ -45,16 +45,7 @@ export const BookmarkGrid = ({
     (currentPage + 1) * BOOKS_PER_PAGE
   );
   const [forcedVisible, setForcedVisible] = useState<Record<string, boolean>>({});
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem('gleamverse_favorites') || '[]'); } catch { return []; }
-  });
-  const toggleFavorite = (id: string) => {
-    const sid = id.toString();
-    const next = favorites.includes(sid) ? favorites.filter(x => x !== sid) : [...favorites, sid];
-    setFavorites(next);
-    try { localStorage.setItem('gleamverse_favorites', JSON.stringify(next)); } catch {}
-  };
-  const longPressTimers = useRef<Record<string, any>>({});
+  const longPressTimers = useRef<Record<string, number>>({});
 
   const handlePointerDown = (id: string) => {
     clearTimeout(longPressTimers.current[id]);
@@ -68,7 +59,7 @@ export const BookmarkGrid = ({
 
   // Add focus when section becomes active
   useEffect(() => {
-    if (isActive && gridRef.current) {
+    if (isActive && gridRef.current && typeof gridRef.current.scrollIntoView === 'function') {
       gridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [isActive]);
@@ -158,13 +149,13 @@ export const BookmarkGrid = ({
                   <DropdownMenuTrigger asChild>
                     <button
                       aria-label="Bookmark options"
-                      className={`absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-slate-900/70 text-white flex items-center justify-center transition-all duration-200 ${forcedVisible[book.id] ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} hover:scale-110`}
+                      className={`absolute top-2 right-2 z-10 h-8 w-8 rounded-full bg-slate-900/70 text-white flex items-center justify-center transition-all duration-200 ${forcedVisible[book.id] ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100'} hover:scale-110`}
                     >
                       <Bookmark className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="min-w-[200px]">
-                    {(['Planning to Read','Reading','On Hold','Completed'] as const).map((status) => (
+                  <DropdownMenuContent align="end" className="min-w-[140px] -translate-y-[10px] transition-transform">
+                    {(['Planning to Read','Reading','On Hold','Completed','Favorites'] as const).map((status) => (
                       <DropdownMenuItem
                         key={status}
                         onClick={async () => {
@@ -174,20 +165,15 @@ export const BookmarkGrid = ({
                           } else if (current === status) {
                             await removeBookmark(book.id);
                           } else {
-                            await updateBookmarkStatus(book.id, status as any);
+                            await updateBookmarkStatus(book.id, status);
                           }
                         }}
                         className="justify-between"
                       >
                         <span>{status}</span>
-                        {bookmarkStatuses[book.id] === status && <span className="text-xs opacity-60">Selected</span>}
+                        {bookmarkStatuses[book.id] === status && <Check className="w-3.5 h-3.5 opacity-80" />}
                       </DropdownMenuItem>
                     ))}
-                    <div className="h-px bg-border my-1" />
-                    <DropdownMenuItem onClick={() => toggleFavorite(book.id)} className="justify-between">
-                      <span>Favorite</span>
-                      {favorites.includes(book.id.toString()) && <span className="text-xs opacity-60">Added</span>}
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

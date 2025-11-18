@@ -1,4 +1,4 @@
-import { ArrowLeft, ZoomIn, ZoomOut, Download, BookOpen, Book, Music, Maximize, Minimize, Sun, Moon, FileText, Hand } from 'lucide-react';
+import { ArrowLeft, Download, BookOpen, Book, Music, Maximize, Minimize, Sun, Moon, FileText } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
  
@@ -10,8 +10,6 @@ import { useState } from 'react';
 interface BookHeaderProps {
   bookInfo: { title: string; author: string };
   bookCoverSrc?: string;
-  magnification: number;
-  onMagnificationChange: (size: number) => void;
   theme: 'light' | 'sepia' | 'dark';
   onThemeChange: (theme: 'light' | 'sepia' | 'dark') => void;
   pageMode: 'single' | 'double';
@@ -33,8 +31,6 @@ interface BookHeaderProps {
 export function BookHeader({
   bookInfo,
   bookCoverSrc,
-  magnification,
-  onMagnificationChange,
   theme,
   onThemeChange,
   pageMode,
@@ -58,14 +54,6 @@ export function BookHeader({
   const handleDownload = () => { if (onDownload) onDownload(); };
   const handleBackToLibrary = () => { if (onBack) onBack(); };
 
-  const increaseMagnification = () => { 
-    if (magnification < 200) onMagnificationChange(Math.min(200, magnification + 10)); 
-  };
-  
-  const decreaseMagnification = () => { 
-    if (magnification > 50) onMagnificationChange(Math.max(50, magnification - 10)); 
-  };
-
   const commitPageJump = () => {
     const page = parseInt(pageInput);
     if (page >= 1 && page <= totalPages) onPageJump(page);
@@ -74,9 +62,9 @@ export function BookHeader({
   };
 
   const themeColors = {
-    light: 'bg-gradient-to-r from-blue-50/95 via-indigo-50/95 to-purple-50/95 backdrop-blur-md border-blue-200 text-gray-900',
-    sepia: 'bg-gradient-to-r from-amber-50/95 via-orange-50/95 to-yellow-50/95 backdrop-blur-md border-amber-300 text-amber-950',
-    dark: 'bg-gradient-to-r from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-md border-slate-700 text-gray-100'
+    light: 'bg-gradient-to-r from-blue-100/95 via-indigo-100/95 to-purple-100/95 backdrop-blur-md border-blue-300 text-gray-900',
+    sepia: 'bg-gradient-to-r from-amber-200/95 via-orange-200/95 to-yellow-200/95 backdrop-blur-md border-amber-500 text-amber-950',
+    dark: 'bg-gradient-to-r from-slate-800/95 via-slate-800/95 to-slate-900/95 backdrop-blur-md border-slate-700 text-gray-100'
   } as const;
 
   const buttonHover = {
@@ -190,58 +178,13 @@ export function BookHeader({
 
             <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
 
-            {/* Magnification Controls */}
-            <div className="flex items-center gap-1 rounded-lg p-1">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={decreaseMagnification} 
-                disabled={magnification <= 50} 
-                className={`size-8 p-0 ${buttonHover[theme]} transition-colors disabled:opacity-30`}
-                title="Zoom out (Ctrl + -)"
-                aria-label="Zoom out"
-              >
-                <ZoomOut className="size-4" />
-              </Button>
-              <span className="text-xs font-bold px-2 min-w-[3.5rem] text-center tabular-nums">
-                {magnification}%
-              </span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={increaseMagnification} 
-              disabled={magnification >= 200} 
-              className={`size-8 p-0 ${buttonHover[theme]} transition-colors disabled:opacity-30`}
-              title="Zoom in (Ctrl + +)"
-              aria-label="Zoom in"
-            >
-              <ZoomIn className="size-4" />
-            </Button>
-            </div>
+            {/* Magnification removed */}
 
             
 
             <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
 
-            {/* Pan Tool Toggle */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onTogglePanMode} 
-                className={`size-9 p-0 transition-all ${
-                  isPanMode 
-                    ? theme === 'light' ? 'bg-blue-200 text-blue-700 hover:bg-blue-300' :
-                      theme === 'sepia' ? 'bg-amber-200 text-amber-800 hover:bg-amber-300' :
-                      'bg-indigo-700 text-indigo-100 hover:bg-indigo-600'
-                    : buttonHover[theme]
-                }`}
-                title={isPanMode ? "Disable pan mode (H)" : "Enable pan mode (H)"}
-                aria-pressed={isPanMode}
-              >
-                <Hand className={`size-5 ${isPanMode ? 'animate-pulse' : ''}`} />
-              </Button>
-
-            <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
+            
 
             {/* Page Mode Toggle */}
               <Button 
@@ -302,17 +245,7 @@ export function BookHeader({
         </div>
       </div>
       
-      {/* Enhanced Progress Bar */}
-      <div className="h-1 w-full bg-black/10 dark:bg-white/10" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <div 
-          className={`h-full transition-all duration-500 ${
-            theme === 'light' ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500' :
-            theme === 'sepia' ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500' :
-            'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500'
-          }`}
-          style={{ width: `${pct}%` }} 
-        />
-      </div>
+      {/* Progress bar removed for cleaner reading footer */}
     </header>
   );
 }
