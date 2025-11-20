@@ -244,6 +244,7 @@ export function HelpPage() {
                     </p>
                     <ul className={`text-sm space-y-2 list-disc pl-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       <li>Adjusting text size and theme</li>
+                      <li>Single-page reading (page flip removed)</li>
                       <li>Using bookmarks and highlights</li>
                       <li>Taking notes</li>
                       <li>Background music options</li>
@@ -423,7 +424,7 @@ export function HelpPage() {
                             variant="link"
                             size="sm"
                             className={`px-0 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}
-                            onClick={() => document.querySelector('[data-value="faq"]')?.click()}
+                            onClick={() => (document.querySelector('[data-value="faq"]') as HTMLElement | null)?.click()}
                           >
                             View FAQs
                           </Button>

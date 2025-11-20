@@ -30,8 +30,8 @@ const AuthContext = createContext<AuthContextType>({
   signUp: async () => null,
   signIn: async () => null,
   verifyOtp: async () => null,
-  signOut: async () => {},
-  resetPassword: async () => {},
+  signOut: async () => { },
+  resetPassword: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!email || !password) {
         throw new Error('Email and password are required');
       }
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -86,11 +86,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           status: error.status,
           name: error.name,
           message: error.message,
-          details: error.details
+          details: (error as { details?: string })?.details
         });
         throw error;
       }
-      
+
       // Log successful registration
       console.log('Registration successful for:', email);
       toast.success('Registration successful! Please check your email to verify your account.');
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         status: supabaseError.status,
         stack: supabaseError.stack
       });
-      
+
       // User-friendly error messages
       if (supabaseError.message?.includes('API key')) {
         toast.error('Authentication service unavailable. Please try again later.');
@@ -184,7 +184,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (error: unknown) {
       const supabaseError = error as SupabaseError;
       console.error('Sign in error:', supabaseError);
-      
+
       // Detailed error handling with specific user messages
       if (supabaseError.status === 429) {
         toast.error('Too many sign-in attempts. Please try again later.');
@@ -204,21 +204,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
       // Clear any local auth data
       try {
         localStorage.removeItem('auth_fallback_user');
       } catch (storageError) {
         console.warn('Failed to clear local auth data:', storageError);
       }
-      
+
       setUser(null);
       toast.success('Signed out successfully');
     } catch (error: unknown) {
       const supabaseError = error as SupabaseError;
       console.error('Sign out error:', supabaseError);
       toast.error(supabaseError.error_description || supabaseError.message || 'Failed to sign out');
-      
+
       // Force sign out on client side even if API call fails
       setUser(null);
     } finally {
@@ -229,24 +229,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const resetPassword = async (email: string) => {
     try {
       setLoading(true);
-      
+
       // Validate email
       if (!email || !email.includes('@')) {
         toast.error('Please enter a valid email address');
         return;
       }
-      
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
 
       if (error) throw error;
-      
+
       toast.success('Password reset email sent! Check your inbox.');
     } catch (error: unknown) {
       const supabaseError = error as SupabaseError;
       console.error('Password reset error:', supabaseError);
-      
+
       // Specific error messages based on error type
       if (supabaseError.status === 429) {
         toast.error('Too many password reset attempts. Please try again later.');

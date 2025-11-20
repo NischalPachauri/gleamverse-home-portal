@@ -59,7 +59,7 @@ export const Footer = () => {
               <li>
                 <a href="#" onClick={(e) => { 
                   e.preventDefault(); 
-                  const searchInput = document.querySelector('input[placeholder*="Search"]');
+                  const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement | null;
                   if (searchInput) {
                     searchInput.scrollIntoView({ behavior: 'smooth' });
                     searchInput.focus();

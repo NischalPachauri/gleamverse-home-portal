@@ -1,24 +1,23 @@
-import { ArrowLeft, Download, BookOpen, Book, Music, Maximize, Minimize, Sun, Moon, FileText } from 'lucide-react';
+import { ArrowLeft, Download, BookOpen, Book, Music, Maximize, Minimize, Sun, Moon, FileText, Palette } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
- 
 import { Separator } from '@/components/ui/separator';
 import { ImageWithFallback } from '@/components/ImageWithFallback';
 import { Input } from '@/components/ui/input';
 import { useState } from 'react';
+import { readerConfig, ReaderTheme } from '@/config/readerConfig';
 
 interface BookHeaderProps {
   bookInfo: { title: string; author: string };
   bookCoverSrc?: string;
-  theme: 'light' | 'sepia' | 'dark';
-  onThemeChange: (theme: 'light' | 'sepia' | 'dark') => void;
+  theme: ReaderTheme;
+  onThemeChange: (theme: ReaderTheme) => void;
   pageMode: 'single' | 'double';
   onPageModeChange: (mode: 'single' | 'double') => void;
   currentPage: number;
   totalPages: number;
   backgroundMusic: string;
   onBackgroundMusicChange: (music: string) => void;
-  musicOptions?: { value: string; label: string }[];
   isFullscreen: boolean;
   onToggleFullscreen: () => void;
   onPageJump: (page: number) => void;
@@ -39,7 +38,6 @@ export function BookHeader({
   totalPages,
   backgroundMusic,
   onBackgroundMusicChange,
-  musicOptions,
   isFullscreen,
   onToggleFullscreen,
   onPageJump,
@@ -61,76 +59,55 @@ export function BookHeader({
     setPageInput('');
   };
 
-  const themeColors = {
-    light: 'bg-gradient-to-r from-blue-100/95 via-indigo-100/95 to-purple-100/95 backdrop-blur-md border-blue-300 text-gray-900',
-    sepia: 'bg-gradient-to-r from-amber-200/95 via-orange-200/95 to-yellow-200/95 backdrop-blur-md border-amber-500 text-amber-950',
-    dark: 'bg-gradient-to-r from-slate-800/95 via-slate-800/95 to-slate-900/95 backdrop-blur-md border-slate-700 text-gray-100'
-  } as const;
+  const currentTheme = readerConfig.themes[theme];
 
-  const buttonHover = {
-    light: 'hover:bg-blue-100/50',
-    sepia: 'hover:bg-amber-100/50',
-    dark: 'hover:bg-slate-700/50'
-  } as const;
-
-  const inputBg = {
-    light: 'bg-blue-50/50 border-blue-200 focus:border-blue-400',
-    sepia: 'bg-amber-50/50 border-amber-300 focus:border-amber-500',
-    dark: 'bg-slate-800/50 border-slate-600 focus:border-slate-400'
-  } as const;
-
-  const selectBg = {
-    light: 'bg-blue-100/40 border-blue-300',
-    sepia: 'bg-amber-100/40 border-amber-400',
-    dark: 'bg-slate-800/60 border-slate-600'
-  } as const;
-
-
-  const themeIcons = { 
-    light: <Sun className="size-5" />, 
-    sepia: <FileText className="size-5" />, 
-    dark: <Moon className="size-5" /> 
+  const themeIcons = {
+    light: <Sun className="size-5" />,
+    sepia: <FileText className="size-5" />,
+    dark: <Moon className="size-5" />,
+    midnight: <Moon className="size-5" />,
+    forest: <Palette className="size-5" />
   } as const;
 
   const pct = Math.max(0, Math.min(100, totalPages ? (currentPage / totalPages) * 100 : 0));
 
   return (
-    <header className={`${themeColors[theme]} border-b-2 transition-all duration-300 shadow-sm`} role="banner" aria-label="Reader header">
-      <div className="px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+    <header className={`${currentTheme.panelBg} backdrop-blur-2xl border-b ${currentTheme.panelBorder} ${currentTheme.text} transition-all duration-300 shadow-md relative z-50`} role="banner" aria-label="Reader header">
+      <div className="px-6 py-4">
+        <div className="flex items-center justify-between gap-6">
           {/* Left Section - Back Button, Cover, and Title */}
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleBackToLibrary} 
-              className={`gap-2 flex-shrink-0 ${buttonHover[theme]} transition-colors`}
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBackToLibrary}
+              className={`gap-2 flex-shrink-0 hover:bg-black/5 transition-colors h-10 px-4`}
               aria-label="Back to Library"
             >
-              <ArrowLeft className="size-4" />
-              <span className="hidden sm:inline font-medium">Library</span>
+              <ArrowLeft className="size-5" />
+              <span className="hidden sm:inline font-medium text-sm">Library</span>
             </Button>
-            
-            <Separator orientation="vertical" className="h-8 flex-shrink-0 bg-current opacity-20" />
-            
-            {/* Book Cover and Title - No Gap */}
-            <div className="flex items-center gap-3 min-w-0" aria-label="Book identity">
-              <ImageWithFallback 
-                src={bookCoverSrc || "/placeholder.svg"} 
-                alt={bookInfo.title} 
-                className="h-14 w-auto object-cover rounded shadow-md flex-shrink-0 ring-1 ring-black/10" 
+
+            <Separator orientation="vertical" className="h-10 flex-shrink-0 bg-current opacity-10" />
+
+            {/* Book Cover and Title */}
+            <div className="flex items-center gap-5 min-w-0" aria-label="Book identity">
+              <ImageWithFallback
+                src={bookCoverSrc || "/placeholder.svg"}
+                alt={bookInfo.title}
+                className="h-14 w-auto object-cover rounded-md shadow-sm flex-shrink-0 ring-1 ring-black/5"
               />
-              <div className="min-w-0 max-w-md">
-                <h1 className="text-base font-bold leading-tight line-clamp-2">
+              <div className="min-w-0 flex flex-col justify-center">
+                <h1 className="text-xl font-bold leading-tight truncate pr-4 tracking-tight">
                   {bookInfo.title}
                 </h1>
-                <p className="text-xs opacity-70 truncate mt-0.5">{bookInfo.author}</p>
+                <p className="text-sm opacity-60 truncate font-medium">{bookInfo.author}</p>
               </div>
             </div>
           </div>
 
           {/* Center - Page Number */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             {editingPage ? (
               <Input
                 type="number"
@@ -140,112 +117,109 @@ export function BookHeader({
                 value={pageInput}
                 onChange={(e) => setPageInput(e.target.value)}
                 onBlur={commitPageJump}
-                onKeyDown={(e) => { 
-                  if (e.key === 'Enter') commitPageJump(); 
-                  if (e.key === 'Escape') { setEditingPage(false); setPageInput(''); } 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commitPageJump();
+                  if (e.key === 'Escape') { setEditingPage(false); setPageInput(''); }
                 }}
                 placeholder={`${currentPage}`}
-                className={`h-10 w-28 text-center text-base font-semibold rounded-md ${inputBg[theme]} focus:outline-none focus:ring-2 focus:ring-blue-500/50`}
+                className={`h-10 w-24 text-center text-sm font-semibold rounded-lg bg-white/10 border-white/20 focus:ring-2 focus:ring-blue-500/50 shadow-inner`}
                 aria-label="Jump to page"
               />
             ) : (
               <button
                 onClick={() => { setEditingPage(true); setPageInput(String(currentPage)); }}
-                className={`text-base font-semibold px-3 py-2 rounded-md ${buttonHover[theme]} transition-colors`}
+                className={`text-sm font-semibold px-4 py-2 rounded-lg hover:bg-black/5 transition-all duration-200 tabular-nums tracking-wide`}
                 title="Click to jump to page"
                 aria-label={`Current page ${currentPage} of ${totalPages}`}
               >
-                {`${currentPage} / ${totalPages}`}
+                {currentPage} <span className="opacity-30 mx-2">/</span> {totalPages}
               </button>
             )}
           </div>
 
           {/* Right Section - All Controls */}
-          <div className="flex items-center gap-1.5 flex-1 justify-end">
+          <div className="flex items-center gap-3 flex-1 justify-end">
             {/* Theme Selector */}
-            <button 
-              onClick={() => {
-                const themes: ('light' | 'sepia' | 'dark')[] = ['light', 'sepia', 'dark'];
-                const idx = themes.indexOf(theme);
-                onThemeChange(themes[(idx + 1) % 3]);
-              }}
-              className={`inline-flex items-center justify-center rounded-md size-9 ${buttonHover[theme]} transition-colors`}
-              title="Change theme (T)"
-              aria-label="Change theme"
-            >
-              {themeIcons[theme]}
-            </button>
-
-            <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
-
-            {/* Magnification removed */}
-
-            
-
-            <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
-
-            
-
-            {/* Page Mode Toggle */}
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => onPageModeChange(pageMode === 'single' ? 'double' : 'single')} 
-                className={`size-9 p-0 ${buttonHover[theme]} transition-colors`}
-                title={pageMode === 'single' ? 'Switch to double page (D)' : 'Switch to single page (D)'}
-                aria-label="Toggle page mode"
-              >
-                {pageMode === 'single' ? <Book className="size-5" /> : <BookOpen className="size-5" />}
-              </Button>
-
-            <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
-
-            {/* Music Selector */}
-            <Select value={backgroundMusic} onValueChange={onBackgroundMusicChange}>
-              <SelectTrigger className={`w-[140px] h-9 text-sm rounded-md border ${selectBg[theme]} transition-colors`}>
-                <Music className="size-4 mr-1.5" />
-                <SelectValue placeholder="Music" />
+            <Select value={theme} onValueChange={(v) => onThemeChange(v as ReaderTheme)}>
+              <SelectTrigger className="w-[110px] h-10 text-xs font-medium rounded-lg border-0 bg-black/5 hover:bg-black/10 transition-colors focus:ring-0 shadow-sm">
+                <div className="flex items-center gap-2.5">
+                  {themeIcons[theme as keyof typeof themeIcons] || <Palette className="size-4" />}
+                  <span className="truncate">{readerConfig.themes[theme].name}</span>
+                </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No Music</SelectItem>
-                {(musicOptions || []).map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                {Object.entries(readerConfig.themes).map(([key, t]) => (
+                  <SelectItem key={key} value={key} className="text-xs font-medium">{t.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
 
-            <Separator orientation="vertical" className="h-5 bg-current opacity-20" />
+            <Separator orientation="vertical" className="h-6 bg-current opacity-10" />
 
-            
+            {/* Page Mode Toggle */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onPageModeChange(pageMode === 'single' ? 'double' : 'single')}
+              className={`size-10 p-0 hover:bg-black/5 transition-colors rounded-lg`}
+              title={pageMode === 'single' ? 'Switch to double page (D)' : 'Switch to single page (D)'}
+              aria-label="Toggle page mode"
+            >
+              {pageMode === 'single' ? <Book className="size-5 opacity-70" /> : <BookOpen className="size-5 opacity-70" />}
+            </Button>
+
+            <Separator orientation="vertical" className="h-6 bg-current opacity-10" />
+
+            {/* Music Selector */}
+            <Select value={backgroundMusic} onValueChange={onBackgroundMusicChange}>
+              <SelectTrigger className={`w-[140px] h-10 text-xs font-medium rounded-lg border-0 bg-black/5 hover:bg-black/10 transition-colors focus:ring-0 shadow-sm`}>
+                <Music className="size-4 mr-2 opacity-70" />
+                <SelectValue placeholder="Music" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none" className="text-xs">No Music</SelectItem>
+                {readerConfig.musicTracks.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value} className="text-xs">{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Separator orientation="vertical" className="h-6 bg-current opacity-10" />
 
             {/* Download Button */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleDownload} 
-              className={`size-9 p-0 ${buttonHover[theme]} transition-colors`}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownload}
+              className={`size-10 p-0 hover:bg-black/5 transition-colors rounded-lg`}
               title="Download PDF"
               aria-label="Download PDF"
             >
-              <Download className="size-5" />
+              <Download className="size-5 opacity-70" />
             </Button>
 
             {/* Fullscreen Toggle */}
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onToggleFullscreen} 
-              className={`size-9 p-0 ${buttonHover[theme]} transition-colors`}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onToggleFullscreen}
+              className={`size-10 p-0 hover:bg-black/5 transition-colors rounded-lg`}
               title={isFullscreen ? 'Exit fullscreen (F)' : 'Enter fullscreen (F)'}
               aria-pressed={isFullscreen}
             >
-              {isFullscreen ? <Minimize className="size-5" /> : <Maximize className="size-5" />}
+              {isFullscreen ? <Minimize className="size-5 opacity-70" /> : <Maximize className="size-5 opacity-70" />}
             </Button>
           </div>
         </div>
       </div>
-      
-      {/* Progress bar removed for cleaner reading footer */}
+
+      {/* Progress Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/5">
+        <div
+          className="h-full bg-blue-500/80 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
     </header>
   );
 }

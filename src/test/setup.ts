@@ -33,26 +33,26 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
+  constructor() { }
+  disconnect() { }
+  observe() { }
+  unobserve() { }
   takeRecords() {
     return [];
   }
-};
+} as unknown as IntersectionObserver;
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
-  constructor() {}
-  disconnect() {}
-  observe() {}
-  unobserve() {}
+  constructor() { }
+  disconnect() { }
+  observe() { }
+  unobserve() { }
 };
 
 // Mock performance APIs
 Object.defineProperty(global, 'performance', {
-  value: {
+  value: ({
     now: vi.fn(() => Date.now()),
     mark: vi.fn(),
     measure: vi.fn(),
@@ -60,7 +60,7 @@ Object.defineProperty(global, 'performance', {
     clearMeasures: vi.fn(),
     getEntriesByType: vi.fn(() => []),
     getEntriesByName: vi.fn(() => []),
-  } as Performance,
+  } as unknown) as Performance,
 });
 
 // Mock PerformanceObserver
@@ -69,8 +69,9 @@ global.PerformanceObserver = class PerformanceObserver {
   constructor(callback: (list: PerformanceObserverEntryList, observer: PerformanceObserver) => void) {
     this.callback = callback;
   }
-  observe() {}
-  disconnect() {}
+  observe() { }
+  disconnect() { }
+  static get supportedEntryTypes() { return []; }
 };
 
 // Mock fetch

@@ -39,15 +39,15 @@ describe('useUserHistory queue', () => {
     for (let i = 0; i < 5; i++) {
       await act(async () => { await result.current.updateProgress(`b${i}`, 1 + i) })
     }
-    const initialOrder = result.current.history.map(h => h.book_id)
+    const initialOrder = result.current.history.map((h: any) => h.book_id)
     expect(initialOrder.length).toBe(5)
     // Update b2 to make it newest
     await act(async () => { await result.current.updateProgress('b2', 99) })
-    const afterUpdateOrder = result.current.history.map(h => h.book_id)
+    const afterUpdateOrder = result.current.history.map((h: any) => h.book_id)
     expect(afterUpdateOrder[0]).toBe('b2')
     // Add 6th book; oldest should be evicted
     await act(async () => { await result.current.updateProgress('b6', 1) })
-    const finalOrder = result.current.history.map(h => h.book_id)
+    const finalOrder = result.current.history.map((h: any) => h.book_id)
     expect(finalOrder.length).toBe(5)
     expect(finalOrder.includes('b6')).toBe(true)
     expect(['b6','b2']).toContain(finalOrder[0])

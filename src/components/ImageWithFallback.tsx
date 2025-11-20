@@ -33,7 +33,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [imgSrc, setImgSrc] = useState<string>(src);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
-  const imageMetrics = window.__imageMetrics || (window.__imageMetrics = { success: 0, failure: 0 });
+  const imageMetrics = window.__imageMetrics || (window.__imageMetrics = { success: 0, failure: 0, records: [] });
   const coverCache = window.__coverCache || (window.__coverCache = new Map<string, Promise<void>>());
   const coverLoaded: Set<string> = window.__coverLoaded || (window.__coverLoaded = new Set<string>());
 
@@ -120,7 +120,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
 export default ImageWithFallback;
 declare global {
   interface Window {
-    __imageMetrics?: { success: number; failure: number };
+    __imageMetrics?: { success: number; failure: number; records: { title: string; src: string; success: boolean; duration: number; ts: number; }[] };
     __coverCache?: Map<string, Promise<void>>;
     __coverLoaded?: Set<string>;
     __imgRetries?: Record<string, number>;

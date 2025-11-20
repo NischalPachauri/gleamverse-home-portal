@@ -1,20 +1,8 @@
+import { Book } from "../types/profile";
+
 // Book data based on available PDFs in public/books
-export interface Book {
-  id: string;
-  title: string;
-  author: string;
-  genre: string;
-  genres?: string[];
-  genreDescriptions?: Record<string, string>;
-  description: string;
-  coverImage?: string;
-  pdfPath: string;
-  publishYear?: number;
-  pages?: number;
-  rating?: number;
-  language?: string;
-  tags?: string[];
-}
+export type { Book };
+
 
 export const books: Book[] = [
   {
@@ -1161,7 +1149,7 @@ export const books: Book[] = [
     genre: "General",
     description: "A book titled \"Harry Potter Complete Collection\".",
     coverImage: "Harry Potter Complete Collection",
-    pdfPath: "/books/Harry Potter Complete Collection.pdf",
+    pdfPath: "/books/test.pdf",
     publishYear: 2020,
     pages: 200,
     rating: 3.5,
@@ -4359,14 +4347,14 @@ export const getBookById = (id: string): Book | undefined => {
 };
 
 export const getBooksByGenre = (genre: string): Book[] => {
-  return books.filter(book => 
+  return books.filter(book =>
     book.genre.toLowerCase() === genre.toLowerCase()
   );
 };
 
 export const searchBooks = (query: string): Book[] => {
   const lowercaseQuery = query.toLowerCase();
-  return books.filter(book => 
+  return books.filter(book =>
     book.title.toLowerCase().includes(lowercaseQuery) ||
     book.author.toLowerCase().includes(lowercaseQuery) ||
     book.genre.toLowerCase().includes(lowercaseQuery) ||
@@ -4376,31 +4364,31 @@ export const searchBooks = (query: string): Book[] => {
 };
 
 export const getBooksByAuthor = (author: string): Book[] => {
-  return books.filter(book => 
+  return books.filter(book =>
     book.author.toLowerCase().includes(author.toLowerCase())
   );
 };
 
 export const getBooksByLanguage = (language: string): Book[] => {
-  return books.filter(book => 
+  return books.filter(book =>
     book.language && book.language.toLowerCase() === language.toLowerCase()
   );
 };
 
 export const getBooksByYearRange = (startYear: number, endYear: number): Book[] => {
-  return books.filter(book => 
+  return books.filter(book =>
     book.publishYear && book.publishYear >= startYear && book.publishYear <= endYear
   );
 };
 
 export const getBooksByRating = (minRating: number): Book[] => {
-  return books.filter(book => 
+  return books.filter(book =>
     book.rating && book.rating >= minRating
   );
 };
 
 export const getBooksByTag = (tag: string): Book[] => {
-  return books.filter(book => 
+  return books.filter(book =>
     book.tags && book.tags.some(t => t.toLowerCase() === tag.toLowerCase())
   );
 };

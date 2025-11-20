@@ -5,7 +5,7 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: ReactNode | ((args: { error: Error; resetErrorBoundary: () => void }) => ReactNode);
   onReset?: () => void;
   name?: string;
 }
@@ -50,6 +50,12 @@ class ErrorBoundary extends Component<Props, State> {
   render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
+        if (typeof this.props.fallback === 'function') {
+          return (this.props.fallback as (args: { error: Error; resetErrorBoundary: () => void }) => ReactNode)({
+            error: this.state.error || new Error('Unknown error'),
+            resetErrorBoundary: this.resetErrorBoundary
+          });
+        }
         return this.props.fallback;
       }
 

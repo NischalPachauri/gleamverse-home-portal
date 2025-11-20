@@ -86,7 +86,7 @@ export function useReadingGoals() {
         title: goal.title,
         description: goal.description ?? null,
         target_books: Number(goal.target_books ?? 1),
-        completed_books: Number(goal.completed_books ?? 0),
+        completed_books: Number(('completed_books' in goal ? (goal as ReadingGoal).completed_books : 0)),
         book_ids: goal.book_ids ?? [],
         deadline: goal.deadline ?? null,
       };
@@ -103,7 +103,9 @@ export function useReadingGoals() {
       }
 
       // Use the returned data from Supabase if available
-      const savedGoal: ReadingGoal = data && data.length > 0 ? (data[0] as ReadingGoal) : { ...insertPayload, id: goal.id || '', created_at: new Date().toISOString() } as ReadingGoal;
+      const savedGoal: ReadingGoal = data && data.length > 0
+        ? (data[0] as ReadingGoal)
+        : { ...insertPayload, id: (('id' in goal ? (goal as ReadingGoal).id : '')), created_at: new Date().toISOString() } as ReadingGoal;
       
       // Update local state
       setGoals(prev => [savedGoal, ...prev]);

@@ -405,3 +405,24 @@ All colors MUST be HSL.
 /* Scroll reveal animations */
 .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
 .reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* 3D Page Flip Animation */
+.perspective-container {
+  perspective: 2000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-0 {
+  transform: rotateY(0deg);
+}
+
+.rotate-y-90 {
+  transform: rotateY(-90deg);
+}
+
+.-rotate-y-90 {
+  transform: rotateY(90deg);
+}

@@ -1,12 +1,14 @@
-import { ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreVertical, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { TurnFlipReader } from '@/components/reader/turn_flip_reader';
+import { toast } from 'sonner';
 import { useUserHistory } from '@/hooks/useUserHistory';
+import { FlipBookViewer } from '@/components/FlipBookViewer';
 
 import BookHeader from '@/components/reader/BookHeader';
 import ChapterMenu from '@/components/reader/ChapterMenu';
+import { readerConfig, ReaderTheme } from '@/config/readerConfig';
 
 try {
   (pdfjs as unknown as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
@@ -18,7 +20,7 @@ interface BookContentProps {
   currentPage: number;
   onPageChange: (page: number) => void;
   totalPages: number;
-  theme: 'light' | 'sepia' | 'dark';
+  theme: ReaderTheme;
   isChapterMenuOpen: boolean;
   pdfPath: string;
   onDocumentLoadSuccess: (pdf: unknown) => void;
@@ -47,117 +49,16 @@ export function BookContent({
   fitToPage,
   headerHeight,
 }: BookContentProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [pageWidth, setPageWidth] = useState<number>(700);
-  const [showArrows, setShowArrows] = useState(true);
-  const isDraggingRef = useRef(false);
-  const dragStartRef = useRef<{ x: number; y: number; scrollX: number; scrollY: number } | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const pendingMoveRef = useRef<{ dx: number; dy: number } | null>(null);
-  const pointerIdRef = useRef<number | null>(null);
-  const [pageRatio, setPageRatio] = useState<number>(1.414);
+  // FlipBookViewer handles its own rendering and controls
+  // We just pass the props
 
-  const pageBackground = { 
-    light: 'bg-white', 
-    sepia: 'bg-amber-50', 
-    dark: 'bg-slate-900' 
-  } as const;
-
-  const containerBg = { 
-    light: 'bg-gradient-to-b from-blue-50 to-indigo-50', 
-    sepia: 'bg-gradient-to-b from-amber-50 to-yellow-50', 
-    dark: 'bg-gradient-to-b from-slate-900 to-slate-950' 
-  } as const;
-
-  const textColor = {
-    light: 'text-gray-900',
-    sepia: 'text-amber-950',
-    dark: 'text-gray-100'
-  } as const;
-
-  // Calculate page width: fit-to-page initially; magnification when disabled
-  useEffect(() => {
-    const base = 700;
-    if (fitToPage) {
-      const containerWidth = containerRef.current?.clientWidth || window.innerWidth;
-      const containerHeight = containerRef.current?.clientHeight || window.innerHeight;
-      const height = Math.max(300, containerHeight - Math.max(0, headerHeight));
-      const widthFromHeight = Math.max(300, Math.floor(height / pageRatio));
-      const cappedWidth = Math.min(widthFromHeight, pageMode === 'double' ? Math.floor(containerWidth / 2) : containerWidth);
-      setPageWidth(cappedWidth);
-    } else {
-      const width = Math.max(300, Math.round(base * (magnification / 100)));
-      setPageWidth(width);
-    }
-    setShowArrows(true);
-    console.debug('BookContent sizing', { fitToPage, magnification, pageMode, headerHeight, pageWidthCandidate: pageMode === 'double' ? Math.floor((containerRef.current?.clientWidth || window.innerWidth) / 2) : (containerRef.current?.clientWidth || window.innerWidth) });
-  }, [fitToPage, magnification, pageMode, pageRatio, headerHeight]);
-
-  const nextPage = () => {
-    const increment = pageMode === 'double' ? 2 : 1;
-    if (currentPage + increment <= totalPages) {
-      onPageChange(currentPage + increment);
-    }
-  };
-
-  const prevPage = () => {
-    const decrement = pageMode === 'double' ? 2 : 1;
-    if (currentPage - decrement >= 1) {
-      onPageChange(currentPage - decrement);
-    }
-  };
-
-  // Enhanced pan/drag functionality
-  // Fresh hand tool implementation using pointer events
-  const onPointerDown = (_e: React.PointerEvent<HTMLDivElement>) => {};
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDraggingRef.current || !containerRef.current || !dragStartRef.current) return;
-    e.preventDefault();
-    const dx = e.clientX - dragStartRef.current.x;
-    const dy = e.clientY - dragStartRef.current.y;
-    pendingMoveRef.current = { dx, dy };
-    if (rafRef.current == null) {
-      rafRef.current = requestAnimationFrame(() => {
-        rafRef.current = null;
-        const move = pendingMoveRef.current;
-        if (!move || !containerRef.current || !dragStartRef.current) return;
-        const targetLeft = dragStartRef.current.scrollX - move.dx;
-        const targetTop = dragStartRef.current.scrollY - move.dy;
-        const maxLeft = containerRef.current.scrollWidth - containerRef.current.clientWidth;
-        const maxTop = containerRef.current.scrollHeight - containerRef.current.clientHeight;
-        containerRef.current.scrollLeft = Math.max(0, Math.min(maxLeft, targetLeft));
-        containerRef.current.scrollTop = Math.max(0, Math.min(maxTop, targetTop));
-      });
-    }
-  };
-
-  const endDrag = () => {
-    isDraggingRef.current = false;
-    dragStartRef.current = null;
-    if (rafRef.current != null) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
-    pendingMoveRef.current = null;
-    if (containerRef.current) {
-      containerRef.current.style.cursor = '';
-      if (pointerIdRef.current != null) {
-        try { containerRef.current.releasePointerCapture(pointerIdRef.current); } catch (e) { console.warn('Release pointer capture failed', e); }
-      }
-    }
-    pointerIdRef.current = null;
-  };
-
-  const onWheel = (_e: React.WheelEvent<HTMLDivElement>) => {};
+  // Map theme to 'light' | 'dark'
+  const flipbookTheme = theme === 'dark' || theme === 'midnight' ? 'dark' : 'light';
 
   return (
-    <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${containerBg[theme]} overflow-hidden`} role="main" aria-label="Book content">
+    <div className={`flex-1 flex items-center justify-center transition-all duration-300 bg-gray-100 overflow-hidden`} role="main" aria-label="Book content">
       <div
-        ref={containerRef}
-        className={`reader-fixed-area flex items-center justify-center no-scrollbar`}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerLeave={endDrag}
-        onWheel={onWheel}
+        className={`reader-fixed-area flex items-center justify-center no-scrollbar w-full h-full`}
         style={(() => {
           const v = `${isFullscreen ? 0 : Math.max(0, headerHeight)}px`
           return { ['--reader-header' as unknown as string]: v } as React.CSSProperties
@@ -166,11 +67,7 @@ export function BookContent({
         {!isFullscreen && (
           <button
             onClick={onToggleChapters}
-            className={`absolute left-4 top-4 z-20 size-10 rounded-full border-2 flex items-center justify-center transition-all ${
-              theme === 'light' ? 'bg-white/95 text-gray-900 border-blue-300 hover:bg-blue-100' :
-              theme === 'sepia' ? 'bg-amber-100/95 text-amber-900 border-amber-400 hover:bg-amber-100' :
-              'bg-slate-800/95 text-gray-100 border-slate-600 hover:bg-slate-700'
-            }`}
+            className={`absolute left-4 top-4 z-20 size-10 rounded-full border flex items-center justify-center transition-all bg-white text-black hover:scale-105 shadow-sm`}
             title="Open chapter navigation (C)"
             aria-label="Open chapter navigation"
             aria-expanded={isChapterMenuOpen}
@@ -178,92 +75,19 @@ export function BookContent({
             <MoreVertical className="size-5" />
           </button>
         )}
-        {/* Navigation Arrows - Only show when not overflowing */}
-        {showArrows && !isPanMode && (
-          <>
-            <Button 
-              aria-label="Previous page" 
-              variant="ghost" 
-              size="lg" 
-              onClick={prevPage} 
-              disabled={currentPage === 1} 
-              className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 size-14 p-0 rounded-full transition-all opacity-95 ${
-                theme === 'light' ? 'bg-blue-600 text-white ring-2 ring-white/70 hover:bg-blue-700' : 
-                theme === 'sepia' ? 'bg-amber-700 text-amber-50 ring-2 ring-amber-200 hover:bg-amber-800' : 
-                'bg-indigo-600 text-white ring-2 ring-slate-200/50 hover:bg-indigo-700'
-              } disabled:opacity-50`}
-            >
-              <ChevronLeft className="size-7" />
-            </Button>
 
-            <Button 
-              aria-label="Next page" 
-              variant="ghost" 
-              size="lg" 
-              onClick={nextPage} 
-              disabled={currentPage >= totalPages} 
-              className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 size-14 p-0 rounded-full transition-all opacity-95 ${
-                theme === 'light' ? 'bg-blue-600 text-white ring-2 ring-white/70 hover:bg-blue-700' : 
-                theme === 'sepia' ? 'bg-amber-700 text-amber-50 ring-2 ring-amber-200 hover:bg-amber-800' : 
-                'bg-indigo-600 text-white ring-2 ring-slate-200/50 hover:bg-indigo-700'
-              } disabled:opacity-50`}
-            >
-              <ChevronRight className="size-7" />
-            </Button>
-          </>
-        )}
-
-        {/* Book Pages Container */}
-        <div className={`gap-0 py-0 px-0 flex ${isFullscreen ? 'items-stretch justify-between' : 'items-center justify-center'}`}>
-          {pageMode === 'double' ? (
-            <TurnFlipReader
-              pdfPath={pdfPath}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageWidth={pageWidth}
-              theme={theme}
-              onPageChange={onPageChange}
-              isFullscreen={isFullscreen}
-              onDocumentLoadSuccess={onDocumentLoadSuccess}
-              onDocumentLoadError={onDocumentLoadError}
-            />
-          ) : (
-            /* Single Page */
-            <div 
-              className={`${pageBackground[theme]} rounded-none p-0 transition-all duration-300`}
-              style={{ 
-                width: `${pageWidth}px`,
-              }}
-            >
-              <Document 
-                file={pdfPath} 
-                onLoadSuccess={onDocumentLoadSuccess} 
-                onLoadError={onDocumentLoadError}
-              >
-                <Page 
-                  pageNumber={currentPage} 
-                  width={pageWidth}
-                  onLoadSuccess={(p: { getViewport: (opts: { scale: number }) => { width: number; height: number } }) => { try { const vp = p.getViewport({ scale: 1 }); setPageRatio(vp.height / vp.width); } catch (e) { console.warn('Viewport calc failed', e); } }}
-                  renderTextLayer={false} 
-                  renderAnnotationLayer={false}
-                />
-              </Document>
-            </div>
-          )}
-        </div>
-
-        {/* Preload adjacent pages to warm cache and reduce transition delay */}
-        <div className="sr-only select-none" aria-hidden="true">
-          <Document file={pdfPath}><Page pageNumber={Math.max(1, currentPage - 1)} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} /></Document>
-          <Document file={pdfPath}><Page pageNumber={Math.min(totalPages, (pageMode === 'double' ? currentPage + 2 : currentPage + 1))} width={pageWidth} renderTextLayer={false} renderAnnotationLayer={false} /></Document>
-        </div>
-
+        <FlipBookViewer
+          pdfPath={pdfPath}
+          startPage={currentPage}
+          onPageChange={onPageChange}
+          theme={flipbookTheme}
+          onLoadError={onDocumentLoadError}
+          onLoadSuccess={() => {}}
+        />
       </div>
     </div>
   );
 }
-
-export default BookContent;
 
 interface PDFReaderProps {
   pdfPath: string;
@@ -287,7 +111,10 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
   const [pageMode, setPageMode] = useState<'single' | 'double'>(('' + (typeof localStorage !== 'undefined' ? localStorage.getItem('readerPageMode') : '')) === 'single' ? 'single' : 'double');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light');
+  const [theme, setTheme] = useState<ReaderTheme>(() => {
+    const t = typeof localStorage !== 'undefined' ? localStorage.getItem('readerTheme') : null;
+    return (t && readerConfig.themes[t as ReaderTheme]) ? (t as ReaderTheme) : 'light';
+  });
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [isPanMode, setIsPanMode] = useState<boolean>(false);
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState<boolean>(false);
@@ -300,32 +127,16 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
   const [headerHeight, setHeaderHeight] = useState<number>(0);
   const { updateProgress, getProgress, history } = useUserHistory();
   const progressDebounceRef = useRef<number | null>(null);
-  
+
   const setPageSafely = useCallback((page: number) => {
     const total = totalPages || 0;
-    let target = Math.max(1, Math.min(total || page, page));
-    if (pageMode === 'double' && target % 2 === 0) target = target - 1;
+    const target = Math.max(1, Math.min(total || page, page));
     setCurrentPage(target);
-  }, [totalPages, pageMode]);
-
-  useEffect(() => {
-    try { localStorage.setItem('readerPageMode', pageMode) } catch { /* noop */ }
-  }, [pageMode])
-
-  const onPageModeChange = useCallback((mode: 'single' | 'double') => {
-    setPageMode(mode)
-    setCurrentPage(prev => {
-      const total = totalPages || 0
-      let target = Math.max(1, Math.min(total || prev, prev))
-      if (mode === 'double' && target % 2 === 0) target = target - 1
-      return target
-    })
-  }, [totalPages])
+  }, [totalPages]);
 
   const onDocumentLoadSuccess = useCallback((pdf: PdfDoc) => {
     const n = pdf?._pdfInfo?.numPages || pdf?.numPages || 0;
     setTotalPages(n);
-    setCurrentPage((prev) => (pageMode === 'double' && prev % 2 === 0 ? prev - 1 : prev));
     (async () => {
       try {
         const outline = await pdf.getOutline?.();
@@ -395,6 +206,7 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
   const onDocumentLoadError = useCallback((error: Error) => {
     console.error('PDF load error:', error);
     setTotalPages(0);
+    try { toast.error('Failed to load PDF. You can try downloading it.'); } catch {}
   }, []);
 
   const toggleFullscreen = async () => {
@@ -433,7 +245,6 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
     const measure = () => {
       const h = headerWrapperRef.current?.offsetHeight || 72;
       setHeaderHeight(h);
-      console.debug('Reader header measured height:', h);
     };
     measure();
     const onResize = () => measure();
@@ -448,6 +259,10 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
   }, [isFullscreen]);
 
   useEffect(() => {
+    try { localStorage.setItem('readerTheme', theme); } catch (err) { console.warn('Theme persist failed', err); }
+  }, [theme]);
+
+  useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     if (backgroundMusic === 'none') {
@@ -457,8 +272,8 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
     }
     audio.src = backgroundMusic;
     audio.loop = true;
-    audio.volume = 0.2;
-    audio.play().catch(() => {});
+    audio.volume = 0.25; // Increased volume
+    audio.play().catch(() => { });
   }, [backgroundMusic]);
 
   useEffect(() => {
@@ -469,17 +284,15 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') setPageSafely(pageMode === 'double' ? currentPage + 2 : currentPage + 1);
-      if (e.key === 'ArrowLeft') setPageSafely(pageMode === 'double' ? currentPage - 2 : currentPage - 1);
-      if (e.key.toLowerCase() === 'f') toggleFullscreen();
-      if (e.key.toLowerCase() === 'd') setPageMode(m => (m === 'single' ? 'double' : 'single'));
-      if (e.key.toLowerCase() === 'h') setIsPanMode(v => !v);
-      if (e.key.toLowerCase() === 't') setTheme(t => (t === 'light' ? 'dark' : t === 'dark' ? 'sepia' : 'light'));
-      if (e.key.toLowerCase() === 'c') setIsChapterMenuOpen(v => !v);
+      const key = e.key.toLowerCase();
+      if (key === 'f') toggleFullscreen();
+      if (key === 'h') setIsPanMode(v => !v);
+      if (key === 'c') setIsChapterMenuOpen(v => !v);
+      if (key === 'd') setPageMode(m => (m === 'single' ? 'double' : 'single'));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [totalPages, pageMode, currentPage, setPageSafely]);
+  }, [totalPages, pageMode]);
 
   useEffect(() => {
     if (!bookId) return;
@@ -506,7 +319,8 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
       const normalized = pageMode === 'double' && cp % 2 === 0 ? cp - 1 : cp;
       setCurrentPage(normalized);
     }
-  }, [bookId, pageMode, history, getProgress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookId, pageMode]);
 
   useEffect(() => {
     if (!chapters.length) return;
@@ -532,38 +346,33 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
           className="sticky top-0 z-30"
         >
           <BookHeader
-          bookInfo={{ title, author: author || '' }}
-          bookCoverSrc={bookCoverSrc}
-          theme={theme}
-          onThemeChange={setTheme}
-          pageMode={pageMode}
-          onPageModeChange={onPageModeChange}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          backgroundMusic={backgroundMusic}
-          onBackgroundMusicChange={setBackgroundMusic}
-          musicOptions={[
-            { value: '/music/track1.mp3', label: 'Ambient 1' },
-            { value: '/music/track2.mp3', label: 'Ambient 2' },
-            { value: '/music/track3.mp3', label: 'Ambient 3' },
-            { value: '/music/track4.mp3', label: 'Ambient 4' },
-            { value: '/music/track5.mp3', label: 'Ambient 5' },
-            { value: '/music/track6.mp3', label: 'Ambient 6' },
-          ]}
-        isFullscreen={false}
-          onToggleFullscreen={toggleFullscreen}
-          onPageJump={setPageSafely}
-          onBack={onBack}
-          onDownload={() => {
-            const link = document.createElement('a');
-            link.href = pdfPath;
-            link.download = `${title}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }}
-          isPanMode={isPanMode}
-          onTogglePanMode={() => setIsPanMode(v => !v)}
+            bookInfo={{ title, author: author || '' }}
+            bookCoverSrc={bookCoverSrc}
+            theme={theme}
+            onThemeChange={setTheme}
+            pageMode={pageMode}
+            onPageModeChange={(mode) => {
+              setPageMode(mode);
+              try { localStorage.setItem('readerPageMode', mode); } catch (err) { console.warn('Page mode persist failed', err); }
+            }}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            backgroundMusic={backgroundMusic}
+            onBackgroundMusicChange={setBackgroundMusic}
+            isFullscreen={isFullscreen}
+            onToggleFullscreen={toggleFullscreen}
+            onPageJump={setPageSafely}
+            onBack={onBack}
+            onDownload={() => {
+              const link = document.createElement('a');
+              link.href = pdfPath;
+              link.download = `${title}.pdf`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+            isPanMode={isPanMode}
+            onTogglePanMode={() => setIsPanMode(v => !v)}
           />
         </div>
       )}

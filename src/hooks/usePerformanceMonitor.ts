@@ -151,12 +151,13 @@ export const performanceBenchmarks = {
   }
 };
 
+type Rating = 'excellent' | 'good' | 'acceptable' | 'poor';
 export const analyzePerformance = (metrics: PerformanceMetrics) => {
-  const results = {
-    loadTime: 'excellent' as const,
-    renderTime: 'excellent' as const,
-    memoryUsage: 'excellent' as const,
-    overall: 'excellent' as const
+  const results: { loadTime: Rating; renderTime: Rating; memoryUsage: Rating; overall: Rating } = {
+    loadTime: 'excellent',
+    renderTime: 'excellent',
+    memoryUsage: 'excellent',
+    overall: 'excellent'
   };
 
   // Analyze load time
@@ -187,7 +188,7 @@ export const analyzePerformance = (metrics: PerformanceMetrics) => {
   }
 
   // Determine overall performance
-  const scores = [results.loadTime, results.renderTime, results.memoryUsage];
+  const scores: Rating[] = [results.loadTime, results.renderTime, results.memoryUsage];
   if (scores.includes('poor')) {
     results.overall = 'poor';
   } else if (scores.includes('acceptable')) {

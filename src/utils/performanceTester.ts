@@ -199,8 +199,7 @@ export class PerformanceTester {
       );
 
       // Use only fulfilled requests to compute accurate average latency
-      const fulfilled = networkResults.filter((r): r is PromiseFulfilledResult<{ url: string; status: number; duration: number; success: boolean; error?: string }>
-        => r.status === 'fulfilled');
+      const fulfilled = networkResults.filter((r): r is PromiseFulfilledResult<{ url: string; status: number; duration: number; success: boolean; error?: string }> => r.status === 'fulfilled');
       const successfulRequests = fulfilled.filter(r => r.value.success).length;
       const failedRequests = networkResults.filter(r => r.status === 'rejected').length + fulfilled.filter(r => !r.value.success).length;
       // Avoid dividing by total when some promises are rejected

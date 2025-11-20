@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { books } from '@/data/books';
@@ -98,7 +98,7 @@ export default function Favorites() {
                   className="relative group"
                   onPointerDown={() => {
                     const id = book.id.toString();
-                    const timer = setTimeout(() => {
+                    const timer = window.setTimeout(() => {
                       setForcedVisible(prev => ({ ...prev, [id]: true }));
                     }, 500);
                     window.__favLP = { ...(window.__favLP || {}), [id]: timer };
@@ -106,12 +106,12 @@ export default function Favorites() {
                   onPointerUp={() => {
                     const id = book.id.toString();
                     const t = window.__favLP?.[id];
-                    if (t) clearTimeout(t);
+                    if (t) window.clearTimeout(t);
                   }}
                   onPointerCancel={() => {
                     const id = book.id.toString();
                     const t = window.__favLP?.[id];
-                    if (t) clearTimeout(t);
+                    if (t) window.clearTimeout(t);
                   }}
                 >
                   <BookCard book={book} hideFavoriteOverlay={true} />

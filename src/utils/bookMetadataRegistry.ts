@@ -26,6 +26,15 @@ const genreKeywords: Record<string, string[]> = {
   Business: ['investor', 'poor dad', 'zero to one', 'millionaire'],
 };
 
+const KNOWN_GENRES = ['Fantasy','Romance','Mystery','Thriller','Classic','SciFi','Nonfiction','SelfHelp','Children','Philosophy','Business'] as const;
+type KnownGenre = typeof KNOWN_GENRES[number];
+function safeGenreDescription(g: string): string {
+  if ((KNOWN_GENRES as readonly string[]).includes(g)) {
+    return genreDescription(g as KnownGenre);
+  }
+  return 'A versatile selection blending multiple themes across popular genres.';
+}
+
 function inferGenresFromTitle(title: string): string[] {
   const inferred = classifyGenres({ title });
   return inferred.length ? inferred : ['General'];
@@ -43,7 +52,7 @@ export const applyMetadata = <T extends { id: string; author: string; genre: str
     author: o?.author ?? book.author,
     genre: primary,
     genres: limited,
-    genreDescriptions: Object.fromEntries(limited.map(g => [g, genreDescription(g)])),
+    genreDescriptions: Object.fromEntries(limited.map(g => [g, safeGenreDescription(g)])),
     description: book.description && book.description.length > 120 ? book.description : desc,
     pages: o?.pages ?? book.pages,
   } as T & { genres?: string[]; genreDescriptions?: Record<string, string>; description?: string };

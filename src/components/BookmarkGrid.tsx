@@ -45,7 +45,7 @@ export const BookmarkGrid = ({
     (currentPage + 1) * BOOKS_PER_PAGE
   );
   const [forcedVisible, setForcedVisible] = useState<Record<string, boolean>>({});
-  const longPressTimers = useRef<Record<string, number>>({});
+  const longPressTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const handlePointerDown = (id: string) => {
     clearTimeout(longPressTimers.current[id]);

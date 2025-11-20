@@ -78,7 +78,7 @@ export const TopBooks = () => {
       return coverImages[b.coverImage];
     }
     // For all other books, generate beautiful covers
-    return getBookCover(b);
+    return getBookCover(b.title);
   };
 
   // Build duplicated list for a seamless continuous loop

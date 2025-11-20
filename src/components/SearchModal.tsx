@@ -263,7 +263,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       </div>
       
       {/* Global styles for animation */}
-      <style jsx global>{`
+      <style>{`
         @keyframes scaleIn {
           from {
             transform: scale(0.8);

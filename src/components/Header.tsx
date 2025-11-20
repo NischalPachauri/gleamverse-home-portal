@@ -14,9 +14,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { SearchBar } from '@/components/SearchBar';
-import { TestProfileIcon } from '@/components/TestProfileIcon';
-import { 
-  User, LogOut, BookMarked, Settings, 
+import {
+  User, LogOut, BookMarked, Settings,
   Menu, X, LogIn, UserPlus, History, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -41,7 +40,7 @@ export function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  
+
   // Add effect to log authentication state changes for debugging
   useEffect(() => {
     console.log("Header component - Authentication state:", { isAuthenticated, userId: user?.id });
@@ -90,15 +89,15 @@ export function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="text-sm font-medium transition-colors hover:text-blue-200"
               >
                 Browse
               </Link>
               {isAuthenticated && (
-                <Link 
-                  to="/bookmarks" 
+                <Link
+                  to="/bookmarks"
                   className="text-sm font-medium transition-colors hover:text-blue-200"
                 >
                   Bookmarks
@@ -109,14 +108,11 @@ export function Header() {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-4">
-              {/* Test Profile Icon - appears adjacent to sign-in button */}
-              <TestProfileIcon />
-              
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="relative h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 text-white"
                     >
                       <Avatar className="h-8 w-8">
@@ -162,21 +158,21 @@ export function Header() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => openAuthModal('login')}
                   className="bg-transparent border-white text-white hover:bg-white/20"
                 >
                   Sign In
                 </Button>
               )}
-              
+
               {/* Bookmarks Button */}
               {isAuthenticated && (
                 <Link to="/bookmarks">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     className="bg-transparent border-white text-white hover:bg-white/20"
                   >
@@ -184,9 +180,7 @@ export function Header() {
                   </Button>
                 </Link>
               )}
-              
-              
-              
+
               {/* Performance Dashboard Toggle */}
               <Button
                 variant="ghost"
@@ -227,7 +221,7 @@ export function Header() {
               >
                 Browse Books
               </Link>
-              
+
               {isAuthenticated ? (
                 <>
                   <Link
@@ -254,8 +248,8 @@ export function Header() {
                     </Button>
                   </Link>
                   <div className="pt-3 border-t">
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="w-full justify-start"
                       onClick={handleSignOut}
                     >
@@ -283,23 +277,21 @@ export function Header() {
                   </Button>
                 </>
               )}
-              
-              
             </div>
           </div>
         )}
       </header>
 
       {/* Auth Modal */}
-      <AuthModal 
-        isOpen={authModalOpen} 
+      <AuthModal
+        isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         initialMode={authModalMode}
       />
-      
+
       {/* Performance Dashboard */}
-      <PerformanceDashboard 
-        isVisible={showPerformanceDashboard} 
+      <PerformanceDashboard
+        isVisible={showPerformanceDashboard}
         onClose={() => setShowPerformanceDashboard(false)}
       />
     </>
