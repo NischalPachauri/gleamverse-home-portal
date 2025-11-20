@@ -19,27 +19,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
-    ((): PluginOption => ({
-      name: "copy-flipbook-assets",
-      apply: "build" as const,
-      generateBundle(this: any) {
-        try {
-          const jsPath = path.resolve(__dirname, "flipbook.min.js");
-          const js = fs.readFileSync(jsPath);
-          this.emitFile({ type: "asset", fileName: "flipbook.min.js", source: js });
-        } catch {}
-        try {
-          const cssPath = path.resolve(__dirname, "flipbook.style.css");
-          const css = fs.readFileSync(cssPath);
-          this.emitFile({ type: "asset", fileName: "flipbook.style.css", source: css });
-        } catch {}
-        try {
-          const pdfSvcPath = path.resolve(__dirname, "public/flipbook.pdfservice.min.js");
-          const pdfSvc = fs.readFileSync(pdfSvcPath);
-          this.emitFile({ type: "asset", fileName: "flipbook.pdfservice.min.js", source: pdfSvc });
-        } catch {}
-      }
-    }))()
+    
   ].filter(Boolean),
   resolve: {
     alias: {

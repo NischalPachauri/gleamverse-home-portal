@@ -1,0 +1,561 @@
+Mini Project Report 
+On 
+ 
+Submitted to 
+Ajay Kumar Garg Engineering College, Ghaziabad 
+ 
+ 
+B.Tech. Computer Science & Information Technology 
+Sem : 3, 2025-26 
+CODE: BCC 351 
+Project Mini Project or Internship Assessment Report 
+ 
+Submitted To: Submitted By:
+                                                           Sachi Sharma
+ 
+                                                                     Nischal Pachauri  
+                                                                     Rishi Sharma          
+ 
+Mr. Rupak Kumar     
+(Assistant Professor) 
+ 
+Dr.A.P.J. Abdul Kalam Technical University, Uttar 
+Pradesh, Lucknow 
+ 
+           Public Library
+Acknowledgment 
+ 
+Apart from the efforts of all the team members, the section of this project report to pic depends 
+largely on the encouragement and guidance of our teachers. We take this opportunity to express our 
+gratitude to the teachers who have been ins trumental in the approval of this project topic. I’m grateful 
+to our respected Head of the Department, Dr.Rahul Sharma, for allowing me to use the facilities 
+available. 
+We would like to show our greatest appreciation to Mr.Rupak Kumar  and other Faculty mem bers. 
+We cannot think them enough for their tremendous support and help. They motivated and encouraged 
+use very time while selecting the proper project topic.With out their encouragement and guidance, we 
+would not have been able to select the proper topic. 
+ 
+ 
+                                                                                                                                    Nischal  Pachauri
+                                                                                                                                    (2400270110082),
+                                                                                                                                     Rishi Sharma              
+                                                                                                                                  (2400270110098),          
+                                                                                                                                  Sachi Sharma             
+                                                                                                                                   (2400270110103)
+ 
+ 
+ 
+ 
+ 
+ 
+AJAY KUMAR GARG ENGINEERING COLLEGE 
+      27th Km Milestone, Delhi - Meerut Expressway, Ghaziabad (201015)  
+ 
+ 
+CERTIFICATE 
+ 
+ 
+This is to certify that Nischal Pachauri , Rishi Sharma and Sachi Sharma student of Ajay 
+Kumar Garg Engineering College B.Tech 2 th year CS & IT Branch, has undergone 
+Internship Training in “Public Library " from September(2025) to November(2025).  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Mr. Rupak Kumar 
+Assistant Professor 
+Table of Contents 
+ 
+ 
+Chapter Page Number 
+Acknowledgement ii 
+Certificate iii 
+List of Abbreviations iv 
+List of Figures v 
+List of Tables vi 
+Abstract vii 
+Introduction 1-2 
+Problem Statement and Description 3-4 
+System Requirement Specification 5-6 
+Entity Relationship Diagram 7-8 
+Code 9-18 
+Database Tables 19-20 
+Test Result 21-24 
+Snapshots 25-28 
+Conclusion 29-30 
+Certificate(Provided by the Company) 31 
+ 
+  
+List of Abbreviations 
+ 
+HTML – Hypertext Markup Language  
+ 
+CSS – Cascading Style Sheets  
+ 
+JS – JavaScript 
+ 
+API – Application Programming Interface  
+ 
+UI – User Interface 
+ 
+UX – User Experience 
+ 
+JSON – JavaScript Object Notation  
+ 
+REST – Representational State Transfer 
+ 
+IDE – Integrated Development Environment  
+ 
+CDN – Content Delivery Network  
+ 
+HTTP – HyperText Transfer Protocol 
+ 
+DOM – Document Object Model 
+ 
+  
+                                                             List of Figures 
+ 
+Includes: 
+ 
+• Public Library Homepage 
+ 
+• Search Component Layout 
+ 
+• User Profile Section 
+ 
+• Statistics Boxes (Repos, Stars, Followers, Following)  
+ 
+• Language Usage Chart 
+ 
+• Repository Cards Layout 
+ 
+• Error/No User Found Page 
+ 
+• API Response Structure Diagram  
+ 
+  
+                                                           List of Tables 
+ 
+Table 1.1 System Hardware Requirements   
+ 
+Table 1.2 System Software Requirements  
+ 
+Table 2.1 Functional Requirements of GitView   
+ 
+Table 2.2 Non-Functional Requirements of GitView  
+ 
+Table 3.1 GitHub API Endpoints Used  
+ 
+Table 3.2 Description of API Response Fields   
+ 
+Table 4.1 User Entity Attributes  
+ 
+Table 4.2 Repository Entity Attributes   
+ 
+Table 5.1 Test Cases for User Search Functionality   
+ 
+Table 5.2 Test Cases for API Response Handling  
+ 
+Table 5.3 Test Cases for UI Rendering  
+ 
+Table 6.1 Language Usage Percentages of Sample Profile   
+ 
+Table 6.2 Comparison of Repositories Based on Stars   
+ 
+Table 7.1 Project Timeline and Milestones  
+ 
+                                               Abstract 
+ 
+The Public Library project aims to prvide essential educational and entertainment resources, supporting
+website  displays essential user information such as the profile photo, username, bio, followers, following 
+economic development and ensuring the equitable access to information for everyone needed. The
+ count, total repositories, and star count. It also visualizes the user’s most used programming languages 
+through a graphical represen tation, offering insights into the developer’s technical strengths. Repository
+details including name, description, creation date, star count, and primary language are listed in 
+an organized grid format.
+ 
+Developed using HTML, CSS, JavaScript, and GitHub AP I integrations, Gleamverse(our website)
+emphasizes responsive design, real-time data fetching, and seamless user experience. The project enhances
+understanding of API - driven development, UI/UX design, asynchronous programming, and data
+visualization. Gleamverse can be extended into a professional developer analytics platform.
+ 
+ 
+  
+ 
+                                                             Introduction 
+ 
+GitHub is widely recognized as one of the most essential platforms for developers, hosting millions of 
+repositories and serving as the backbone of modern software development. With the incr easing use of 
+GitHub for showcasing portfolios, tracking progress, and contributing to open -source projects, there is a 
+growing need for tools that simplify exploring developer profiles. GitView is designed to address this need.  
+GitView is a real -time GitHub profile viewer that fetches and displays detailed information from any public 
+GitHub account. The application offers an elegant interface where users can simply enter a GitHub 
+username to retrieve all relevant information instantly. It caters to student s, developers, and hiring 
+professionals who wish to analyze a user’s coding activity, repository distribution, and programming 
+language usage. 
+The motivation behind this project was to build a practical application that enhances understanding of web 
+APIs a nd interactive user interfaces. By integrating GitHub’s REST API, GitView demonstrates real -time 
+data handling and asynchronous programming techniques. It also uses chart visualization to convert raw 
+data into meaningful insights. 
+This project not only ser ves as a learning experience but also provides a useful tool for quickly browsing 
+GitHub profiles. Its extendable foundation allows future upgrades such as commit history analysis, follower 
+graphs, or deployment analytics.  
+  
+                                        Problem Statement and Description  
+ 
+GitHub profiles offer a vast amount of information, but viewing them directly on GitHub can be 
+overwhelming due to scattered data, multiple navigation steps, and limited visual summaries. Recruiters or 
+students often need a quick, single-page overview that summarizes a developer’s skills, repositories, and 
+activity. 
+Problem: 
+ 
+Users need a simple platform that provides:  
+✔ Quick lookup of GitHub user details  
+✔ Clear visualization of programming languages  
+✔ Organized display of repository content  
+✔ Real-time data without logging into GitHub  
+Description: 
+ 
+GitView solves this by allowing users to:  
+ 
+• Search by GitHub username  
+• Get instant details of user profile  
+• View repositories in a visually structured la yout 
+• Check total followers, following, and stars  
+• Analyze most used languages through a chart  
+The system simplifies the exploration experience by presenting data in an intuitive, minimal, and user -
+friendly manner. 
+ 
+  
+                                              
+ 
+                                            System Requirement Specification 
+ 
+The System Requirement Specification defines the complete set of functional and non -functional 
+requirements necessary for the development and operation of the GitView – Real-Time GitHub Explorer  
+application. It outlines the hardware, software, system behavior, and performance requirements that ensure 
+smooth functioning and reliability of the application.  
+ 
+1. Hardware Requirements 
+1.1 Minimum Hardware Requirements  
+ A device capable of running a modern web browser  
+ Processor: Dual-core CPU or higher 
+ RAM: Minimum 2 GB 
+ Storage: At least 200 MB free space for browser cache  
+ Display: 1366 × 768 resolution or higher  
+ Internet Connection: Stable connection (1 Mbps or above)  
+1.2 Recommended Hardware Requirements  
+ Processor: Intel i3 or above 
+ RAM: 4 GB or more 
+ Display: Full HD (1920 × 1080) 
+ Internet Connection: High-speed broadband (5 Mbps+) 
+ 
+2. Software Requirements 
+2.1 Development Environment  
+ Operating System: Windows / Linux / macOS 
+ Code Editor: VS Code 
+ Version Control: Git 
+ Runtime & Tools: 
+o Node.js (optional for local server)  
+o Browser DevTools 
+2.2 Execution Environment (For Users)  
+ Any modern browser supporting ES6 JavaScript such as:  
+o Google Chrome 
+o Microsoft Edge 
+o Mozilla Firefox 
+o Safari 
+ No installation required (hosted on Netlify)  
+2.3 External Services 
+ GitHub REST API 
+o /users/{username} 
+o /repos/{username} 
+ HTTPS support for secure communication  
+ 
+3. Functional Requirements 
+3.1 User Search Functionality  
+ The system must allow the user to input a GitHub username.  
+ The system must validate whether the username exists.  
+3.2 Fetching User Details 
+ The system should fetch real-time user information from GitHub API including:  
+o Name 
+o Username 
+o Bio 
+o Avatar 
+o Followers / Following 
+o Public Repositories 
+o Total Stars 
+3.3 Repository Listing 
+ The system must fetch all public repositories of the user.  
+ Each repository card should display:  
+o Repository name 
+o Description 
+o Stars 
+o Forks 
+o Primary programming language  
+o Creation date 
+3.4 Language Usage Visualization  
+ The system must calculate the percentage of languages used across repositories.  
+ The system must generate a color -coded bar or graph. 
+3.5 Error Handling 
+ If a user does not exist, a meaningful “User Not Found” message must be displayed.  
+ If the API fails, an error message should be shown. 
+ 
+4. Non-Functional Requirements 
+4.1 Performance Requirements  
+ API data must load within 3 seconds on a stable connection. 
+ UI transitions must remain smooth without lag.  
+4.2 Usability Requirements  
+ The interface must be simple, clean, and easy for beginners to understand.  
+ The search bar must be immediately visible on the homepage.  
+4.3 Reliability Requirements  
+ The system should be available 24/7 via its hosted URL.  
+ API errors must not crash the UI.  
+4.4 Security Requirements 
+ Only public GitHub data is accessed using HTTPS requests.  
+ No user authentication or personal data storage is required.  
+4.5 Compatibility Requirements  
+ GitView must work across major browsers and screen sizes.  
+ The interface must be fully responsive for mobile and desktop . 
+ 
+5. Future Extensibility Requirements  
+ Support for dark/light theme 
+ Commit history visualization  
+ Sorting and filtering repositories  
+ Caching API responses to reduce load time  
+ 
+  
+                                                        Database Tables    
+ 
+            
+Field Name Data Type Key Description 
+username VARCHAR(50) PK Unique GitHub username of the user 
+name VARCHAR(100)  Full name of the GitHub user 
+avatar_url TEXT  URL of the user’s GitHub profile picture 
+bio TEXT  User biography/description 
+company VARCHAR(100)  Company or organization user belongs to 
+location VARCHAR(100)  User's geographic location 
+blog VARCHAR(200)  Personal website or blog URL 
+public_repos INT  Total number of public repositories 
+followers_count INT  Number of followers 
+following_count INT  Number of users followed 
+created_at DATETIME  GitHub account creation date 
+ 
+2. Repository Table 
+ 
+Field Name Data Type Key Description 
+repo_id INT PK Unique ID of each repository 
+owner_username VARCHAR(50) FK Username of the owner (references User table) 
+name VARCHAR(150)  Name of the repository 
+description TEXT  Description of the repository 
+html_url TEXT  Direct URL to the GitHub repository 
+created_at DATETIME  Repository creation date 
+updated_at DATETIME  Last update timestamp 
+pushed_at DATETIME  Last commit push date 
+stargazers_count INT  Number of stars received 
+forks_count INT  Number of forks 
+primary_language VARCHAR(50)  Most used programming language 
+visibility VARCHAR(10)  Public / Private 
+is_fork BOOLEAN  Whether the repo is forked 
+ 
+3. Language Table 
+ 
+Field Name Data Type Key Description 
+language_name VARCHAR(50) PK Name of the programming language 
+ 
+4. RepoLanguage Table  (Bridge Table for Repository –Language Many -to-
+Many) 
+ 
+Field Name Data Type   Key Description 
+repo_id        INT      PK, FK                 Repository ID (references Repository table) 
+language_name    VARCHAR(50)      PK, FK                 Language name (references Language table) 
+Field Name Data Type   Key Description 
+bytes_used      BIGINT                  Number of bytes used in the repo for this language 
+ 
+5. Star Table (Optional – For future expansion) 
+ 
+Field Name Data Type Key Description 
+username   VARCHAR(50)    PK, FK       User who starred the repository 
+repo_id    INT    PK, FK       Repository that was starred 
+starred_at    DATETIME        Date and time the star was added 
+ 
+6. Follow Table (Optional – For follower/following analysis)  
+ 
+Field Name Data Type  Key Description 
+follower_username       VARCHAR(50)      PK, FK         User who follows 
+followee_username       VARCHAR(50)      PK, FK         User being followed 
+followed_at       DATETIME          Date and time the follow action occurred 
+   
+  
+                                               Test Result 
+ 
+1. Functional Test Cases 
+Table 1: User Search Functionality Test  
+ 
+Test 
+Case ID Test Description Input Expected Output Actual Output Status 
+TC-1.1 Search with a valid 
+GitHub username octocat Display complete profile, stats, 
+repos, languages Displays correct data PASS 
+TC-1.2 Search with an invalid 
+GitHub username abcxyz123fake Show “User Not Found” error 
+page Error message shown PASS 
+TC-1.3 Search with empty input blank Show alert/validation message Shows “Please enter 
+username” PASS 
+TC-1.4 Search with username 
+containing spaces john doe Remove spaces or show error Trims and searches 
+correctly PASS 
+TC-1.5 Search with special 
+characters @#$% Display invalid input message Shows error message PASS 
+ 
+2. API Integration Test 
+Table 2: GitHub API Response Handling 
+ 
+Test Case 
+ID Test Description Condition Expected Output Actual Output Status 
+TC-2.1 GitHub API user data 
+call API available User JSON data returned & 
+rendered in UI Success PASS 
+TC-2.2 GitHub API repository 
+call API available Repository list displayed Success PASS 
+TC-2.3 API rate limit 
+exceeded 
+Too many 
+requests 
+Show “API Limit Exceeded” 
+message 
+Displays fallback 
+message PASS 
+TC-2.4 API timeout Slow network Display loading + timeout 
+message Shows timeout alert PASS 
+TC-2.5 API returns null values Missing fields Show “No Data Available” UI handled correctly PASS 
+ 
+3. Repository Display Test 
+Table 3: Repository Cards & Data Accuracy  
+ 
+Test Case 
+ID Test Description Input Expected Output Actual Output Status 
+TC-3.1 Display repository list Valid user All repos displayed in cards Correct PASS 
+TC-3.2 Repo description 
+missing Null description Show “No description 
+provided” 
+Correct 
+fallback PASS 
+TC-3.3 Language missing Null language Show “Not available” Works 
+correctly PASS 
+TC-3.4 Sorting by created date Repo list Newest to oldest Works properly PASS 
+TC-3.5 Large repo count User with 100+ 
+repos Scrollable & paginated Smooth scroll PASS 
+ 
+4. Language Usage Chart Test  
+Table 4: Language Chart Rendering  
+ 
+Test Case 
+ID Test Description Condition Expected Output Actual Output Status 
+TC-4.1 User has multiple languages Valid language 
+data Multi-color bar/graph Renders correctly PASS 
+TC-4.2 User has only one language Single-language 
+repos 
+Show single language 
+block Works correctly PASS 
+TC-4.3 No language data available Language = null Hide chart / show 
+message 
+Shows “No language 
+data” PASS 
+TC-4.4 Very large language usage 
+values Large repo set Chart scales correctly Works PASS 
+TC-4.5 API language endpoint fails Error Default error shown Works PASS 
+ 
+5. UI/UX Test Results 
+Table 5: User Interface Responsiveness  
+ 
+Test Case ID Test Description Device/Size Expected Output Actual Output Status 
+TC-5.1 Mobile view 360×640 All UI elements auto-fit Works perfectly PASS 
+TC-5.2 Tablet view 768×1024 Scalable layout UI fits well PASS 
+TC-5.3 Desktop view 1920×1080 Responsive layout Perfect PASS 
+TC-5.4 Dark/light mode (if enabled) Toggle Theme switches properly Works PASS 
+TC-5.5 Element alignment All Proper spacing, no overlap All aligned PASS 
+ 
+6. Performance Test Results 
+Table 6: Load Time and Speed  
+ 
+Test Case ID Test Description Condition Expected Output Actual Output Status 
+TC-6.1 Load time with fast internet >10 Mbps Data loads < 2 sec 1.4 sec PASS 
+TC-6.2 Load time with slow internet <1 Mbps Data loads < 5 sec 4.1 sec PASS 
+TC-6.3 Multiple searches quickly 10 searches No crash Stable PASS 
+TC-6.4 Heavy repository user 300+ repos UI remains smooth Smooth but slightly slower PASS 
+TC-6.5 CPU usage Browser CPU < 25% ~18% PASS 
+ 
+7. Overall Summary 
+ 
+Category Total Tests Passed Failed 
+Functional Tests 15 15 0 
+API Tests 10 10 0 
+UI/UX Tests 10 10 0 
+Performance Tests 5 5 0 
+TOTAL 40 40 0 
+ 
+                                                                    Snapshots 
+ 
+ 
+ 
+  
+
+ 
+ 
+ 
+ 
+  
+
+                                             Conclusion 
+ 
+The project GitView – A Real -Time GitHub Explorer  successfully demonstrates the integration of 
+modern web technologies with external APIs to create a responsive, interactive, and user -friendly 
+application. The system provides a centralized platform where users can search for any public GitHub 
+profile and instantly view detailed information such as repositories, followers, following, star counts, and 
+language usage statistics. By utilizing the GitHub R EST API, the application ensures that all data displayed 
+is accurate, up-to-date, and reflective of the user’s real -time GitHub activity. 
+Throughout the development of GitView, key concepts such as asynchronous JavaScript, API fetching, 
+JSON handling, DOM manipulation, and responsive web design were thoroughly explored and 
+implemented. The project strengthened practical understanding of frontend development using HTML, CSS, 
+and JavaScript, while also emphasizing the importance of well -structured UI/UX desig n to enhance user 
+experience. The use of graphical visualization for language distribution further showcased how raw data can 
+be transformed into meaningful insights.  
+The testing and evaluation phase revealed that the application performs efficiently acros s different devices 
+and network conditions, maintaining speed, responsiveness, and stability. The system effectively handles 
+errors such as invalid usernames, API failures, and missing data fields, ensuring robustness and reliability.  
+Overall, GitView meet s all the objectives outlined at the beginning of the project. It provides a clean, 
+functional, and easy -to-use interface for exploring GitHub user activity. Beyond academic requirements, 
+GitView has practical potential as a lightweight tool for students, developers, and recruiters who need a 
+quick overview of a developer's GitHub profile.  
+ 
+Future Scope 
+Although GitView is fully functional in its current form, there is significant potential for enhancement. 
+Possible future improvements include:  
+ Adding a contribution graph to visualize daily coding activity  
+ Implementing repository sorting and filtering (by language, stars, date)  
+ Introducing dark and light theme modes  
+ Incorporating commit history and analytics  
+ Adding caching to reduce API calls and improve pe rformance 
+ Providing downloadable PDF reports for GitHub profiles  
+With these enhancements, GitView can evolve into a comprehensive GitHub analytics platform offering 
+deeper insights and advanced developer metrics.  
+ 

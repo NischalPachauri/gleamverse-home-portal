@@ -72,8 +72,8 @@ export function BookHeader({
   const pct = Math.max(0, Math.min(100, totalPages ? (currentPage / totalPages) * 100 : 0));
 
   return (
-    <header className={`${currentTheme.panelBg} backdrop-blur-2xl border-b ${currentTheme.panelBorder} ${currentTheme.text} transition-all duration-300 shadow-md relative z-50`} role="banner" aria-label="Reader header">
-      <div className="px-6 py-4">
+    <header className={`${currentTheme.panelBg} border-b ${currentTheme.panelBorder} ${currentTheme.text} transition-all duration-300 shadow-md relative z-50 antialiased`} role="banner" aria-label="Reader header">
+      <div className="px-6 py-2.5">
         <div className="flex items-center justify-between gap-6">
           {/* Left Section - Back Button, Cover, and Title */}
           <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -81,27 +81,27 @@ export function BookHeader({
               variant="ghost"
               size="sm"
               onClick={handleBackToLibrary}
-              className={`gap-2 flex-shrink-0 hover:bg-black/5 transition-colors h-10 px-4`}
+              className={`gap-2 flex-shrink-0 hover:bg-black/5 transition-colors h-9 px-3`}
               aria-label="Back to Library"
             >
-              <ArrowLeft className="size-5" />
-              <span className="hidden sm:inline font-medium text-sm">Library</span>
+              <ArrowLeft className="size-4" />
+              <span className="hidden sm:inline font-medium text-xs">Library</span>
             </Button>
 
-            <Separator orientation="vertical" className="h-10 flex-shrink-0 bg-current opacity-10" />
+            <Separator orientation="vertical" className="h-9 flex-shrink-0 bg-current opacity-10" />
 
             {/* Book Cover and Title */}
-            <div className="flex items-center gap-5 min-w-0" aria-label="Book identity">
+            <div className="flex items-center gap-3 min-w-0" aria-label="Book identity">
               <ImageWithFallback
                 src={bookCoverSrc || "/placeholder.svg"}
                 alt={bookInfo.title}
-                className="h-14 w-auto object-cover rounded-md shadow-sm flex-shrink-0 ring-1 ring-black/5"
+                className="h-12 w-auto object-cover rounded-md shadow-sm flex-shrink-0 ring-1 ring-black/5"
               />
-              <div className="min-w-0 flex flex-col justify-center">
-                <h1 className="text-xl font-bold leading-tight truncate pr-4 tracking-tight">
+              <div className="min-w-0 flex flex-col justify-center max-w-sm">
+                <h1 className="text-base font-bold leading-tight line-clamp-2 tracking-tight" title={bookInfo.title}>
                   {bookInfo.title}
                 </h1>
-                <p className="text-sm opacity-60 truncate font-medium">{bookInfo.author}</p>
+                <p className="text-xs opacity-60 truncate font-medium">{bookInfo.author}</p>
               </div>
             </div>
           </div>
@@ -168,8 +168,6 @@ export function BookHeader({
               {pageMode === 'single' ? <Book className="size-5 opacity-70" /> : <BookOpen className="size-5 opacity-70" />}
             </Button>
 
-            <Separator orientation="vertical" className="h-6 bg-current opacity-10" />
-
             {/* Music Selector */}
             <Select value={backgroundMusic} onValueChange={onBackgroundMusicChange}>
               <SelectTrigger className={`w-[140px] h-10 text-xs font-medium rounded-lg border-0 bg-black/5 hover:bg-black/10 transition-colors focus:ring-0 shadow-sm`}>
@@ -214,10 +212,10 @@ export function BookHeader({
       </div>
 
       {/* Progress Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/5">
+      <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/10">
         <div
-          className="h-full bg-blue-500/80 transition-all duration-300 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-          style={{ width: `${pct}%` }}
+          className="h-full transition-all duration-300 ease-out shadow-[0_0_10px_rgba(0,119,204,0.55)]"
+          style={{ width: `${pct}%`, backgroundColor: '#0077cc' }}
         />
       </div>
     </header>
