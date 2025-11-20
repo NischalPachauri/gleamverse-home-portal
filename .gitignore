@@ -12,6 +12,20 @@ dist
 dist-ssr
 *.local
 
+# Python
+.venv
+venv
+*.py
+*.pyc
+__pycache__
+
+# PowerShell scripts
+*.ps1
+
+# Generated files
+*.txt
+!robots.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
