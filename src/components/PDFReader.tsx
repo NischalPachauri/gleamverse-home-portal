@@ -48,11 +48,14 @@ export function BookContent({
   const currentTheme = readerConfig.themes[theme];
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [containerHeight, setContainerHeight] = useState<number>(0);
 
   useLayoutEffect(() => {
     const measure = () => {
       const w = containerRef.current?.clientWidth || 0;
+      const h = containerRef.current?.clientHeight || 0;
       setContainerWidth(w);
+      setContainerHeight(h);
     };
     measure();
     const onResize = () => measure();
@@ -60,14 +63,20 @@ export function BookContent({
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Calculate page width to fit screen
-  const pageWidth = (() => {
+  // Calculate page width and height to fit screen properly
+  const { pageWidth, pageHeight } = (() => {
+    const padding = 40; // Add padding for better display
+    const availableWidth = Math.max(300, containerWidth - padding);
+    const availableHeight = Math.max(400, containerHeight - padding);
+
     if (pageMode === 'double') {
-      // For double page, each page takes ~48% of container width with gap between them
-      return Math.max(300, Math.floor(containerWidth * 0.48));
+      // For double page, each page takes ~47% of container width
+      const width = Math.floor(availableWidth * 0.47);
+      return { pageWidth: width, pageHeight: undefined }; // Let height auto-calculate
     } else {
-      // For single page, take 95% of container width
-      return Math.max(400, Math.floor(containerWidth * 0.95));
+      // For single page, fit to container while maintaining aspect ratio
+      const width = Math.floor(availableWidth * 0.90);
+      return { pageWidth: width, pageHeight: undefined };
     }
   })();
 
@@ -84,10 +93,10 @@ export function BookContent({
   };
 
   return (
-    <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${currentTheme.bg} antialiased overflow-hidden`} role="main" aria-label="Book content">
+    <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${currentTheme.bg} antialiased overflow-auto`} role="main" aria-label="Book content">
       <div
         ref={containerRef}
-        className={`reader-fixed-area relative flex items-center justify-center no-scrollbar w-full h-full`}
+        className={`reader-fixed-area relative flex items-center justify-center w-full h-full min-h-[500px]`}
         style={(() => {
           const v = `${isFullscreen ? 0 : Math.max(0, headerHeight)}px`
           return { ['--reader-header' as unknown as string]: v } as React.CSSProperties
@@ -110,31 +119,65 @@ export function BookContent({
         >
           <Document
             file={pdfPath}
-            loading={<div className="flex items-center gap-2 text-slate-500"><Loader2 className="size-4 animate-spin" /> Loading PDF…</div>}
+            loading={<div className="flex flex-col items-center gap-3 text-slate-600">
+              <Loader2 className="size-8 animate-spin" />
+              <p>Loading PDF...</p>
+            </div>}
+            error={<div className="flex flex-col items-center gap-3 text-red-600">
+              <p className="text-lg font-semibold">Failed to load PDF</p>
+              <p className="text-sm">Please try downloading the file or refresh the page</p>
+            </div>}
             onLoadSuccess={(doc) => {
               const count = (doc as unknown as { numPages: number }).numPages || 0;
               onDocumentLoadSuccess(count);
             }}
-            onLoadError={onDocumentLoadError}
+            onLoadError={(error) => {
+              console.error('PDF load error:', error);
+              onDocumentLoadError(error);
+            }}
+            options={{
+              cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+              cMapPacked: true,
+              standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+            }}
           >
             {pageMode === 'single' ? (
               <Page
                 pageNumber={Math.max(1, Math.min(totalPages || currentPage, currentPage))}
                 width={pageWidth}
+                height={pageHeight}
                 renderMode="canvas"
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+                loading={<div className="flex items-center gap-2 text-slate-500">
+                  <Loader2 className="size-4 animate-spin" />
+                  Rendering page...
+                </div>}
               />
             ) : (
               <div className="flex items-start justify-center gap-6">
                 <Page
                   pageNumber={Math.max(1, Math.min(totalPages || currentPage, currentPage))}
                   width={pageWidth}
+                  height={pageHeight}
                   renderMode="canvas"
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  loading={<div className="flex items-center gap-2 text-slate-500">
+                    <Loader2 className="size-4 animate-spin" />
+                  </div>}
                 />
                 {currentPage + 1 <= totalPages && (
                   <Page
                     pageNumber={currentPage + 1}
                     width={pageWidth}
+                    height={pageHeight}
                     renderMode="canvas"
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    loading={<div className="flex items-center gap-2 text-slate-500">
+                      <Loader2 className="size-4 animate-spin" />
+                    </div>}
                   />
                 )}
               </div>
