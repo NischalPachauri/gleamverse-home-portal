@@ -1,0 +1,380 @@
+[
+    {
+        "bookId": "1",
+        "title": "10 Books in 1",
+        "genreAnalysis": {
+            "primary": "Anthology",
+            "secondary": "General Fiction",
+            "confidence": 85
+        },
+        "authorInfo": {
+            "name": "Various Authors",
+            "nationality": "International",
+            "birthYear": "N/A"
+        },
+        "pageAnalysis": {
+            "total": 1250,
+            "frontMatter": 12,
+            "content": 1238,
+            "notes": "Compilation of multiple works. No missing pages detected."
+        },
+        "description": {
+            "summary": "A comprehensive collection bringing together ten distinct literary works into a single volume. This anthology offers a diverse range of storytelling styles and themes, providing readers with a broad spectrum of narratives.",
+            "themes": [
+                "Diversity",
+                "Storytelling",
+                "Compilation"
+            ],
+            "characters": [
+                "Various"
+            ],
+            "context": "Modern compilation intended for avid readers."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "28",
+        "title": "Atomic Habits",
+        "genreAnalysis": {
+            "primary": "Self-Help",
+            "secondary": "Psychology",
+            "confidence": 98
+        },
+        "authorInfo": {
+            "name": "James Clear",
+            "nationality": "American",
+            "birthYear": "1986"
+        },
+        "pageAnalysis": {
+            "total": 320,
+            "frontMatter": 10,
+            "content": 310,
+            "notes": "Complete text with diagrams and charts."
+        },
+        "description": {
+            "summary": "A transformative guide on how to change your habits and get 1% better every day. James Clear distills complex topics into simple behaviors that can be easily applied to daily life and work. He draws on proven ideas from biology, psychology, and neuroscience to create an easy-to-understand guide for making good habits inevitable and bad habits impossible.",
+            "themes": [
+                "Self-Improvement",
+                "Habit Formation",
+                "Productivity",
+                "Psychology"
+            ],
+            "characters": [],
+            "context": "Published in 2018, becoming a global bestseller in personal development."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "19",
+        "title": "Akbar And Birbal",
+        "genreAnalysis": {
+            "primary": "Folklore",
+            "secondary": "Historical Fiction",
+            "confidence": 95
+        },
+        "authorInfo": {
+            "name": "Traditional / Various",
+            "nationality": "Indian",
+            "birthYear": "N/A"
+        },
+        "pageAnalysis": {
+            "total": 150,
+            "frontMatter": 4,
+            "content": 146,
+            "notes": "Illustrated collection of stories."
+        },
+        "description": {
+            "summary": "A delightful collection of witty and humorous tales featuring the Mughal Emperor Akbar and his wise advisor Birbal. These stories highlight Birbal's intelligence and wit in solving problems and outsmarting courtiers, offering moral lessons and entertainment.",
+            "themes": [
+                "Wisdom",
+                "Humor",
+                "Justice",
+                "Friendship"
+            ],
+            "characters": [
+                "Akbar",
+                "Birbal"
+            ],
+            "context": "Based on oral traditions from the Mughal era in India."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "73",
+        "title": "Harry Potter and the Sorcerer's Stone",
+        "genreAnalysis": {
+            "primary": "Fantasy",
+            "secondary": "Young Adult",
+            "confidence": 99
+        },
+        "authorInfo": {
+            "name": "J.K. Rowling",
+            "nationality": "British",
+            "birthYear": "1965"
+        },
+        "pageAnalysis": {
+            "total": 309,
+            "frontMatter": 6,
+            "content": 303,
+            "notes": "First book in the series. Standard pagination."
+        },
+        "description": {
+            "summary": "Harry Potter, an orphan living with his cruel aunt and uncle, learns on his eleventh birthday that he is a wizard. He is whisked away to Hogwarts School of Witchcraft and Wizardry, where he makes friends, learns magic, and uncovers the truth about his parents' mysterious deaths and his own destiny.",
+            "themes": [
+                "Magic",
+                "Friendship",
+                "Good vs Evil",
+                "Coming of Age"
+            ],
+            "characters": [
+                "Harry Potter",
+                "Hermione Granger",
+                "Ron Weasley",
+                "Albus Dumbledore",
+                "Voldemort"
+            ],
+            "context": "The start of the global phenomenon published in 1997."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "129",
+        "title": "The Alchemist",
+        "genreAnalysis": {
+            "primary": "Fiction",
+            "secondary": "Philosophy",
+            "confidence": 97
+        },
+        "authorInfo": {
+            "name": "Paulo Coelho",
+            "nationality": "Brazilian",
+            "birthYear": "1947"
+        },
+        "pageAnalysis": {
+            "total": 163,
+            "frontMatter": 8,
+            "content": 155,
+            "notes": "Complete allegorical novel."
+        },
+        "description": {
+            "summary": "The story of Santiago, an Andalusian shepherd boy who travels in search of a worldly treasure. His quest leads him to riches far different—and far more satisfying—than he ever imagined. A story about listening to your heart and following your dreams.",
+            "themes": [
+                "Destiny",
+                "Dreams",
+                "Personal Legend",
+                "Spirituality"
+            ],
+            "characters": [
+                "Santiago",
+                "The Alchemist",
+                "Melchizedek"
+            ],
+            "context": "A modern classic published in 1988."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "44",
+        "title": "Crime and Punishment",
+        "genreAnalysis": {
+            "primary": "Classic Fiction",
+            "secondary": "Psychological Thriller",
+            "confidence": 96
+        },
+        "authorInfo": {
+            "name": "Fyodor Dostoevsky",
+            "nationality": "Russian",
+            "birthYear": "1821"
+        },
+        "pageAnalysis": {
+            "total": 671,
+            "frontMatter": 15,
+            "content": 656,
+            "notes": "Dense philosophical text."
+        },
+        "description": {
+            "summary": "A psychological drama of Raskolnikov, an impoverished student who formulates a plan to kill an unscrupulous pawnbroker for her money. The novel explores his mental anguish and moral dilemmas before and after the crime, delving into themes of guilt, redemption, and the psychology of crime.",
+            "themes": [
+                "Guilt",
+                "Redemption",
+                "Morality",
+                "Psychology",
+                "Nihilism"
+            ],
+            "characters": [
+                "Rodion Raskolnikov",
+                "Sonya Marmeladova",
+                "Porfiry Petrovich"
+            ],
+            "context": "First published in 1866, a masterpiece of Russian literature."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "16",
+        "title": "Adventures of Huckleberry Finn",
+        "genreAnalysis": {
+            "primary": "Classic Fiction",
+            "secondary": "Adventure",
+            "confidence": 95
+        },
+        "authorInfo": {
+            "name": "Mark Twain",
+            "nationality": "American",
+            "birthYear": "1835"
+        },
+        "pageAnalysis": {
+            "total": 366,
+            "frontMatter": 10,
+            "content": 356,
+            "notes": "Includes original illustrations."
+        },
+        "description": {
+            "summary": "The story of Huck Finn, who fakes his own death to escape his abusive father and floats down the Mississippi River on a raft with Jim, a runaway slave. A satirical look at racism, society, and freedom in the antebellum South.",
+            "themes": [
+                "Racism",
+                "Freedom",
+                "Friendship",
+                "Society"
+            ],
+            "characters": [
+                "Huckleberry Finn",
+                "Jim",
+                "Tom Sawyer"
+            ],
+            "context": "Published in 1884, often called 'The Great American Novel'."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "55",
+        "title": "Emotional Intelligence",
+        "genreAnalysis": {
+            "primary": "Psychology",
+            "secondary": "Self-Help",
+            "confidence": 94
+        },
+        "authorInfo": {
+            "name": "Daniel Goleman",
+            "nationality": "American",
+            "birthYear": "1946"
+        },
+        "pageAnalysis": {
+            "total": 352,
+            "frontMatter": 12,
+            "content": 340,
+            "notes": "Scientific text with references."
+        },
+        "description": {
+            "summary": "Daniel Goleman argues that our view of human intelligence is far too narrow. He defines the five crucial skills of emotional intelligence and shows how they determine our success in relationships, work, and even our physical well-being.",
+            "themes": [
+                "Psychology",
+                "Emotions",
+                "Success",
+                "Leadership"
+            ],
+            "characters": [],
+            "context": "Groundbreaking book published in 1995."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "144",
+        "title": "The Psychology of Money",
+        "genreAnalysis": {
+            "primary": "Finance",
+            "secondary": "Psychology",
+            "confidence": 97
+        },
+        "authorInfo": {
+            "name": "Morgan Housel",
+            "nationality": "American",
+            "birthYear": "N/A"
+        },
+        "pageAnalysis": {
+            "total": 252,
+            "frontMatter": 8,
+            "content": 244,
+            "notes": "Concise chapters on financial wisdom."
+        },
+        "description": {
+            "summary": "Doing well with money isn't necessarily about what you know. It's about how you behave. And behavior is hard to teach, even to really smart people. Housel shares 19 short stories exploring the strange ways people think about money.",
+            "themes": [
+                "Money",
+                "Wealth",
+                "Greed",
+                "Happiness"
+            ],
+            "characters": [],
+            "context": "Published in 2020, offering a fresh perspective on personal finance."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    },
+    {
+        "bookId": "153",
+        "title": "The Three Musketeers",
+        "genreAnalysis": {
+            "primary": "Historical Adventure",
+            "secondary": "Classic",
+            "confidence": 96
+        },
+        "authorInfo": {
+            "name": "Alexandre Dumas",
+            "nationality": "French",
+            "birthYear": "1802"
+        },
+        "pageAnalysis": {
+            "total": 700,
+            "frontMatter": 10,
+            "content": 690,
+            "notes": "Epic historical narrative."
+        },
+        "description": {
+            "summary": "A swashbuckling adventure following d'Artagnan, a young man who leaves home to join the Musketeers of the Guard. He befriends the three most formidable musketeers of the age—Athos, Porthos, and Aramis—and gets involved in affairs of state and court intrigue.",
+            "themes": [
+                "Friendship",
+                "Loyalty",
+                "Adventure",
+                "Honor"
+            ],
+            "characters": [
+                "d'Artagnan",
+                "Athos",
+                "Porthos",
+                "Aramis"
+            ],
+            "context": "Set in the 17th century, published in 1844."
+        },
+        "qa": {
+            "status": "Passed",
+            "timestamp": "2025-11-21T13:50:00Z"
+        }
+    }
+]

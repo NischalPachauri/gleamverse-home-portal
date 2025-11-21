@@ -1,7 +1,8 @@
 import { ChevronLeft, ChevronRight, MoreVertical, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect, useMemo } from 'react';
+import { Document, Page } from 'react-pdf';
+import { pdfjs } from '@/config/pdfConfig'; // Import configured pdfjs
 import { toast } from 'sonner';
 import { useUserHistory } from '@/hooks/useUserHistory';
 
@@ -9,10 +10,6 @@ import BookHeader from '@/components/reader/BookHeader';
 import ChapterMenu from '@/components/reader/ChapterMenu';
 import { readerConfig, ReaderTheme } from '@/config/readerConfig';
 import { installErrorMonitor } from '@/utils/errorMonitor';
-
-try {
-  (pdfjs as unknown as { GlobalWorkerOptions: { workerSrc: string } }).GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
-} catch { /* noop */ }
 
 interface BookContentProps {
   pageMode: 'single' | 'double';
@@ -92,6 +89,13 @@ export function BookContent({
     onPageChange(Math.min(totalPages, currentPage + step));
   };
 
+  // Memoize options to prevent unnecessary reloads
+  const options = useMemo(() => ({
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/standard_fonts/',
+  }), []);
+
   return (
     <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${currentTheme.bg} antialiased overflow-auto`} role="main" aria-label="Book content">
       <div
@@ -135,11 +139,7 @@ export function BookContent({
               console.error('PDF load error:', error);
               onDocumentLoadError(error);
             }}
-            options={{
-              cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
-              cMapPacked: true,
-              standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
-            }}
+            options={options}
           >
             {pageMode === 'single' ? (
               <Page
