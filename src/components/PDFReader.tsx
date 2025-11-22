@@ -6,6 +6,7 @@ import { pdfjs } from '@/config/pdfConfig'; // Import configured pdfjs
 import { toast } from 'sonner';
 import { useUserHistory } from '@/hooks/useUserHistory';
 
+import { cn } from '@/lib/utils';
 import BookHeader from '@/components/reader/BookHeader';
 import ChapterMenu from '@/components/reader/ChapterMenu';
 import { readerConfig, ReaderTheme } from '@/config/readerConfig';
@@ -62,18 +63,28 @@ export function BookContent({
 
   // Calculate page width and height to fit screen properly
   const { pageWidth, pageHeight } = (() => {
-    const padding = 40; // Add padding for better display
+    // Zero padding for all modes as requested
+    const padding = 0;
     const availableWidth = Math.max(300, containerWidth - padding);
     const availableHeight = Math.max(400, containerHeight - padding);
 
+    // Determine if container is landscape (wide) or portrait (tall)
+    const isLandscape = availableWidth > availableHeight;
+
     if (pageMode === 'double') {
-      // For double page, each page takes ~47% of container width
-      const width = Math.floor(availableWidth * 0.47);
-      return { pageWidth: width, pageHeight: undefined }; // Let height auto-calculate
+      // For double page on landscape screen, height is the limiting factor
+      // We return undefined width to let react-pdf scale based on height
+      return { pageWidth: undefined, pageHeight: availableHeight };
     } else {
-      // For single page, fit to container while maintaining aspect ratio
-      const width = Math.floor(availableWidth * 0.90);
-      return { pageWidth: width, pageHeight: undefined };
+      // For single page
+      if (isLandscape) {
+        // Fit to height on landscape screen
+        return { pageWidth: undefined, pageHeight: availableHeight };
+      } else {
+        // Fit to width on portrait screen (e.g. mobile)
+        const width = Math.floor(availableWidth * 0.95);
+        return { pageWidth: width, pageHeight: undefined };
+      }
     }
   })();
 
@@ -89,6 +100,19 @@ export function BookContent({
     onPageChange(Math.min(totalPages, currentPage + step));
   };
 
+  // Keyboard navigation with arrow keys
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' && canGoPrev) {
+        goPrev();
+      } else if (e.key === 'ArrowRight' && canGoNext) {
+        goNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage, totalPages, pageMode, canGoPrev, canGoNext]);
+
   // Memoize options to prevent unnecessary reloads
   const options = useMemo(() => ({
     cMapUrl: 'https://unpkg.com/pdfjs-dist@5.4.296/cmaps/',
@@ -97,10 +121,10 @@ export function BookContent({
   }), []);
 
   return (
-    <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${currentTheme.bg} antialiased overflow-auto`} role="main" aria-label="Book content">
+    <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${currentTheme.bg} antialiased overflow-hidden`} role="main" aria-label="Book content">
       <div
         ref={containerRef}
-        className={`reader-fixed-area relative flex items-center justify-center w-full h-full min-h-[500px]`}
+        className="absolute inset-0 flex items-center justify-center w-full"
         style={(() => {
           const v = `${isFullscreen ? 0 : Math.max(0, headerHeight)}px`
           return { ['--reader-header' as unknown as string]: v } as React.CSSProperties
@@ -109,7 +133,7 @@ export function BookContent({
         {!isFullscreen && (
           <button
             onClick={onToggleChapters}
-            className={`absolute left-4 top-4 z-30 size-10 rounded-full border flex items-center justify-center transition-all bg-white text-black hover:scale-105 shadow-sm`}
+            className={`absolute left-4 top-4 z-30 size-11 rounded-full flex items-center justify-center transition-all ${currentTheme.ui.buttonGlass} shadow-lg hover:scale-105`}
             title="Open chapter navigation (C)"
             aria-label="Open chapter navigation"
             aria-expanded={isChapterMenuOpen}
@@ -141,7 +165,7 @@ export function BookContent({
             }}
             options={options}
           >
-            {pageMode === 'single' ? (
+            {pageMode === 'single' || (pageMode === 'double' && currentPage === totalPages && totalPages % 2 !== 0) ? (
               <Page
                 pageNumber={Math.max(1, Math.min(totalPages || currentPage, currentPage))}
                 width={pageWidth}
@@ -155,21 +179,11 @@ export function BookContent({
                 </div>}
               />
             ) : (
-              <div className="flex items-start justify-center gap-6">
-                <Page
-                  pageNumber={Math.max(1, Math.min(totalPages || currentPage, currentPage))}
-                  width={pageWidth}
-                  height={pageHeight}
-                  renderMode="canvas"
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  loading={<div className="flex items-center gap-2 text-slate-500">
-                    <Loader2 className="size-4 animate-spin" />
-                  </div>}
-                />
-                {currentPage + 1 <= totalPages && (
+              <div className="flex items-start justify-center gap-0 relative">
+                {/* Left page */}
+                <div className="shadow-2xl">
                   <Page
-                    pageNumber={currentPage + 1}
+                    pageNumber={Math.max(1, Math.min(totalPages || currentPage, currentPage))}
                     width={pageWidth}
                     height={pageHeight}
                     renderMode="canvas"
@@ -179,7 +193,25 @@ export function BookContent({
                       <Loader2 className="size-4 animate-spin" />
                     </div>}
                   />
-                )}
+                </div>
+                {/* Binding shadow */}
+                <div className="w-1 bg-gradient-to-r from-black/30 via-black/10 to-transparent absolute left-1/2 -translate-x-1/2 h-full z-10"></div>
+                {/* Right page - only show if it exists */}
+                {currentPage + 1 <= totalPages ? (
+                  <div className="shadow-2xl">
+                    <Page
+                      pageNumber={currentPage + 1}
+                      width={pageWidth}
+                      height={pageHeight}
+                      renderMode="canvas"
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                      loading={<div className="flex items-center gap-2 text-slate-500">
+                        <Loader2 className="size-4 animate-spin" />
+                      </div>}
+                    />
+                  </div>
+                ) : null}
               </div>
             )}
           </Document>
@@ -188,22 +220,22 @@ export function BookContent({
           <button
             onClick={goPrev}
             disabled={!canGoPrev}
-            className={`absolute left-2 sm:left-4 z-30 -translate-y-[20px] top-1/2 size-10 rounded-full flex items-center justify-center bg-black/10 hover:bg-black/20 text-white shadow-md border border-white/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed`}
-            aria-label="Previous page"
+            className={`absolute left-2 sm:left-4 z-30 -translate-y-[20px] top-1/2 size-12 rounded-full flex items-center justify-center ${currentTheme.ui.buttonGlass} shadow-xl transition-all hover:scale-110 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100`}
+            aria-label="Previous page (Left Arrow)"
           >
-            <ChevronLeft className="size-5" />
+            <ChevronLeft className="size-6" />
           </button>
           <button
             onClick={goNext}
             disabled={!canGoNext}
-            className={`absolute right-2 sm:right-4 z-30 -translate-y-[20px] top-1/2 size-10 rounded-full flex items-center justify-center bg-black/10 hover:bg-black/20 text-white shadow-md border border-white/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed`}
-            aria-label="Next page"
+            className={`absolute right-2 sm:right-4 z-30 -translate-y-[20px] top-1/2 size-12 rounded-full flex items-center justify-center ${currentTheme.ui.buttonGlass} shadow-xl transition-all hover:scale-110 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100`}
+            aria-label="Next page (Right Arrow)"
           >
-            <ChevronRight className="size-5" />
+            <ChevronRight className="size-6" />
           </button>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 
@@ -452,7 +484,7 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col overflow-hidden">
+    <div className={`fixed inset-0 flex flex-col overflow-hidden transition-colors duration-300 ${readerConfig.themes[theme].bg}`}>
       {!isFullscreen && (
         <div
           ref={headerWrapperRef}
@@ -503,7 +535,7 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
         />
       )}
       <audio hidden ref={audioRef} />
-      <div className="reader-fixed-area" style={(() => {
+      <div className="flex-1 relative overflow-hidden" style={(() => {
         const v = `${isFullscreen ? 0 : Math.max(0, headerHeight)}px`
         return { ['--reader-header' as unknown as string]: v } as React.CSSProperties
       })()}>
@@ -526,3 +558,5 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
     </div>
   );
 }
+
+export default PDFReader;

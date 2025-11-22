@@ -115,7 +115,7 @@ export const bookCoverMapping: Record<string, string> = {
   "The Adventures of Huckleberry Finn": "/BookCoversNew/The adventures of huckleberry finn.jpg",
   "The Adventures of Sherlock Holmes": "/BookCoversNew/The adventures of sherlock holmes.jpg",
   "The Adventures of Tom Sawyer": "/BookCoversNew/The adventures of tom sawyer.jpg",
-  "The Alchemist": "/BookCoversNew/The alchemist.jpg",
+
   "The Art of War": "/BookCoversNew/The art of war.jpg",
   "The Autobiography of Benjamin Franklin": "/BookCoversNew/The autobiography of benjamin franklin.jpg",
   "The Bachelor of Arts": "/BookCoversNew/The bachelor of arts.jpg",
@@ -128,7 +128,7 @@ export const bookCoverMapping: Record<string, string> = {
   "The Blue Umbrella": "/BookCoversNew/The blue umbrella.jpg",
   "The Book Thief": "/BookCoversNew/The book thief.jpg",
   "The Bridges of Madison County": "/BookCoversNew/The bridges of madison county.jpg",
-  "The Call of the Wild": "/BookCoversNew/The call of the wild.jpg",
+
   "The Canterville Ghost": "/BookCoversNew/The canterville ghost.jpg",
   "The Catcher in the Rye": "/BookCoversNew/The catcher in the rye.jpg",
   "The Chamber": "/BookCoversNew/The chamber.jpg",
@@ -140,7 +140,7 @@ export const bookCoverMapping: Record<string, string> = {
   "The Count of Monte Cristo": "/BookCoversNew/The count of monte cristo.jpg",
   "The Da Vinci Code": "/BookCoversNew/The da vinci code.jpg",
   "The Dark Half": "/BookCoversNew/The dark half.jpg",
-  "The Day of the Jackal": "/BookCoversNew/The day of the jackal.jpg",
+
   "The Devil Wears Prada": "/BookCoversNew/The devil wears prada.jpg",
   "The Diary of a Young Girl": "/BookCoversNew/The diary of a young girl.jpg",
   "The English Teacher": "/BookCoversNew/The english teacher.jpg",
@@ -170,7 +170,7 @@ export const bookCoverMapping: Record<string, string> = {
   "The Last Song": "/BookCoversNew/The last song.jpg",
   "The Little Prince": "/BookCoversNew/The little prince.jpg",
   "The Longest Ride": "/BookCoversNew/The longest ride.jpg",
-  "The Lost Symbol": "/BookCoversNew/The lost symbol.jpg",
+
   "The Lovely Bones": "/BookCoversNew/The lovely bones.jpg",
   "The Magic": "/BookCoversNew/The magic.jpg",
   "The Magic Mountain": "/BookCoversNew/The magic mountain.jpg",
@@ -187,7 +187,7 @@ export const bookCoverMapping: Record<string, string> = {
   "The Partner": "/BookCoversNew/The partner.jpg",
   "The Pelican Brief": "/BookCoversNew/The pelican brief.jpg",
   "The Picture of Dorian Gray": "/BookCoversNew/The picture of dorian gray.jpg",
-  "The Pilgrimage": "/BookCoversNew/The pilgrimage.jpg",
+
   "The Pillars of the Earth": "/BookCoversNew/The pillars of the earth.jpg",
   "The Portrait of a Lady": "/BookCoversNew/The portrait of a lady.jpg",
   "The Power of Now": "/BookCoversNew/The power of now.jpg",
@@ -240,13 +240,13 @@ export const bookCoverMapping: Record<string, string> = {
   "Unaccustomed Earth": "/BookCoversNew/Unaccustomed earth.jpg",
   "Under the Net": "/BookCoversNew/Under the net.jpg",
   "Vanity Fair": "/BookCoversNew/Vanity fair.jpg",
-  "Veronika Decides to Die": "/BookCoversNew/Veronika decides to die.jpg",
+
   "Waiting for Godot": "/BookCoversNew/Waiting for godot.jpg",
   "War and Peace": "/BookCoversNew/War and peace.jpg",
   "Watership Down": "/BookCoversNew/Watership down.jpg",
   "We the Living": "/BookCoversNew/We the living.jpg",
   "What Katy Did": "/BookCoversNew/What katy did.jpg",
-  "When Only Love Remains": "/BookCoversNew/When only love remains.jpg",
+
   "Where the Heart Is": "/BookCoversNew/Where the heart is.jpg",
   "White Teeth": "/BookCoversNew/White teeth.jpg",
   "Wings of Fire": "/BookCoversNew/Wings of fire.jpg",
@@ -255,7 +255,7 @@ export const bookCoverMapping: Record<string, string> = {
   "You Can Win": "/BookCoversNew/You can win.jpg",
   "Your Erroneous Zones": "/BookCoversNew/Your erroneous zones.jpg",
   "Zero to One": "/BookCoversNew/Zero to one.jpg",
-  
+
   // Additional mappings from the 185 specific missing mappings
   "10 Books in 1": "/BookCoversNew/Ten books in one.png",
   "10 Ways to Write More Effective Ads": "/BookCoversNew/10 ways to write effective ads.png",
@@ -281,7 +281,7 @@ export const bookCoverMapping: Record<string, string> = {
   "Five Point Someone": "/BookCoversNew/5 points someone what not to do at iit.jpg",
   "Frankenstein or The Mordern Prometheus": "/BookCoversNew/Frankstein.png",
   "Fundamental Theories of Physics": "/BookCoversNew/Black Hole Physics.jpg",
-  "Guide to Competetive Programming": "/BookCoversNew/Allen B Tucker Computer Science and Engineering Handbook.pdf",
+
   "Harry Potter and the Philosophers Stone": "/BookCoversNew/harry-potter-1-philosophers-stone.png",
   "50 Stories in English": "/BookCoversNew/50 stories in easy english.png",
   "100 years of the best American short stories": "/BookCoversNew/100 years of best American stories.png",
@@ -437,7 +437,114 @@ export const bookCoverMapping: Record<string, string> = {
   "You are Trending in my Dreams": "/BookCoversNew/You Are Trending In My Dreams Now.jpeg",
   "You Were My Crush Hindi": "/BookCoversNew/You were my crush till you said you love me.jpg",
   "You Were My Crush": "/BookCoversNew/You were my crush till you said you love me.jpg",
-  "Your Dreams are Mine Now": "/BookCoversNew/Your Dreams Are Mine Now Novel.jpeg"
+  "Your Dreams are Mine Now": "/BookCoversNew/Your Dreams Are Mine Now Novel.jpeg",
+
+  // Auto-generated mappings
+  "A Warrior s Life": "/BookCoversNew/Paulo Caelho A Warrior S Life.jpeg",
+  "Adventures of Pinocchio": "/BookCoversNew/The Adventures Of Pinocchio.png",
+  "Adventures of Tom Bombadil": "/BookCoversNew/The adventures of Tom bombadil.png",
+  "Ayurveda The Divine Science": "/BookCoversNew/ayurveda.jpg",
+  "Do Kadam Aur Sahi": "/BookCoversNew/DO Kadam Aur Sahi.png",
+  "Don t Feed the Monkey Mind": "/BookCoversNew/Don T Feed The Monkey Mind.jpg",
+  "English Fairy Tales and More English Fairy Tales": "/BookCoversNew/English Fairy tales.png",
+  "English Short Stories": "/BookCoversNew/SHORT STORIES.jpeg",
+  "Grandma s Bag of Stories": "/BookCoversNew/Grandma S Bag Of Stories.jpg",
+  "Guide to Competetive Programming": "/BookCoversNew/Guide to Competitive Programming.png",
+  "Hast Rekha": "/BookCoversNew/Hast rekha.png",
+  "Healing the Child Within": "/BookCoversNew/Healing the child within.png",
+  "Henry and Mudge and a Very Merry Christmas": "/BookCoversNew/Henry and Mudge and a very merry christmas.png",
+  "Henry and Mudge and the Careful Cousin": "/BookCoversNew/Henry and Mudge and the careful cousin.png",
+  "Henry and Mudge and the Forever Sea": "/BookCoversNew/Henry and Mudge and the forever sea.png",
+  "Henry and Mudge and the Happy Cat": "/BookCoversNew/Henry and Mudge and the happy cat.png",
+  "Henry and Mudge and the Long Weekend": "/BookCoversNew/Henry and Mudge and the long weekend.png",
+  "Henry and Mudge and the Snowman Plan": "/BookCoversNew/Henry And Mudge And The Snowman Plan.png",
+  "Henry and Mudge and the Tall Tree House": "/BookCoversNew/Henry and Mudge and the tall tree house.png",
+  "Henry and Mudge and the Tumbling Trip": "/BookCoversNew/Henry and Mudge and the tumbling trip.png",
+  "Henry and Mudge and the Wild Wind": "/BookCoversNew/Henry and Mudge and the wild wind.png",
+  "Henry and Mudge in Puddle Trouble": "/BookCoversNew/Henry and Mudge in puddle trouble.png",
+  "Henry and Mudge in the Green Time": "/BookCoversNew/Henry and Mudge in the green time.png",
+  "Henry and Mudge in the Sparkle Days": "/BookCoversNew/Henry and Mudge in the sparkle days.png",
+  "Henry and Mudge Take the Big Test": "/BookCoversNew/Henry and Mudge take the big test.png",
+  "Henry and Mudge Under the Yellow Moon": "/BookCoversNew/Henry and Mudge under the yellow moon.png",
+  "HOLD MY HAND": "/BookCoversNew/hold my hand.jpg",
+  "House of Cards": "/BookCoversNew/house of cards.jpg",
+  "How to Become a Straight A Student": "/BookCoversNew/How To Become A Straight A Student.jpg",
+  "How to Read People Like a Book": "/BookCoversNew/how to read people like a book.jpg",
+  "How to Win Every Argument": "/BookCoversNew/How To Win Every Argument.jpg",
+  "I Too had a Love Story": "/BookCoversNew/I Too Had A Love Story.jpg",
+  "India that is Bharat": "/BookCoversNew/India That Is Bharat.jpg",
+  "Inferno": "/BookCoversNew/inferno.jpg",
+  "It Happens for a Reason": "/BookCoversNew/It happens for a reason.jpg",
+  "It Started with a Friend Request": "/BookCoversNew/It Started With A Friend Request.jpg",
+  "Katie In Love": "/BookCoversNew/Katie in love.jpg",
+  "Life Is What You Make It": "/BookCoversNew/life is what you make it.jpg",
+  "Long Walk to Freedom": "/BookCoversNew/long walk to Freedom.jpg",
+  "Love Kisses And All Things Warm": "/BookCoversNew/Love Kisses And All Things Warm.jpeg",
+  "Michael Jordan A Biography": "/BookCoversNew/Michael Jordan A Biography.jpeg",
+  "Midnights Children by Salman Rushdie": "/BookCoversNew/Midnights Children By Salman Rushdie.jpeg",
+  "Mistakes Like Love and Sex": "/BookCoversNew/Mistakes Like Love And Sex.jpeg",
+  "Modern Arabic Short Stories": "/BookCoversNew/Modern Arabic Short Stories.jpeg",
+  "Moonwalking with Einstein": "/BookCoversNew/Moonwalking With Einstein.jpeg",
+  "Mystery Short Stories": "/BookCoversNew/Mystery Short Stories.jpeg",
+  "Narendra Modi A Political Biography": "/BookCoversNew/Narendra Modi A Political Biography.jpeg",
+  "Nelson Mandela A Biography": "/BookCoversNew/Nelson Mandela A Biography.jpeg",
+  "Oliver Twist": "/BookCoversNew/Oliver Twist.jpeg",
+  "One Arranged Murder": "/BookCoversNew/One Arranged Murder.jpeg",
+  "One Night at The Call Center": "/BookCoversNew/One night at the call center.png",
+  "Our IMPossible Love": "/BookCoversNew/our impossible love.jpg",
+  "Percy Jackson and The Last Olympian": "/BookCoversNew/Percy Jackson And The Last Olympian.jpeg",
+  "Percy Jackson and The Lightning Thief": "/BookCoversNew/Percy Jackson And The Lightning Thief.jpeg",
+  "Percy Jackson and The Sea of Monsters": "/BookCoversNew/Percy Jackson And The Sea Of Monsters.jpeg",
+  "Percy Jackson and The Titan s Curse": "/BookCoversNew/Percy Jackson And The Titan S Curse.jpeg",
+  "Rebecca": "/BookCoversNew/Rebecca.jpeg",
+  "Robinson Crusoe": "/BookCoversNew/Robinson Crusoe.jpeg",
+  "Saket": "/BookCoversNew/Saket.png",
+  "Satyayoddha Kalki Eye of Brahma": "/BookCoversNew/Satyayoddha Kalki Eye Of Brahma.jpeg",
+  "Selected Short Stories": "/BookCoversNew/Selected Short Stories.jpeg",
+  "Short stories English": "/BookCoversNew/Short Stories English.jpeg",
+  "Short Stories For Children": "/BookCoversNew/Short Stories For Children.jpeg",
+  "Short Stories for English Courses": "/BookCoversNew/Short Stories For English Courses.jpeg",
+  "SHORT STORIES": "/BookCoversNew/SHORT STORIES.jpeg",
+  "Shutter Island": "/BookCoversNew/Shutter Island.jpeg",
+  "Soma in Yoga and Ayurveda": "/BookCoversNew/Soma in Yoga and Ayurveda.jpeg",
+  "Something I Never Told You": "/BookCoversNew/Something I Never Told You.jpeg",
+  "Sorry You are Not My Type": "/BookCoversNew/sorry you are not my type.jpeg",
+  "Spanish Short Stories For Beginners": "/BookCoversNew/Spanish Short Stories For Beginners.jpeg",
+  "Stop Overthinking": "/BookCoversNew/Stop Overthinking.jpg",
+  "Sweet Nothings": "/BookCoversNew/Sweet Nothings.jpeg",
+  "Sweet Sixteen": "/BookCoversNew/Sweet Sixteen.jpeg",
+  "Ten Years Later": "/BookCoversNew/Ten Years Later.jpeg",
+  "Textbook of Ayurveda": "/BookCoversNew/Textbook of Ayurveda.jpeg",
+  "THE ONE YOU CANNOT HAVE": "/BookCoversNew/The One You Cannot Have.jpeg",
+  "The Alchemist": "/BookCoversNew/The Alchemist By Paulo Caelho.jpeg",
+  "The Call of the Wild": "/BookCoversNew/The Call Of The Wild.jpeg",
+  "The Day of the Jackal": "/BookCoversNew/The Day Of The Jackal.jpeg",
+  "The Lost Symbol": "/BookCoversNew/The Lost Symbol.jpeg",
+  "The Pilgrimage": "/BookCoversNew/The Pilgrimage.jpeg",
+  "The Ritual": "/BookCoversNew/the ritual.jpg",
+  "The Theory of Everything": "/BookCoversNew/Stephen W Hawking The Theory Of Everything.jpeg",
+  "The Way of the Superior Man": "/BookCoversNew/the way of the superior man.jpg",
+  "This Love that Feels Right": "/BookCoversNew/This Love That Feels Right.jpeg",
+  "Three Ghost Stories": "/BookCoversNew/Three Ghost Stories.jpeg",
+  "Till The Last Breath": "/BookCoversNew/Till The Last Breath.jpeg",
+  "Trade and Grow Rich": "/BookCoversNew/Trade And Grow Rich.jpeg",
+  "Universal Magick": "/BookCoversNew/Universal Magick.jpeg",
+  "Veronika Decides to Die": "/BookCoversNew/Veronika Decides To Die.jpeg",
+  "Vicomte de Bragelonne": "/BookCoversNew/Vicomte De Bragelonne.jpeg",
+  "What is Death": "/BookCoversNew/What Is Death.jpeg",
+  "When Only Love Remains": "/BookCoversNew/When ONly Love Remains Durjoy Datta.jpeg",
+  "Wilde Oscar Short Stories": "/BookCoversNew/Wilde Oscar Short Stories.jpeg",
+  "Winning Habits": "/BookCoversNew/winning habits.jpg",
+  "You Were My Crush Till You Said You Love Me": "/BookCoversNew/You were my crush till you said you love me.jpg",
+
+  // Manual mappings
+  "Art Of Drawing The Human Body": "/BookCoversNew/Small Size Drawing The Human Body.jpeg",
+  "Bhagavad Gita Hindi": "/BookCoversNew/Bhagavad Gita Hindi.png",
+  "Franny and Zooey": "/BookCoversNew/Franny and Zooey.png",
+  "How To Analyze People": "/BookCoversNew/How To Analyse People.jpg",
+  "The Girls Of My Dreams": "/BookCoversNew/pingpdf.com The girl of my dreams.jpeg",
+  "Will You Still Love Me By Ravinder Singh": "/BookCoversNew/Will You Still Love Me Ravindra Singh.jpeg",
+  "यन फरडम परयवरण और आतम नरभरत": "/BookCoversNew/Unn Freedom,Paryavaran And Atma Bharat.jpeg"
 };
 
 export function getBookCover(title: string): string {
@@ -454,7 +561,7 @@ export function getBookCover(title: string): string {
   if (bookCoverMapping[title]) {
     return sanitize(bookCoverMapping[title]);
   }
-  
+
   // Try case-insensitive match
   const lowerTitle = title.toLowerCase();
   const caseInsensitiveMatch = Object.keys(bookCoverMapping).find(
@@ -463,7 +570,7 @@ export function getBookCover(title: string): string {
   if (caseInsensitiveMatch) {
     return sanitize(bookCoverMapping[caseInsensitiveMatch]);
   }
-  
+
   // Try partial match (first 50 characters)
   const partialMatch = Object.keys(bookCoverMapping).find(
     key => title.includes(key) || key.includes(title)
@@ -471,7 +578,7 @@ export function getBookCover(title: string): string {
   if (partialMatch) {
     return sanitize(bookCoverMapping[partialMatch]);
   }
-  
+
   // Return default cover if no match found
   return DEFAULT;
 }
