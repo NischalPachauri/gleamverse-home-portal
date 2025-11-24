@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Search, Grid, List } from 'lucide-react';
 import { books } from '@/data/books';
 import { getBookCover } from '@/utils/bookCoverMapping';
-import ImageWithFallback from './ImageWithFallback';
+import { ImageWithFallback } from './ImageWithFallback';
 
 interface BookCoverGalleryProps {
   itemsPerPage?: number;
@@ -11,7 +11,7 @@ interface BookCoverGalleryProps {
   viewMode?: 'grid' | 'list';
 }
 
-const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({ 
+const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
   itemsPerPage = 12,
   className = '',
   showSearch = true,
@@ -29,82 +29,55 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
     setBookCovers(covers);
     setFilteredCovers(covers);
   }, []);
-  
-  useEffect(() => {
-    // Create placeholder book covers since bookCoverMapping was removed
-    const placeholderCovers: Array<[string, string]> = [
-      ['The Alchemist', '/placeholder.svg'],
-      ['Atomic Habits', '/placeholder.svg'],
-      ['The Great Gatsby', '/placeholder.svg'],
-      ['To Kill a Mockingbird', '/placeholder.svg'],
-      ['1984', '/placeholder.svg'],
-      ['Pride and Prejudice', '/placeholder.svg'],
-      ['The Catcher in the Rye', '/placeholder.svg'],
-      ['Harry Potter and the Sorcerer\'s Stone', '/placeholder.svg'],
-      ['The Lord of the Rings', '/placeholder.svg'],
-      ['The Hobbit', '/placeholder.svg'],
-      ['Fahrenheit 451', '/placeholder.svg'],
-      ['Jane Eyre', '/placeholder.svg'],
-      ['The Adventures of Sherlock Holmes', '/placeholder.svg'],
-      ['The Picture of Dorian Gray', '/placeholder.svg'],
-      ['Wuthering Heights', '/placeholder.svg'],
-      ['Moby Dick', '/placeholder.svg'],
-      ['War and Peace', '/placeholder.svg'],
-      ['Crime and Punishment', '/placeholder.svg'],
-      ['The Brothers Karamazov', '/placeholder.svg'],
-      ['Anna Karenina', '/placeholder.svg']
-    ];
-    
-    setBookCovers(placeholderCovers);
-    setFilteredCovers(placeholderCovers);
-  }, []);
-  
+
+
+
   // Filter books based on search query
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredCovers(bookCovers);
     } else {
       const query = searchQuery.toLowerCase();
-      const filtered = bookCovers.filter(([title]) => 
+      const filtered = bookCovers.filter(([title]) =>
         title.toLowerCase().includes(query)
       );
       setFilteredCovers(filtered);
     }
     setCurrentPage(1); // Reset to first page on search
   }, [searchQuery, bookCovers]);
-  
+
   const totalPages = Math.ceil(filteredCovers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const visibleCovers = filteredCovers.slice(startIndex, startIndex + itemsPerPage);
-  
+
   const goToNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-  
+
   const goToPreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
-  
+
   const goToPage = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  
+
   const handleImageError = (title: string) => {
     setImageLoadErrors(prev => new Set(prev).add(title));
   };
-  
+
   // Generate page numbers for pagination
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 7;
-    
+
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -126,10 +99,10 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
         pages.push(totalPages);
       }
     }
-    
+
     return pages;
   };
-  
+
   if (bookCovers.length === 0) {
     return (
       <div className={`w-full ${className}`}>
@@ -139,7 +112,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
       </div>
     );
   }
-  
+
   return (
     <div className={`w-full ${className}`}>
       {/* Header with Search and View Toggle */}
@@ -150,7 +123,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
             ({filteredCovers.length} book{filteredCovers.length !== 1 ? 's' : ''})
           </span>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {/* Search Bar */}
           {showSearch && (
@@ -165,7 +138,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
               />
             </div>
           )}
-          
+
           {/* View Mode Toggle */}
           <div className="flex gap-1 border border-gray-300 rounded-md p-1">
             <button
@@ -185,7 +158,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Book Covers Grid/List */}
       {filteredCovers.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
@@ -194,13 +167,13 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
       ) : (
         <>
           <div className={
-            viewMode === 'grid' 
+            viewMode === 'grid'
               ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4"
               : "flex flex-col gap-3"
           }>
             {visibleCovers.map(([title, path], index) => {
               const hasError = imageLoadErrors.has(title);
-              
+
               return viewMode === 'grid' ? (
                 // Grid View
                 <div key={index} className="flex flex-col items-center group">
@@ -250,7 +223,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
               );
             })}
           </div>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -262,7 +235,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
                 <ChevronLeft className="mr-1" size={16} />
                 Previous
               </button>
-              
+
               {/* Page Numbers */}
               <div className="flex items-center gap-2">
                 {getPageNumbers().map((page, idx) => (
@@ -272,11 +245,10 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
                     ) : (
                       <button
                         onClick={() => goToPage(page as number)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
                       >
                         {page}
                       </button>
@@ -284,7 +256,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
                   </React.Fragment>
                 ))}
               </div>
-              
+
               <button
                 onClick={goToNextPage}
                 disabled={currentPage === totalPages}
@@ -295,7 +267,7 @@ const BookCoverGallery: React.FC<BookCoverGalleryProps> = ({
               </button>
             </div>
           )}
-          
+
           {/* Stats */}
           <div className="mt-6 text-center text-sm text-gray-500">
             Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredCovers.length)} of {filteredCovers.length} books

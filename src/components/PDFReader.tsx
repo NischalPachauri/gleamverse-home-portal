@@ -465,7 +465,7 @@ export function PDFReader({ pdfPath, title, author, bookCoverSrc, onBack, bookId
       const normalized = pageMode === 'double' && cp % 2 === 0 ? cp - 1 : cp;
       setCurrentPage(normalized);
     }
-  }, [bookId, pageMode]);
+  }, [bookId, pageMode, history]); // Added history to dependencies
 
   useEffect(() => {
     if (!chapters.length) return;

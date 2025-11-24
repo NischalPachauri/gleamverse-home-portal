@@ -84,7 +84,7 @@ const BrowseCategories = ({ onSelect, activeId }: { onSelect: (id: string) => vo
   );
 };
 const ContinueReadingDesign = ({ books, onRemove }: { books: ContinueReadingItem[]; onRemove: (id: string) => void }) => {
-  const visible = books.slice(0, 6);
+  const visible = books.slice(0, 6); // Limit to 6 books as requested
   return (
     <div className="relative w-full overflow-x-auto snap-x snap-mandatory scroll-smooth">
       <div className="flex gap-4 min-w-full">
